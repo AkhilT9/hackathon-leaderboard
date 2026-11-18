@@ -1,0 +1,222 @@
+%PDF-1.4
+%‚„œ”
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [6 0 R 8 0 R] /Count 2 >>
+endobj
+3 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+4 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Courier >>
+endobj
+6 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 7 0 R /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R >> >> /Annots [<< /Type /Annot /Subtype /Link /Rect [175.0 646.0 325.0 664.0] /Border [0 0 0] /A << /S /URI /URI (https://hackathon-leaderboard-6m5i.onrender.com/) >> >> << /Type /Annot /Subtype /Link /Rect [175.0 628.0 325.0 646.0] /Border [0 0 0] /A << /S /URI /URI (https://hackathon-leaderboard-6m5i.onrender.com/stage) >> >> << /Type /Annot /Subtype /Link /Rect [175.0 610.0 325.0 628.0] /Border [0 0 0] /A << /S /URI /URI (https://hackathon-leaderboard-6m5i.onrender.com/join) >> >> << /Type /Annot /Subtype /Link /Rect [175.0 592.0 325.0 610.0] /Border [0 0 0] /A << /S /URI /URI (https://github.com/AkhilT9/hackathon-leaderboard) >> >>] >>
+endobj
+7 0 obj
+<< /Length 6040 >>
+stream
+0.080 0.120 0.250 rg
+BT /F2 18 Tf 50.0 742.0 Td (Hackathon AI Observability & Leaderboard) Tj ET
+0.400 0.450 0.550 rg
+BT /F1 10.5 Tf 50.0 716.0 Td (Official Quickstart Guide for Participants, Mentors & Organizers) Tj ET
+0.200 0.250 0.600 rg
+BT /F2 13 Tf 50.0 694.0 Td (1. Live Working Links \(Cloud Deployed\)) Tj ET
+0.850 0.900 0.980 rg
+50.0 690.0 512.0 1.5 re f
+0.920 0.940 0.970 rg
+50.0 664.0 512.0 18.0 re f
+0.150 0.200 0.300 rg
+BT /F2 9 Tf 56.0 670.0 Td (Portal) Tj ET
+0.150 0.200 0.300 rg
+BT /F2 9 Tf 175.0 670.0 Td (Cloud URL \(Click to Open\)) Tj ET
+0.150 0.200 0.300 rg
+BT /F2 9 Tf 335.0 670.0 Td (Description) Tj ET
+0.980 0.980 0.990 rg
+50.0 646.0 512.0 18.0 re f
+0.900 0.920 0.950 RG
+0.5 w 50.0 646.0 512.0 18.0 re S
+0.150 0.200 0.300 rg
+BT /F2 8.5 Tf 56.0 652.0 Td (Main Leaderboard) Tj ET
+0.150 0.300 0.850 rg
+BT /F1 8.5 Tf 175.0 652.0 Td (hackathon-leaderboard-6m5i.onrender.com) Tj ET
+0.300 0.350 0.400 rg
+BT /F1 8.5 Tf 335.0 652.0 Td (Live standings, metrics, replays) Tj ET
+0.980 0.980 0.990 rg
+50.0 628.0 512.0 18.0 re f
+0.900 0.920 0.950 RG
+0.5 w 50.0 628.0 512.0 18.0 re S
+0.150 0.200 0.300 rg
+BT /F2 8.5 Tf 56.0 634.0 Td (Stage HUD View) Tj ET
+0.150 0.300 0.850 rg
+BT /F1 8.5 Tf 175.0 634.0 Td (/stage) Tj ET
+0.300 0.350 0.400 rg
+BT /F1 8.5 Tf 335.0 634.0 Td (Auditorium big-screen neon projector) Tj ET
+0.980 0.980 0.990 rg
+50.0 610.0 512.0 18.0 re f
+0.900 0.920 0.950 RG
+0.5 w 50.0 610.0 512.0 18.0 re S
+0.150 0.200 0.300 rg
+BT /F2 8.5 Tf 56.0 616.0 Td (1-Click Join Form) Tj ET
+0.150 0.300 0.850 rg
+BT /F1 8.5 Tf 175.0 616.0 Td (/join) Tj ET
+0.300 0.350 0.400 rg
+BT /F1 8.5 Tf 335.0 616.0 Td (Generate custom 1-line connection script) Tj ET
+0.980 0.980 0.990 rg
+50.0 592.0 512.0 18.0 re f
+0.900 0.920 0.950 RG
+0.5 w 50.0 592.0 512.0 18.0 re S
+0.150 0.200 0.300 rg
+BT /F2 8.5 Tf 56.0 598.0 Td (GitHub Repository) Tj ET
+0.150 0.300 0.850 rg
+BT /F1 8.5 Tf 175.0 598.0 Td (github.com/AkhilT9/hackathon-leaderboard) Tj ET
+0.300 0.350 0.400 rg
+BT /F1 8.5 Tf 335.0 598.0 Td (Full open-source code & Dockerfile) Tj ET
+0.200 0.250 0.600 rg
+BT /F2 13 Tf 50.0 576.0 Td (2. For Hackathon Participants \(10-Second Setup\)) Tj ET
+0.850 0.900 0.980 rg
+50.0 572.0 512.0 1.5 re f
+0.200 0.250 0.300 rg
+BT /F1 9.5 Tf 50.0 558.0 Td (Connect your laptop's AI coding assistant to the live leaderboard in 1 command.) Tj ET
+0.200 0.250 0.300 rg
+BT /F1 9.5 Tf 50.0 544.0 Td (Supported Assistants: Cursor IDE, Claude Code, Google Antigravity, GitHub Copilot, OpenCode, Codex.) Tj ET
+0.150 0.200 0.300 rg
+BT /F2 11 Tf 50.0 526.0 Td (Step 1: Run Your 1-Line Quick Join Command) Tj ET
+0.200 0.250 0.300 rg
+BT /F1 9 Tf 50.0 510.0 Td (Windows \(PowerShell\):) Tj ET
+0.080 0.110 0.180 rg
+50.0 476.0 512.0 26.0 re f
+0.920 0.950 0.980 rg
+BT /F3 8.5 Tf 62.0 488.0 Td (irm "https://hackathon-leaderboard-6m5i.onrender.com/join.ps1?name=YOUR_NAME&team=YOUR_TEAM" | iex) Tj ET
+0.200 0.250 0.300 rg
+BT /F1 9 Tf 50.0 462.0 Td (macOS / Linux \(Terminal\):) Tj ET
+0.080 0.110 0.180 rg
+50.0 428.0 512.0 26.0 re f
+0.920 0.950 0.980 rg
+BT /F3 8.5 Tf 62.0 440.0 Td (curl -fsSL "https://hackathon-leaderboard-6m5i.onrender.com/join.sh?name=YOUR_NAME&team=YOUR_TEAM" | bash) Tj ET
+0.940 0.980 0.950 rg
+50.0 359.0 512.0 63.0 re f
+0.100 0.600 0.300 rg
+50.0 359.0 4.0 63.0 re f
+0.060 0.360 0.180 rg
+BT /F2 10 Tf 64.0 406.0 Td (Privacy & Security Guarantee \(Local Zero-Leakage\)) Tj ET
+0.200 0.250 0.300 rg
+BT /F1 8.5 Tf 64.0 392.0 Td (? agentplay processes your agent sessions locally on your laptop.) Tj ET
+0.200 0.250 0.300 rg
+BT /F1 8.5 Tf 64.0 380.0 Td (? Only numerical telemetry is uploaded: tool names \(bash, read_file\), step duration, error counts, commits.) Tj ET
+0.200 0.250 0.300 rg
+BT /F1 8.5 Tf 64.0 368.0 Td (? All code files, prompts, passwords, and API keys are completely stripped and redacted before upload.) Tj ET
+0.150 0.200 0.300 rg
+BT /F2 11 Tf 50.0 343.0 Td (Step 2: Keep Score Auto-Syncing During the Hackathon \(Optional\)) Tj ET
+0.080 0.110 0.180 rg
+50.0 307.0 512.0 26.0 re f
+0.920 0.950 0.980 rg
+BT /F3 8.5 Tf 62.0 319.0 Td (python sync_to_hub.py --hub https://hackathon-leaderboard-6m5i.onrender.com --name "YOUR_NAME" --team "YOUR_TEAM" --watch) Tj ET
+0.200 0.250 0.600 rg
+BT /F2 13 Tf 50.0 293.0 Td (3. For Mentors, Judges & Organizers) Tj ET
+0.850 0.900 0.980 rg
+50.0 289.0 512.0 1.5 re f
+0.980 0.960 1.000 rg
+50.0 220.0 512.0 63.0 re f
+0.500 0.200 0.800 rg
+50.0 220.0 4.0 63.0 re f
+0.300 0.120 0.480 rg
+BT /F2 10 Tf 64.0 267.0 Td (Auditorium Stage Projector View \(/stage\)) Tj ET
+0.200 0.250 0.300 rg
+BT /F1 8.5 Tf 64.0 253.0 Td (? Open https://hackathon-leaderboard-6m5i.onrender.com/stage on the main venue projector.) Tj ET
+0.200 0.250 0.300 rg
+BT /F1 8.5 Tf 64.0 241.0 Td (? Features a live Top 3 Team Podium \(Gold, Silver, Bronze\) updated automatically.) Tj ET
+0.200 0.250 0.300 rg
+BT /F1 8.5 Tf 64.0 229.0 Td (? Rolling cyberpunk activity ticker streams participant actions and git commits in real time.) Tj ET
+0.950 0.980 1.000 rg
+50.0 149.0 512.0 63.0 re f
+0.100 0.450 0.850 rg
+50.0 149.0 4.0 63.0 re f
+0.060 0.270 0.510 rg
+BT /F2 10 Tf 64.0 196.0 Td (Interactive Session Replay Modal \('See His Session'\)) Tj ET
+0.200 0.250 0.300 rg
+BT /F1 8.5 Tf 64.0 182.0 Td (? Click any participant's name on the main dashboard to open their session inspector.) Tj ET
+0.200 0.250 0.300 rg
+BT /F1 8.5 Tf 64.0 170.0 Td (? Inspect the complete 175-step chronological timeline with tool arguments and errors.) Tj ET
+0.200 0.250 0.300 rg
+BT /F1 8.5 Tf 64.0 158.0 Td (? Review Run Health scores \(0-100\) and MCP \(Model Context Protocol\) tool utilization.) Tj ET
+1.000 0.950 0.950 rg
+50.0 91.0 512.0 50.0 re f
+0.900 0.200 0.200 rg
+50.0 91.0 4.0 50.0 re f
+0.540 0.120 0.120 rg
+BT /F2 10 Tf 64.0 125.0 Td (Mentor SOS Alert \(Early Warning System\)) Tj ET
+0.200 0.250 0.300 rg
+BT /F1 8.5 Tf 64.0 111.0 Td (? Automatically flags agents stuck in error loops \(>= 3 consecutive failures\).) Tj ET
+0.200 0.250 0.300 rg
+BT /F1 8.5 Tf 64.0 99.0 Td (? A prominent red SOS banner directs mentors to struggling teams before they lose hours.) Tj ET
+endstream
+endobj
+8 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 9 0 R /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R >> >>  >>
+endobj
+9 0 obj
+<< /Length 1684 >>
+stream
+0.200 0.250 0.600 rg
+BT /F2 13 Tf 50.0 742.0 Td (4. Self-Hosting for Internal Events \(2 Minutes\)) Tj ET
+0.850 0.900 0.980 rg
+50.0 738.0 512.0 1.5 re f
+0.200 0.250 0.300 rg
+BT /F1 9.5 Tf 50.0 724.0 Td (Run locally on your machine or private network:) Tj ET
+0.080 0.110 0.180 rg
+50.0 654.0 512.0 62.0 re f
+0.920 0.950 0.980 rg
+BT /F3 8.5 Tf 62.0 702.0 Td (git clone https://github.com/AkhilT9/hackathon-leaderboard.git) Tj ET
+0.920 0.950 0.980 rg
+BT /F3 8.5 Tf 62.0 690.0 Td (cd hackathon-leaderboard) Tj ET
+0.920 0.950 0.980 rg
+BT /F3 8.5 Tf 62.0 678.0 Td (pip install -r requirements.txt) Tj ET
+0.920 0.950 0.980 rg
+BT /F3 8.5 Tf 62.0 666.0 Td (python server_7400.py   # Opens on http://localhost:7400) Tj ET
+0.200 0.250 0.600 rg
+BT /F2 13 Tf 50.0 640.0 Td (5. Frequently Asked Questions \(FAQ\)) Tj ET
+0.850 0.900 0.980 rg
+50.0 636.0 512.0 1.5 re f
+0.300 0.350 0.450 rg
+BT /F2 9 Tf 58.0 622.0 Td (?) Tj ET
+0.100 0.150 0.250 rg
+BT /F2 9 Tf 70.0 622.0 Td (Network:) Tj ET
+0.250 0.300 0.350 rg
+BT /F1 9 Tf 111.6 622.0 Td ( Does everyone need to be on the venue Wi-Fi?  No. The Render cloud deployment works from anywhere.) Tj ET
+0.300 0.350 0.450 rg
+BT /F2 9 Tf 58.0 609.0 Td (?) Tj ET
+0.100 0.150 0.250 rg
+BT /F2 9 Tf 70.0 609.0 Td (Harnesses:) Tj ET
+0.250 0.300 0.350 rg
+BT /F1 9 Tf 122.0 609.0 Td ( What if a team uses Cursor and another uses Claude?  Both are supported and ranked on the same board.) Tj ET
+0.300 0.350 0.450 rg
+BT /F2 9 Tf 58.0 596.0 Td (?) Tj ET
+0.100 0.150 0.250 rg
+BT /F2 9 Tf 70.0 596.0 Td (Customization:) Tj ET
+0.250 0.300 0.350 rg
+BT /F1 9 Tf 142.8 596.0 Td ( Can we adjust scoring criteria?  Yes, scoring weights are configurable in server_7400.py.) Tj ET
+endstream
+endobj
+xref
+0 10
+0000000000 65535 f 
+0000000015 00000 n 
+0000000064 00000 n 
+0000000127 00000 n 
+0000000197 00000 n 
+0000000272 00000 n 
+0000000340 00000 n 
+0000001125 00000 n 
+0000007217 00000 n 
+0000007364 00000 n 
+trailer
+<< /Size 10 /Root 1 0 R >>
+startxref
+9100
+%%EOF
