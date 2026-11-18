@@ -1,0 +1,6848 @@
+{
+  "uploadedSessions": [
+    {
+      "sessionId": "local:antigravity-cli:7cc953b2-99da-4073-9dc1-b5b6d5fe2abe",
+      "participant": "TestUser",
+      "team": "AlphaSquad",
+      "repo": "event-end-logistics-application",
+      "agentTool": "antigravity-cli",
+      "startedAt": "2026-10-31T14:19:03Z",
+      "uploadedAt": "2026-11-18T15:18:54Z",
+      "durationMs": 1312709000,
+      "calls": 124,
+      "errors": 12,
+      "prs": 0,
+      "commits": 1,
+      "mcpCalls": 13,
+      "costUsd": 0.0,
+      "tokens": 1373474,
+      "filesTouched": 11,
+      "sparkline": [
+        {
+          "calls": 91,
+          "errors": 6
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 15,
+          "errors": 0
+        },
+        {
+          "calls": 19,
+          "errors": 6
+        }
+      ],
+      "facts": {
+        "outcome": "unresolved_errors",
+        "edited": true,
+        "prsCreated": 0,
+        "prsMerged": 0,
+        "costUsd": 0.0,
+        "hasCost": false,
+        "tokens": {
+          "in": 912946,
+          "cw": 0,
+          "cr": 362649,
+          "out": 97879
+        },
+        "costByModel": {},
+        "calls": 124,
+        "errors": 12,
+        "retries": 3,
+        "cmd": {
+          "Get-ChildItem": {
+            "calls": 5,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 4621
+          },
+          "git status": {
+            "calls": 3,
+            "fails": 2,
+            "retries": 0,
+            "byClass": {
+              "other": 2
+            },
+            "verify": false,
+            "outBytes": 223
+          },
+          "Get-Content": {
+            "calls": 2,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 2401
+          },
+          "python": {
+            "calls": 7,
+            "fails": 1,
+            "retries": 0,
+            "byClass": {
+              "other": 1
+            },
+            "verify": false,
+            "outBytes": 4021
+          },
+          ".venvScriptspython.exe": {
+            "calls": 13,
+            "fails": 3,
+            "retries": 1,
+            "byClass": {
+              "other": 3
+            },
+            "verify": false,
+            "outBytes": 7409
+          },
+          "if": {
+            "calls": 2,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 268
+          },
+          "Test-Path": {
+            "calls": 3,
+            "fails": 1,
+            "retries": 0,
+            "byClass": {
+              "other": 1
+            },
+            "verify": false,
+            "outBytes": 260
+          },
+          "Select-String": {
+            "calls": 1,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 134
+          },
+          "Get-Item": {
+            "calls": 1,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 568
+          },
+          "git gh": {
+            "calls": 1,
+            "fails": 1,
+            "retries": 0,
+            "byClass": {
+              "other": 1
+            },
+            "verify": false,
+            "outBytes": 0
+          },
+          "git config": {
+            "calls": 1,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 162
+          },
+          "git init": {
+            "calls": 1,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 732
+          },
+          "git branch": {
+            "calls": 1,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 2000
+          },
+          "git remote": {
+            "calls": 1,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 134
+          },
+          "gh auth auth_status": {
+            "calls": 1,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 357
+          },
+          "gh repo repo_view": {
+            "calls": 4,
+            "fails": 3,
+            "retries": 1,
+            "byClass": {
+              "other": 3
+            },
+            "verify": false,
+            "outBytes": 2000
+          },
+          "gh repo repo_create": {
+            "calls": 1,
+            "fails": 0,
+            "retries": 1,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 327
+          },
+          "git log": {
+            "calls": 1,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 342
+          }
+        },
+        "errorsByClass": {
+          "other": 12
+        },
+        "errorsBySource": {
+          "tool": {
+            "other": 12
+          }
+        },
+        "files": {
+          "event-end-logistics-application:generate.py": {
+            "hits": 4,
+            "reads": 26,
+            "edits": 8
+          },
+          "event-end-logistics-application:template.html": {
+            "hits": 3,
+            "reads": 2,
+            "edits": 2
+          },
+          "event-end-logistics-application:template_premium.html": {
+            "hits": 0,
+            "reads": 1,
+            "edits": 1
+          },
+          "event-end-logistics-application:README.md": {
+            "hits": 0,
+            "reads": 1,
+            "edits": 0
+          },
+          "event-end-logistics-application:styles.css": {
+            "hits": 0,
+            "reads": 2,
+            "edits": 0
+          },
+          "event-end-logistics-application:styles_premium.css": {
+            "hits": 0,
+            "reads": 1,
+            "edits": 0
+          },
+          "event-end-logistics-application:SelfEvaluate": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 1
+          },
+          "event-end-logistics-application:Already": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 1
+          },
+          "event-end-logistics-application:sent_certificates.json": {
+            "hits": 0,
+            "reads": 2,
+            "edits": 0
+          },
+          "event-end-logistics-application:ARCHITECTURE.md": {
+            "hits": 1,
+            "reads": 2,
+            "edits": 0
+          },
+          "event-end-logistics-application:.gitignore": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 1
+          }
+        },
+        "compactions": 0,
+        "preTokens": [],
+        "maxContext": 209218,
+        "rereadsAfterCompaction": 0,
+        "verifyAfterLastEdit": false,
+        "waste": {
+          "retry": 0.0,
+          "abandoned": 0.0,
+          "cacheMiss": 0.0,
+          "reread": 0.0,
+          "deadSubagent": 0.0
+        },
+        "stallMs": 0,
+        "firstPromptChars": 163,
+        "userTurns": 20,
+        "mcp": {},
+        "hookFails": {},
+        "subagents": {},
+        "explore": 39,
+        "act": 73,
+        "editedFiles": 6,
+        "blindEdits": 1,
+        "reworkEdits": 6,
+        "stepsToFirstEdit": 24
+      },
+      "topTools": [
+        {
+          "name": "Bash",
+          "count": 49
+        },
+        {
+          "name": "Read",
+          "count": 39
+        },
+        {
+          "name": "Edit",
+          "count": 19
+        },
+        {
+          "name": "manage_task",
+          "count": 11
+        },
+        {
+          "name": "Write",
+          "count": 5
+        },
+        {
+          "name": "list_plugin_accounts",
+          "count": 1
+        },
+        {
+          "name": "Tool",
+          "count": 1
+        }
+      ],
+      "mentorAlert": true,
+      "mentorReason": "High error count: 12 errors encountered"
+    },
+    {
+      "sessionId": "local:antigravity-cli:7cc953b2-99da-4073-9dc1-b5b6d5fe2abe",
+      "participant": "Akhil",
+      "team": "Observability",
+      "repo": "local-workspace",
+      "agentTool": "antigravity-cli",
+      "startedAt": "2026-10-31T14:19:03Z",
+      "uploadedAt": "2026-11-17T20:20:16Z",
+      "durationMs": 16712000,
+      "calls": 91,
+      "errors": 6,
+      "prs": 0,
+      "commits": 0,
+      "mcpCalls": 11,
+      "costUsd": 0.0,
+      "tokens": 575681,
+      "filesTouched": 0,
+      "sparkline": [
+        {
+          "calls": 53,
+          "errors": 4
+        },
+        {
+          "calls": 13,
+          "errors": 1
+        },
+        {
+          "calls": 10,
+          "errors": 1
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 15,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        }
+      ],
+      "facts": {
+        "outcome": "completed",
+        "edited": true,
+        "prsCreated": 0,
+        "prsMerged": 0,
+        "costUsd": 0.0,
+        "hasCost": false,
+        "tokens": {
+          "in": 258683,
+          "cw": 0,
+          "cr": 254086,
+          "out": 62912
+        },
+        "costByModel": {},
+        "calls": 91,
+        "errors": 6,
+        "retries": 1,
+        "cmd": {
+          "Get-ChildItem": {
+            "calls": 4,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 3811
+          },
+          "git status": {
+            "calls": 1,
+            "fails": 1,
+            "retries": 0,
+            "byClass": {
+              "other": 1
+            },
+            "verify": false,
+            "outBytes": 0
+          },
+          "Get-Content": {
+            "calls": 2,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 2401
+          },
+          "python": {
+            "calls": 6,
+            "fails": 1,
+            "retries": 0,
+            "byClass": {
+              "other": 1
+            },
+            "verify": false,
+            "outBytes": 3882
+          },
+          ".venvScriptspython.exe": {
+            "calls": 13,
+            "fails": 3,
+            "retries": 1,
+            "byClass": {
+              "other": 3
+            },
+            "verify": false,
+            "outBytes": 7409
+          },
+          "if": {
+            "calls": 2,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 268
+          },
+          "Test-Path": {
+            "calls": 1,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 130
+          },
+          "Select-String": {
+            "calls": 1,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 134
+          }
+        },
+        "errorsByClass": {
+          "other": 6
+        },
+        "errorsBySource": {
+          "tool": {
+            "other": 6
+          }
+        },
+        "files": {},
+        "compactions": 0,
+        "preTokens": [],
+        "maxContext": 147556,
+        "rereadsAfterCompaction": 0,
+        "verifyAfterLastEdit": false,
+        "waste": {
+          "retry": 0.0,
+          "abandoned": 0.0,
+          "cacheMiss": 0.0,
+          "reread": 0.0,
+          "deadSubagent": 0.0
+        },
+        "stallMs": 0,
+        "firstPromptChars": 163,
+        "userTurns": 8,
+        "mcp": {},
+        "hookFails": {},
+        "subagents": {},
+        "explore": 31,
+        "act": 49,
+        "editedFiles": 0,
+        "blindEdits": 0,
+        "reworkEdits": 0,
+        "stepsToFirstEdit": null
+      },
+      "topTools": [
+        {
+          "name": "Read",
+          "count": 31
+        },
+        {
+          "name": "Bash",
+          "count": 30
+        },
+        {
+          "name": "Edit",
+          "count": 17
+        },
+        {
+          "name": "manage_task",
+          "count": 11
+        },
+        {
+          "name": "Write",
+          "count": 2
+        }
+      ],
+      "mentorAlert": false,
+      "mentorReason": ""
+    },
+    {
+      "sessionId": "local:antigravity-cli:5f10a40e-f81b-4bd1-933c-2d5299b1b290",
+      "participant": "Akhil",
+      "team": "Observability",
+      "repo": "agentplay",
+      "agentTool": "antigravity-cli",
+      "startedAt": "2026-11-08T08:47:12Z",
+      "uploadedAt": "2026-11-17T20:20:16Z",
+      "durationMs": 206513000,
+      "calls": 153,
+      "errors": 12,
+      "prs": 0,
+      "commits": 0,
+      "mcpCalls": 38,
+      "costUsd": 0.0,
+      "tokens": 1100713,
+      "filesTouched": 9,
+      "sparkline": [
+        {
+          "calls": 109,
+          "errors": 9
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 44,
+          "errors": 3
+        }
+      ],
+      "facts": {
+        "outcome": "completed",
+        "edited": true,
+        "prsCreated": 0,
+        "prsMerged": 0,
+        "costUsd": 0.0,
+        "hasCost": false,
+        "tokens": {
+          "in": 632258,
+          "cw": 0,
+          "cr": 390839,
+          "out": 77616
+        },
+        "costByModel": {},
+        "calls": 153,
+        "errors": 12,
+        "retries": 7,
+        "cmd": {
+          "python": {
+            "calls": 17,
+            "fails": 2,
+            "retries": 2,
+            "byClass": {
+              "other": 2
+            },
+            "verify": false,
+            "outBytes": 15603
+          },
+          "pip": {
+            "calls": 1,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 556
+          },
+          "UsersakhilAppDataRoamingPythonPy": {
+            "calls": 6,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 6570
+          },
+          "git clone": {
+            "calls": 1,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 174
+          },
+          "Get-ChildItem": {
+            "calls": 30,
+            "fails": 3,
+            "retries": 3,
+            "byClass": {
+              "other": 3
+            },
+            "verify": false,
+            "outBytes": 31750
+          },
+          "Get-Content": {
+            "calls": 9,
+            "fails": 3,
+            "retries": 1,
+            "byClass": {
+              "other": 3
+            },
+            "verify": false,
+            "outBytes": 8611
+          },
+          "git remote": {
+            "calls": 2,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 1709
+          },
+          "git log": {
+            "calls": 4,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 1845
+          },
+          "Move-Item": {
+            "calls": 1,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 134
+          },
+          "git diff": {
+            "calls": 2,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 3188
+          },
+          "Select-String": {
+            "calls": 2,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 2345
+          },
+          "sh": {
+            "calls": 5,
+            "fails": 1,
+            "retries": 0,
+            "byClass": {
+              "other": 1
+            },
+            "verify": false,
+            "outBytes": 4557
+          },
+          "git grep": {
+            "calls": 2,
+            "fails": 2,
+            "retries": 0,
+            "byClass": {
+              "other": 2
+            },
+            "verify": false,
+            "outBytes": 0
+          },
+          "netstat": {
+            "calls": 6,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 1252
+          },
+          "git fetch": {
+            "calls": 2,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 871
+          },
+          "git branch": {
+            "calls": 1,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 684
+          },
+          "Get-History": {
+            "calls": 1,
+            "fails": 1,
+            "retries": 0,
+            "byClass": {
+              "other": 1
+            },
+            "verify": false,
+            "outBytes": 0
+          },
+          "Get-Process": {
+            "calls": 1,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 134
+          },
+          "curl": {
+            "calls": 1,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 587
+          },
+          "git show": {
+            "calls": 2,
+            "fails": 0,
+            "retries": 1,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 3669
+          },
+          "Invoke-RestMethod": {
+            "calls": 1,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 2000
+          }
+        },
+        "errorsByClass": {
+          "other": 12
+        },
+        "errorsBySource": {
+          "tool": {
+            "other": 12
+          }
+        },
+        "files": {
+          "agentplay:python/src/agentplay/_core/ingestion/coding_agent/_sources/local/parsers/antigravity.py": {
+            "hits": 0,
+            "reads": 1,
+            "edits": 0
+          },
+          "agentplay:python/src/agentplay/server.py": {
+            "hits": 0,
+            "reads": 1,
+            "edits": 0
+          },
+          "agentplay:python/src/agentplay/cli.py": {
+            "hits": 0,
+            "reads": 3,
+            "edits": 0
+          },
+          "agentplay:viewer/src/insights/InsightsView.tsx": {
+            "hits": 0,
+            "reads": 1,
+            "edits": 0
+          },
+          "agentplay:viewer/src/App.tsx": {
+            "hits": 0,
+            "reads": 2,
+            "edits": 0
+          },
+          "agentplay:docs/signup-endpoint.md": {
+            "hits": 0,
+            "reads": 1,
+            "edits": 0
+          },
+          "agentplay:python/src/agentplay/account.py": {
+            "hits": 0,
+            "reads": 1,
+            "edits": 0
+          },
+          "agentplay:python/src/agentplay/facts.py": {
+            "hits": 0,
+            "reads": 2,
+            "edits": 0
+          },
+          "agentplay:python/src/agentplay/health.py": {
+            "hits": 0,
+            "reads": 2,
+            "edits": 0
+          }
+        },
+        "compactions": 0,
+        "preTokens": [],
+        "maxContext": 648178,
+        "rereadsAfterCompaction": 0,
+        "verifyAfterLastEdit": false,
+        "waste": {
+          "retry": 0.0,
+          "abandoned": 0.0,
+          "cacheMiss": 0.0,
+          "reread": 0.0,
+          "deadSubagent": 0.0
+        },
+        "stallMs": 2201000,
+        "firstPromptChars": 167,
+        "userTurns": 11,
+        "mcp": {},
+        "hookFails": {},
+        "subagents": {},
+        "explore": 15,
+        "act": 100,
+        "editedFiles": 0,
+        "blindEdits": 0,
+        "reworkEdits": 0,
+        "stepsToFirstEdit": null
+      },
+      "topTools": [
+        {
+          "name": "Bash",
+          "count": 97
+        },
+        {
+          "name": "WebSearch",
+          "count": 20
+        },
+        {
+          "name": "manage_task",
+          "count": 18
+        },
+        {
+          "name": "Read",
+          "count": 15
+        },
+        {
+          "name": "Write",
+          "count": 3
+        }
+      ],
+      "mentorAlert": true,
+      "mentorReason": "High error count: 12 errors encountered"
+    },
+    {
+      "sessionId": "local:cursor:ec2fa441-dc06-4473-9e72-4757042b87d5",
+      "participant": "Akhil",
+      "team": "Observability",
+      "repo": "local-workspace",
+      "agentTool": "cursor",
+      "startedAt": "2025-04-25T11:19:02Z",
+      "uploadedAt": "2026-11-17T20:20:16Z",
+      "durationMs": 1017842,
+      "calls": 25,
+      "errors": 0,
+      "prs": 0,
+      "commits": 0,
+      "mcpCalls": 1,
+      "costUsd": 0.0,
+      "tokens": 0,
+      "filesTouched": 0,
+      "sparkline": [
+        {
+          "calls": 2,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 1,
+          "errors": 0
+        },
+        {
+          "calls": 1,
+          "errors": 0
+        },
+        {
+          "calls": 1,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 2,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 1,
+          "errors": 0
+        },
+        {
+          "calls": 1,
+          "errors": 0
+        },
+        {
+          "calls": 1,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 2,
+          "errors": 0
+        },
+        {
+          "calls": 2,
+          "errors": 0
+        },
+        {
+          "calls": 1,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 2,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 1,
+          "errors": 0
+        },
+        {
+          "calls": 2,
+          "errors": 0
+        },
+        {
+          "calls": 1,
+          "errors": 0
+        },
+        {
+          "calls": 2,
+          "errors": 0
+        },
+        {
+          "calls": 2,
+          "errors": 0
+        }
+      ],
+      "facts": {
+        "outcome": "incomplete",
+        "edited": true,
+        "prsCreated": 0,
+        "prsMerged": 0,
+        "costUsd": 0.0,
+        "hasCost": false,
+        "tokens": {
+          "in": 0,
+          "cw": 0,
+          "cr": 0,
+          "out": 0
+        },
+        "costByModel": {},
+        "calls": 25,
+        "errors": 0,
+        "retries": 0,
+        "cmd": {},
+        "errorsByClass": {},
+        "errorsBySource": {},
+        "files": {},
+        "compactions": 0,
+        "preTokens": [],
+        "maxContext": 0,
+        "rereadsAfterCompaction": 0,
+        "verifyAfterLastEdit": false,
+        "waste": {
+          "retry": 0.0,
+          "abandoned": 0.0,
+          "cacheMiss": 0.0,
+          "reread": 0.0,
+          "deadSubagent": 0.0
+        },
+        "stallMs": 0,
+        "firstPromptChars": 20,
+        "userTurns": 16,
+        "mcp": {},
+        "hookFails": {},
+        "subagents": {},
+        "explore": 5,
+        "act": 19,
+        "editedFiles": 0,
+        "blindEdits": 0,
+        "reworkEdits": 0,
+        "stepsToFirstEdit": null
+      },
+      "topTools": [
+        {
+          "name": "Edit",
+          "count": 19
+        },
+        {
+          "name": "Read",
+          "count": 5
+        },
+        {
+          "name": "ListDir",
+          "count": 1
+        }
+      ],
+      "mentorAlert": false,
+      "mentorReason": ""
+    },
+    {
+      "sessionId": "local:cursor:a49ef44b-7943-427a-85bf-ca82c723dc54",
+      "participant": "Akhil",
+      "team": "Observability",
+      "repo": "local-workspace",
+      "agentTool": "cursor",
+      "startedAt": "2025-05-09T05:13:42Z",
+      "uploadedAt": "2026-11-17T20:20:16Z",
+      "durationMs": 454793,
+      "calls": 15,
+      "errors": 1,
+      "prs": 0,
+      "commits": 0,
+      "mcpCalls": 5,
+      "costUsd": 0.0,
+      "tokens": 0,
+      "filesTouched": 0,
+      "sparkline": [
+        {
+          "calls": 1,
+          "errors": 0
+        },
+        {
+          "calls": 1,
+          "errors": 0
+        },
+        {
+          "calls": 1,
+          "errors": 1
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 1,
+          "errors": 0
+        },
+        {
+          "calls": 1,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 1,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 1,
+          "errors": 0
+        },
+        {
+          "calls": 1,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 1,
+          "errors": 0
+        },
+        {
+          "calls": 1,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 1,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 1,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 1,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 1,
+          "errors": 0
+        },
+        {
+          "calls": 1,
+          "errors": 0
+        }
+      ],
+      "facts": {
+        "outcome": "incomplete",
+        "edited": true,
+        "prsCreated": 0,
+        "prsMerged": 0,
+        "costUsd": 0.0,
+        "hasCost": false,
+        "tokens": {
+          "in": 0,
+          "cw": 0,
+          "cr": 0,
+          "out": 0
+        },
+        "costByModel": {},
+        "calls": 15,
+        "errors": 1,
+        "retries": 1,
+        "cmd": {},
+        "errorsByClass": {
+          "other": 1
+        },
+        "errorsBySource": {
+          "tool": {
+            "other": 1
+          }
+        },
+        "files": {},
+        "compactions": 0,
+        "preTokens": [],
+        "maxContext": 0,
+        "rereadsAfterCompaction": 0,
+        "verifyAfterLastEdit": false,
+        "waste": {
+          "retry": 0.0,
+          "abandoned": 0.0,
+          "cacheMiss": 0.0,
+          "reread": 0.0,
+          "deadSubagent": 0.0
+        },
+        "stallMs": 0,
+        "firstPromptChars": 42,
+        "userTurns": 2,
+        "mcp": {},
+        "hookFails": {},
+        "subagents": {},
+        "explore": 5,
+        "act": 5,
+        "editedFiles": 0,
+        "blindEdits": 0,
+        "reworkEdits": 0,
+        "stepsToFirstEdit": null
+      },
+      "topTools": [
+        {
+          "name": "Edit",
+          "count": 5
+        },
+        {
+          "name": "Read",
+          "count": 5
+        },
+        {
+          "name": "ListDir",
+          "count": 3
+        },
+        {
+          "name": "grep_search",
+          "count": 1
+        },
+        {
+          "name": "delete_file",
+          "count": 1
+        }
+      ],
+      "mentorAlert": false,
+      "mentorReason": ""
+    },
+    {
+      "sessionId": "local:cursor:3f2e158b-b10e-411b-bf46-bcc209fe2f4a",
+      "participant": "Akhil",
+      "team": "Observability",
+      "repo": "local-workspace",
+      "agentTool": "cursor",
+      "startedAt": "2025-09-07T11:37:18Z",
+      "uploadedAt": "2026-11-17T20:20:16Z",
+      "durationMs": 827574,
+      "calls": 30,
+      "errors": 0,
+      "prs": 0,
+      "commits": 0,
+      "mcpCalls": 12,
+      "costUsd": 0.0,
+      "tokens": 0,
+      "filesTouched": 0,
+      "sparkline": [
+        {
+          "calls": 2,
+          "errors": 0
+        },
+        {
+          "calls": 1,
+          "errors": 0
+        },
+        {
+          "calls": 1,
+          "errors": 0
+        },
+        {
+          "calls": 2,
+          "errors": 0
+        },
+        {
+          "calls": 1,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 2,
+          "errors": 0
+        },
+        {
+          "calls": 1,
+          "errors": 0
+        },
+        {
+          "calls": 1,
+          "errors": 0
+        },
+        {
+          "calls": 1,
+          "errors": 0
+        },
+        {
+          "calls": 2,
+          "errors": 0
+        },
+        {
+          "calls": 1,
+          "errors": 0
+        },
+        {
+          "calls": 1,
+          "errors": 0
+        },
+        {
+          "calls": 1,
+          "errors": 0
+        },
+        {
+          "calls": 1,
+          "errors": 0
+        },
+        {
+          "calls": 1,
+          "errors": 0
+        },
+        {
+          "calls": 1,
+          "errors": 0
+        },
+        {
+          "calls": 1,
+          "errors": 0
+        },
+        {
+          "calls": 2,
+          "errors": 0
+        },
+        {
+          "calls": 1,
+          "errors": 0
+        },
+        {
+          "calls": 2,
+          "errors": 0
+        },
+        {
+          "calls": 1,
+          "errors": 0
+        },
+        {
+          "calls": 1,
+          "errors": 0
+        },
+        {
+          "calls": 2,
+          "errors": 0
+        }
+      ],
+      "facts": {
+        "outcome": "incomplete",
+        "edited": true,
+        "prsCreated": 0,
+        "prsMerged": 0,
+        "costUsd": 0.0,
+        "hasCost": false,
+        "tokens": {
+          "in": 0,
+          "cw": 0,
+          "cr": 0,
+          "out": 0
+        },
+        "costByModel": {},
+        "calls": 30,
+        "errors": 0,
+        "retries": 0,
+        "cmd": {
+          "npm": {
+            "calls": 1,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 1421
+          },
+          "if": {
+            "calls": 1,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 2000
+          },
+          "curl.exe": {
+            "calls": 2,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 1223
+          },
+          "sh": {
+            "calls": 2,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 1180
+          },
+          "powershell": {
+            "calls": 2,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 3891
+          },
+          "Usersakhilprojectschatbotbackend": {
+            "calls": 1,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 2000
+          },
+          "npm start": {
+            "calls": 1,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 69
+          },
+          "npm install": {
+            "calls": 1,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 1853
+          },
+          "curl": {
+            "calls": 1,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 1827
+          }
+        },
+        "errorsByClass": {},
+        "errorsBySource": {},
+        "files": {},
+        "compactions": 0,
+        "preTokens": [],
+        "maxContext": 0,
+        "rereadsAfterCompaction": 0,
+        "verifyAfterLastEdit": false,
+        "waste": {
+          "retry": 0.0,
+          "abandoned": 0.0,
+          "cacheMiss": 0.0,
+          "reread": 0.0,
+          "deadSubagent": 0.0
+        },
+        "stallMs": 0,
+        "firstPromptChars": 3,
+        "userTurns": 6,
+        "mcp": {},
+        "hookFails": {},
+        "subagents": {},
+        "explore": 6,
+        "act": 15,
+        "editedFiles": 0,
+        "blindEdits": 0,
+        "reworkEdits": 0,
+        "stepsToFirstEdit": null
+      },
+      "topTools": [
+        {
+          "name": "Bash",
+          "count": 12
+        },
+        {
+          "name": "Read",
+          "count": 6
+        },
+        {
+          "name": "todo_write",
+          "count": 5
+        },
+        {
+          "name": "apply_patch",
+          "count": 3
+        },
+        {
+          "name": "delete_file",
+          "count": 3
+        },
+        {
+          "name": "ListDir",
+          "count": 1
+        }
+      ],
+      "mentorAlert": false,
+      "mentorReason": ""
+    },
+    {
+      "sessionId": "local:cursor:585a3441-ea31-44bd-92e8-b0a039c94640",
+      "participant": "Akhil",
+      "team": "Observability",
+      "repo": "local-workspace",
+      "agentTool": "cursor",
+      "startedAt": "2025-09-07T11:52:37Z",
+      "uploadedAt": "2026-11-17T20:20:16Z",
+      "durationMs": 772450,
+      "calls": 10,
+      "errors": 0,
+      "prs": 0,
+      "commits": 0,
+      "mcpCalls": 7,
+      "costUsd": 0.0,
+      "tokens": 0,
+      "filesTouched": 0,
+      "sparkline": [
+        {
+          "calls": 1,
+          "errors": 0
+        },
+        {
+          "calls": 1,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 1,
+          "errors": 0
+        },
+        {
+          "calls": 1,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 1,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 1,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 1,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 1,
+          "errors": 0
+        },
+        {
+          "calls": 1,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 1,
+          "errors": 0
+        }
+      ],
+      "facts": {
+        "outcome": "completed",
+        "edited": true,
+        "prsCreated": 0,
+        "prsMerged": 0,
+        "costUsd": 0.0,
+        "hasCost": false,
+        "tokens": {
+          "in": 0,
+          "cw": 0,
+          "cr": 0,
+          "out": 0
+        },
+        "costByModel": {},
+        "calls": 10,
+        "errors": 0,
+        "retries": 0,
+        "cmd": {
+          "powershell": {
+            "calls": 2,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 3378
+          }
+        },
+        "errorsByClass": {},
+        "errorsBySource": {},
+        "files": {},
+        "compactions": 0,
+        "preTokens": [],
+        "maxContext": 0,
+        "rereadsAfterCompaction": 0,
+        "verifyAfterLastEdit": false,
+        "waste": {
+          "retry": 0.0,
+          "abandoned": 0.0,
+          "cacheMiss": 0.0,
+          "reread": 0.0,
+          "deadSubagent": 0.0
+        },
+        "stallMs": 0,
+        "firstPromptChars": 2,
+        "userTurns": 3,
+        "mcp": {},
+        "hookFails": {},
+        "subagents": {},
+        "explore": 0,
+        "act": 8,
+        "editedFiles": 0,
+        "blindEdits": 0,
+        "reworkEdits": 0,
+        "stepsToFirstEdit": null
+      },
+      "topTools": [
+        {
+          "name": "apply_patch",
+          "count": 5
+        },
+        {
+          "name": "Bash",
+          "count": 2
+        },
+        {
+          "name": "todo_write",
+          "count": 2
+        },
+        {
+          "name": "Edit",
+          "count": 1
+        }
+      ],
+      "mentorAlert": false,
+      "mentorReason": ""
+    },
+    {
+      "sessionId": "local:copilot-vscode:3bd790fc-54e6-43d1-9f58-c4e7f3ec8b4a",
+      "participant": "Akhil",
+      "team": "Observability",
+      "repo": "local-workspace",
+      "agentTool": "copilot-vscode",
+      "startedAt": "2025-09-12T19:40:45Z",
+      "uploadedAt": "2026-11-17T20:20:16Z",
+      "durationMs": 1314156,
+      "calls": 1,
+      "errors": 0,
+      "prs": 0,
+      "commits": 0,
+      "mcpCalls": 0,
+      "costUsd": 0.0,
+      "tokens": 0,
+      "filesTouched": 0,
+      "sparkline": [
+        {
+          "calls": 1,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        }
+      ],
+      "facts": {
+        "outcome": "completed",
+        "edited": false,
+        "prsCreated": 0,
+        "prsMerged": 0,
+        "costUsd": 0.0,
+        "hasCost": false,
+        "tokens": {
+          "in": 0,
+          "cw": 0,
+          "cr": 0,
+          "out": 0
+        },
+        "costByModel": {
+          "copilot/gpt-4.1": 0.0
+        },
+        "calls": 1,
+        "errors": 0,
+        "retries": 0,
+        "cmd": {
+          "git checkout": {
+            "calls": 1,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 33
+          }
+        },
+        "errorsByClass": {},
+        "errorsBySource": {},
+        "files": {},
+        "compactions": 0,
+        "preTokens": [],
+        "maxContext": 0,
+        "rereadsAfterCompaction": 0,
+        "verifyAfterLastEdit": false,
+        "waste": {
+          "retry": 0.0,
+          "abandoned": 0.0,
+          "cacheMiss": 0.0,
+          "reread": 0.0,
+          "deadSubagent": 0.0
+        },
+        "stallMs": 691062,
+        "firstPromptChars": 1114,
+        "userTurns": 10,
+        "mcp": {},
+        "hookFails": {},
+        "subagents": {},
+        "explore": 0,
+        "act": 1,
+        "editedFiles": 0,
+        "blindEdits": 0,
+        "reworkEdits": 0,
+        "stepsToFirstEdit": null
+      },
+      "topTools": [
+        {
+          "name": "Bash",
+          "count": 1
+        }
+      ],
+      "mentorAlert": false,
+      "mentorReason": ""
+    },
+    {
+      "sessionId": "local:cursor:1c6af7f9-b822-48c4-8fd1-78949025b509",
+      "participant": "Akhil",
+      "team": "Observability",
+      "repo": "local-workspace",
+      "agentTool": "cursor",
+      "startedAt": "2025-09-13T07:52:03Z",
+      "uploadedAt": "2026-11-17T20:20:16Z",
+      "durationMs": 5220256135,
+      "calls": 56,
+      "errors": 0,
+      "prs": 0,
+      "commits": 0,
+      "mcpCalls": 54,
+      "costUsd": 0.0,
+      "tokens": 0,
+      "filesTouched": 0,
+      "sparkline": [
+        {
+          "calls": 3,
+          "errors": 0
+        },
+        {
+          "calls": 3,
+          "errors": 0
+        },
+        {
+          "calls": 2,
+          "errors": 0
+        },
+        {
+          "calls": 2,
+          "errors": 0
+        },
+        {
+          "calls": 3,
+          "errors": 0
+        },
+        {
+          "calls": 3,
+          "errors": 0
+        },
+        {
+          "calls": 2,
+          "errors": 0
+        },
+        {
+          "calls": 2,
+          "errors": 0
+        },
+        {
+          "calls": 3,
+          "errors": 0
+        },
+        {
+          "calls": 3,
+          "errors": 0
+        },
+        {
+          "calls": 2,
+          "errors": 0
+        },
+        {
+          "calls": 2,
+          "errors": 0
+        },
+        {
+          "calls": 3,
+          "errors": 0
+        },
+        {
+          "calls": 2,
+          "errors": 0
+        },
+        {
+          "calls": 3,
+          "errors": 0
+        },
+        {
+          "calls": 2,
+          "errors": 0
+        },
+        {
+          "calls": 2,
+          "errors": 0
+        },
+        {
+          "calls": 3,
+          "errors": 0
+        },
+        {
+          "calls": 1,
+          "errors": 0
+        },
+        {
+          "calls": 3,
+          "errors": 0
+        },
+        {
+          "calls": 2,
+          "errors": 0
+        },
+        {
+          "calls": 1,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 4,
+          "errors": 0
+        }
+      ],
+      "facts": {
+        "outcome": "incomplete",
+        "edited": false,
+        "prsCreated": 0,
+        "prsMerged": 0,
+        "costUsd": 0.0,
+        "hasCost": false,
+        "tokens": {
+          "in": 0,
+          "cw": 0,
+          "cr": 0,
+          "out": 0
+        },
+        "costByModel": {},
+        "calls": 56,
+        "errors": 0,
+        "retries": 0,
+        "cmd": {
+          "chmod": {
+            "calls": 1,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 515
+          },
+          "mkdir": {
+            "calls": 1,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 167
+          }
+        },
+        "errorsByClass": {},
+        "errorsBySource": {},
+        "files": {},
+        "compactions": 0,
+        "preTokens": [],
+        "maxContext": 0,
+        "rereadsAfterCompaction": 0,
+        "verifyAfterLastEdit": false,
+        "waste": {
+          "retry": 0.0,
+          "abandoned": 0.0,
+          "cacheMiss": 0.0,
+          "reread": 0.0,
+          "deadSubagent": 0.0
+        },
+        "stallMs": 4526656084,
+        "firstPromptChars": 1267,
+        "userTurns": 2,
+        "mcp": {},
+        "hookFails": {},
+        "subagents": {},
+        "explore": 0,
+        "act": 2,
+        "editedFiles": 0,
+        "blindEdits": 0,
+        "reworkEdits": 0,
+        "stepsToFirstEdit": null
+      },
+      "topTools": [
+        {
+          "name": "write",
+          "count": 47
+        },
+        {
+          "name": "todo_write",
+          "count": 5
+        },
+        {
+          "name": "search_replace",
+          "count": 2
+        },
+        {
+          "name": "Bash",
+          "count": 2
+        }
+      ],
+      "mentorAlert": false,
+      "mentorReason": ""
+    },
+    {
+      "sessionId": "local:copilot-vscode:24aa3eb2-e757-40cf-b4ff-a3a2d34bc979",
+      "participant": "Akhil",
+      "team": "Observability",
+      "repo": "local-workspace",
+      "agentTool": "copilot-vscode",
+      "startedAt": "2026-08-27T05:39:37Z",
+      "uploadedAt": "2026-11-17T20:20:16Z",
+      "durationMs": 1500243,
+      "calls": 3,
+      "errors": 0,
+      "prs": 0,
+      "commits": 0,
+      "mcpCalls": 0,
+      "costUsd": 0.0009,
+      "tokens": 752,
+      "filesTouched": 0,
+      "sparkline": [
+        {
+          "calls": 3,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        }
+      ],
+      "facts": {
+        "outcome": "completed",
+        "edited": false,
+        "prsCreated": 0,
+        "prsMerged": 0,
+        "costUsd": 0.0009,
+        "hasCost": true,
+        "tokens": {
+          "in": 0,
+          "cw": 0,
+          "cr": 0,
+          "out": 752
+        },
+        "costByModel": {
+          "gpt-5.6-luna": 0.000902
+        },
+        "calls": 3,
+        "errors": 0,
+        "retries": 0,
+        "cmd": {
+          "Get-Location": {
+            "calls": 1,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 127
+          },
+          "py": {
+            "calls": 1,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 77
+          }
+        },
+        "errorsByClass": {},
+        "errorsBySource": {},
+        "files": {},
+        "compactions": 0,
+        "preTokens": [],
+        "maxContext": 0,
+        "rereadsAfterCompaction": 0,
+        "verifyAfterLastEdit": false,
+        "waste": {
+          "retry": 0.0,
+          "abandoned": 0.0,
+          "cacheMiss": 0.0,
+          "reread": 0.0,
+          "deadSubagent": 0.0
+        },
+        "stallMs": 0,
+        "firstPromptChars": 1442,
+        "userTurns": 4,
+        "mcp": {},
+        "hookFails": {},
+        "subagents": {},
+        "explore": 1,
+        "act": 2,
+        "editedFiles": 0,
+        "blindEdits": 0,
+        "reworkEdits": 0,
+        "stepsToFirstEdit": null
+      },
+      "topTools": [
+        {
+          "name": "Bash",
+          "count": 2
+        },
+        {
+          "name": "Read",
+          "count": 1
+        }
+      ],
+      "mentorAlert": false,
+      "mentorReason": ""
+    },
+    {
+      "sessionId": "local:copilot-vscode:1e0a09af-4860-46cb-9ef8-37ee22378d8d",
+      "participant": "Akhil",
+      "team": "Observability",
+      "repo": "local-workspace",
+      "agentTool": "copilot-vscode",
+      "startedAt": "2026-09-03T14:02:34Z",
+      "uploadedAt": "2026-11-17T20:20:16Z",
+      "durationMs": 18164913,
+      "calls": 42,
+      "errors": 0,
+      "prs": 0,
+      "commits": 0,
+      "mcpCalls": 16,
+      "costUsd": 0.0028,
+      "tokens": 2334,
+      "filesTouched": 0,
+      "sparkline": [
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 12,
+          "errors": 0
+        },
+        {
+          "calls": 10,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 5,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 9,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 3,
+          "errors": 0
+        },
+        {
+          "calls": 3,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        }
+      ],
+      "facts": {
+        "outcome": "completed",
+        "edited": true,
+        "prsCreated": 0,
+        "prsMerged": 0,
+        "costUsd": 0.0028,
+        "hasCost": true,
+        "tokens": {
+          "in": 0,
+          "cw": 0,
+          "cr": 0,
+          "out": 2334
+        },
+        "costByModel": {
+          "gpt-5.6-luna": 0.0028
+        },
+        "calls": 42,
+        "errors": 0,
+        "retries": 0,
+        "cmd": {
+          "python": {
+            "calls": 3,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 2300
+          },
+          ".venvScriptspython.exe": {
+            "calls": 13,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 4367
+          }
+        },
+        "errorsByClass": {},
+        "errorsBySource": {},
+        "files": {},
+        "compactions": 0,
+        "preTokens": [],
+        "maxContext": 0,
+        "rereadsAfterCompaction": 0,
+        "verifyAfterLastEdit": false,
+        "waste": {
+          "retry": 0.0,
+          "abandoned": 0.0,
+          "cacheMiss": 0.0,
+          "reread": 0.0,
+          "deadSubagent": 0.0
+        },
+        "stallMs": 0,
+        "firstPromptChars": 1800,
+        "userTurns": 18,
+        "mcp": {},
+        "hookFails": {},
+        "subagents": {},
+        "explore": 10,
+        "act": 26,
+        "editedFiles": 0,
+        "blindEdits": 0,
+        "reworkEdits": 0,
+        "stepsToFirstEdit": null
+      },
+      "topTools": [
+        {
+          "name": "Bash",
+          "count": 16
+        },
+        {
+          "name": "Read",
+          "count": 10
+        },
+        {
+          "name": "apply_patch",
+          "count": 10
+        },
+        {
+          "name": "get_errors",
+          "count": 4
+        },
+        {
+          "name": "ListDir",
+          "count": 2
+        }
+      ],
+      "mentorAlert": false,
+      "mentorReason": ""
+    },
+    {
+      "sessionId": "local:copilot-vscode:314a2102-fe83-42f9-9899-8d0a89e5df71",
+      "participant": "Akhil",
+      "team": "Observability",
+      "repo": "local-workspace",
+      "agentTool": "copilot-vscode",
+      "startedAt": "2026-09-05T06:49:03Z",
+      "uploadedAt": "2026-11-17T20:20:16Z",
+      "durationMs": 44177177,
+      "calls": 10,
+      "errors": 0,
+      "prs": 0,
+      "commits": 0,
+      "mcpCalls": 3,
+      "costUsd": 0.0015,
+      "tokens": 1212,
+      "filesTouched": 0,
+      "sparkline": [
+        {
+          "calls": 5,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 5,
+          "errors": 0
+        }
+      ],
+      "facts": {
+        "outcome": "completed",
+        "edited": true,
+        "prsCreated": 0,
+        "prsMerged": 0,
+        "costUsd": 0.0015,
+        "hasCost": true,
+        "tokens": {
+          "in": 0,
+          "cw": 0,
+          "cr": 0,
+          "out": 1212
+        },
+        "costByModel": {
+          "gpt-5.6-luna": 0.001455
+        },
+        "calls": 10,
+        "errors": 0,
+        "retries": 0,
+        "cmd": {
+          "python": {
+            "calls": 1,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 488
+          },
+          ".venvScriptspython": {
+            "calls": 3,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 1675
+          }
+        },
+        "errorsByClass": {},
+        "errorsBySource": {},
+        "files": {},
+        "compactions": 0,
+        "preTokens": [],
+        "maxContext": 0,
+        "rereadsAfterCompaction": 0,
+        "verifyAfterLastEdit": false,
+        "waste": {
+          "retry": 0.0,
+          "abandoned": 0.0,
+          "cacheMiss": 0.0,
+          "reread": 0.0,
+          "deadSubagent": 0.0
+        },
+        "stallMs": 0,
+        "firstPromptChars": 1509,
+        "userTurns": 7,
+        "mcp": {},
+        "hookFails": {},
+        "subagents": {},
+        "explore": 4,
+        "act": 5,
+        "editedFiles": 0,
+        "blindEdits": 0,
+        "reworkEdits": 0,
+        "stepsToFirstEdit": null
+      },
+      "topTools": [
+        {
+          "name": "Bash",
+          "count": 4
+        },
+        {
+          "name": "Read",
+          "count": 2
+        },
+        {
+          "name": "Glob",
+          "count": 1
+        },
+        {
+          "name": "Grep",
+          "count": 1
+        },
+        {
+          "name": "apply_patch",
+          "count": 1
+        },
+        {
+          "name": "get_errors",
+          "count": 1
+        }
+      ],
+      "mentorAlert": false,
+      "mentorReason": ""
+    },
+    {
+      "sessionId": "local:claude-code:0dc11f0a-b0e2-4a6f-aa09-13340b444aa2",
+      "participant": "Akhil",
+      "team": "Observability",
+      "repo": "local-workspace",
+      "agentTool": "claude-code",
+      "startedAt": "2026-10-03T06:38:29Z",
+      "uploadedAt": "2026-11-17T20:20:16Z",
+      "durationMs": 18231260,
+      "calls": 235,
+      "errors": 8,
+      "prs": 0,
+      "commits": 1,
+      "mcpCalls": 10,
+      "costUsd": 18.9142,
+      "tokens": 57349518,
+      "filesTouched": 0,
+      "sparkline": [
+        {
+          "calls": 22,
+          "errors": 1
+        },
+        {
+          "calls": 28,
+          "errors": 0
+        },
+        {
+          "calls": 35,
+          "errors": 0
+        },
+        {
+          "calls": 18,
+          "errors": 0
+        },
+        {
+          "calls": 8,
+          "errors": 0
+        },
+        {
+          "calls": 17,
+          "errors": 1
+        },
+        {
+          "calls": 6,
+          "errors": 0
+        },
+        {
+          "calls": 18,
+          "errors": 0
+        },
+        {
+          "calls": 15,
+          "errors": 0
+        },
+        {
+          "calls": 1,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 7,
+          "errors": 0
+        },
+        {
+          "calls": 2,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 5,
+          "errors": 2
+        },
+        {
+          "calls": 4,
+          "errors": 0
+        },
+        {
+          "calls": 6,
+          "errors": 1
+        },
+        {
+          "calls": 10,
+          "errors": 0
+        },
+        {
+          "calls": 6,
+          "errors": 1
+        },
+        {
+          "calls": 5,
+          "errors": 1
+        },
+        {
+          "calls": 12,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 13,
+          "errors": 1
+        }
+      ],
+      "facts": {
+        "outcome": "completed",
+        "edited": true,
+        "prsCreated": 0,
+        "prsMerged": 0,
+        "costUsd": 18.9142,
+        "hasCost": true,
+        "tokens": {
+          "in": 364,
+          "cw": 460894,
+          "cr": 56624086,
+          "out": 264174
+        },
+        "costByModel": {
+          "claude-opus-5-5": 18.914224
+        },
+        "calls": 235,
+        "errors": 8,
+        "retries": 3,
+        "cmd": {
+          "curl": {
+            "calls": 4,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 2035
+          },
+          "which": {
+            "calls": 2,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 2372
+          },
+          "cargo build": {
+            "calls": 6,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 17397
+          },
+          "cargo test": {
+            "calls": 13,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": true,
+            "outBytes": 14695
+          },
+          "cargo search": {
+            "calls": 1,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 971
+          },
+          "cargo run": {
+            "calls": 3,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 4849
+          },
+          "python": {
+            "calls": 10,
+            "fails": 1,
+            "retries": 1,
+            "byClass": {
+              "exit_code": 1
+            },
+            "verify": true,
+            "outBytes": 14818
+          },
+          "cargo fmt": {
+            "calls": 2,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": true,
+            "outBytes": 1861
+          },
+          "git status": {
+            "calls": 3,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 2283
+          },
+          "git checkout": {
+            "calls": 2,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 3626
+          },
+          "touch": {
+            "calls": 1,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 117
+          },
+          "mkdir": {
+            "calls": 1,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 486
+          },
+          "eval.exe": {
+            "calls": 1,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 256
+          },
+          "sed": {
+            "calls": 1,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": true,
+            "outBytes": 2238
+          },
+          "gh 2>&1": {
+            "calls": 1,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 248
+          },
+          "sleep": {
+            "calls": 1,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 298
+          },
+          "gh.exe": {
+            "calls": 6,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 3923
+          },
+          "git fetch": {
+            "calls": 1,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 67
+          },
+          "git diff": {
+            "calls": 1,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 782
+          },
+          "git show": {
+            "calls": 2,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 1935
+          },
+          "git add": {
+            "calls": 2,
+            "fails": 1,
+            "retries": 0,
+            "byClass": {
+              "permission_denied": 1
+            },
+            "verify": false,
+            "outBytes": 459
+          },
+          "echo": {
+            "calls": 5,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 3462
+          },
+          "git commit": {
+            "calls": 1,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 36
+          },
+          "git reset": {
+            "calls": 1,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 170
+          },
+          "pip": {
+            "calls": 1,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 248
+          }
+        },
+        "errorsByClass": {
+          "exit_code": 4,
+          "interrupted": 3,
+          "permission_denied": 1
+        },
+        "errorsBySource": {
+          "tool": {
+            "exit_code": 4,
+            "permission_denied": 1
+          },
+          "orchestration": {
+            "interrupted": 3
+          }
+        },
+        "files": {},
+        "compactions": 0,
+        "preTokens": [],
+        "maxContext": 487721,
+        "rereadsAfterCompaction": 0,
+        "verifyAfterLastEdit": false,
+        "waste": {
+          "retry": 0.779711,
+          "abandoned": 0.0,
+          "cacheMiss": 0.001383,
+          "reread": 0.0,
+          "deadSubagent": 0.0
+        },
+        "stallMs": 0,
+        "firstPromptChars": 14536,
+        "userTurns": 33,
+        "mcp": {},
+        "hookFails": {},
+        "subagents": {},
+        "explore": 62,
+        "act": 166,
+        "editedFiles": 0,
+        "blindEdits": 0,
+        "reworkEdits": 0,
+        "stepsToFirstEdit": null
+      },
+      "topTools": [
+        {
+          "name": "Bash",
+          "count": 95
+        },
+        {
+          "name": "Edit",
+          "count": 74
+        },
+        {
+          "name": "Read",
+          "count": 33
+        },
+        {
+          "name": "Write",
+          "count": 20
+        },
+        {
+          "name": "PowerShell",
+          "count": 7
+        },
+        {
+          "name": "Grep",
+          "count": 6
+        },
+        {
+          "name": "Tool",
+          "count": 3
+        }
+      ],
+      "mentorAlert": false,
+      "mentorReason": ""
+    },
+    {
+      "sessionId": "local:claude-code:986ed109-5886-4473-b2bc-4c0b29e4b274",
+      "participant": "Akhil",
+      "team": "Observability",
+      "repo": "local-workspace",
+      "agentTool": "claude-code",
+      "startedAt": "2026-10-03T08:25:04Z",
+      "uploadedAt": "2026-11-17T20:20:16Z",
+      "durationMs": 1732662,
+      "calls": 10,
+      "errors": 0,
+      "prs": 0,
+      "commits": 0,
+      "mcpCalls": 2,
+      "costUsd": 0.3293,
+      "tokens": 541465,
+      "filesTouched": 0,
+      "sparkline": [
+        {
+          "calls": 2,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 8,
+          "errors": 0
+        }
+      ],
+      "facts": {
+        "outcome": "completed",
+        "edited": false,
+        "prsCreated": 0,
+        "prsMerged": 0,
+        "costUsd": 0.3293,
+        "hasCost": true,
+        "tokens": {
+          "in": 22,
+          "cw": 28539,
+          "cr": 508663,
+          "out": 4241
+        },
+        "costByModel": {
+          "claude-opus-5-5": 0.329335
+        },
+        "calls": 10,
+        "errors": 0,
+        "retries": 0,
+        "cmd": {},
+        "errorsByClass": {},
+        "errorsBySource": {},
+        "files": {},
+        "compactions": 0,
+        "preTokens": [],
+        "maxContext": 58193,
+        "rereadsAfterCompaction": 0,
+        "verifyAfterLastEdit": false,
+        "waste": {
+          "retry": 0.0,
+          "abandoned": 0.0,
+          "cacheMiss": 8e-05,
+          "reread": 0.0,
+          "deadSubagent": 0.0
+        },
+        "stallMs": 0,
+        "firstPromptChars": 828,
+        "userTurns": 5,
+        "mcp": {},
+        "hookFails": {},
+        "subagents": {},
+        "explore": 9,
+        "act": 0,
+        "editedFiles": 0,
+        "blindEdits": 0,
+        "reworkEdits": 0,
+        "stepsToFirstEdit": null
+      },
+      "topTools": [
+        {
+          "name": "Grep",
+          "count": 5
+        },
+        {
+          "name": "Read",
+          "count": 3
+        },
+        {
+          "name": "PowerShell",
+          "count": 1
+        },
+        {
+          "name": "Glob",
+          "count": 1
+        }
+      ],
+      "mentorAlert": false,
+      "mentorReason": ""
+    },
+    {
+      "sessionId": "local:copilot-vscode:793322e1-96c2-42ec-877e-fd585b92b7db",
+      "participant": "Akhil",
+      "team": "Observability",
+      "repo": "local-workspace",
+      "agentTool": "copilot-vscode",
+      "startedAt": "2026-10-11T07:32:03Z",
+      "uploadedAt": "2026-11-17T20:20:16Z",
+      "durationMs": 509643999,
+      "calls": 35,
+      "errors": 0,
+      "prs": 0,
+      "commits": 0,
+      "mcpCalls": 18,
+      "costUsd": 0.0,
+      "tokens": 7329,
+      "filesTouched": 0,
+      "sparkline": [
+        {
+          "calls": 35,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 1,
+          "errors": 0
+        }
+      ],
+      "facts": {
+        "outcome": "completed",
+        "edited": true,
+        "prsCreated": 0,
+        "prsMerged": 0,
+        "costUsd": 0.0,
+        "hasCost": false,
+        "tokens": {
+          "in": 0,
+          "cw": 0,
+          "cr": 0,
+          "out": 7329
+        },
+        "costByModel": {},
+        "calls": 35,
+        "errors": 0,
+        "retries": 0,
+        "cmd": {
+          "sh": {
+            "calls": 4,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 3892
+          },
+          "python": {
+            "calls": 5,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 6672
+          }
+        },
+        "errorsByClass": {},
+        "errorsBySource": {},
+        "files": {},
+        "compactions": 0,
+        "preTokens": [],
+        "maxContext": 0,
+        "rereadsAfterCompaction": 0,
+        "verifyAfterLastEdit": false,
+        "waste": {
+          "retry": 0.0,
+          "abandoned": 0.0,
+          "cacheMiss": 0.0,
+          "reread": 0.0,
+          "deadSubagent": 0.0
+        },
+        "stallMs": 506651111,
+        "firstPromptChars": 2000,
+        "userTurns": 10,
+        "mcp": {},
+        "hookFails": {},
+        "subagents": {},
+        "explore": 6,
+        "act": 16,
+        "editedFiles": 0,
+        "blindEdits": 0,
+        "reworkEdits": 0,
+        "stepsToFirstEdit": null
+      },
+      "topTools": [
+        {
+          "name": "Bash",
+          "count": 9
+        },
+        {
+          "name": "Read",
+          "count": 5
+        },
+        {
+          "name": "MultiEdit",
+          "count": 4
+        },
+        {
+          "name": "open_browser_page",
+          "count": 4
+        },
+        {
+          "name": "Write",
+          "count": 3
+        },
+        {
+          "name": "fetch_webpage",
+          "count": 2
+        },
+        {
+          "name": "read_page",
+          "count": 2
+        },
+        {
+          "name": "screenshot_page",
+          "count": 2
+        }
+      ],
+      "mentorAlert": false,
+      "mentorReason": ""
+    },
+    {
+      "sessionId": "local:claude-code:63fe3147-b9ff-4438-b81e-2c239743b976",
+      "participant": "Akhil",
+      "team": "Observability",
+      "repo": "s1ced-playground",
+      "agentTool": "claude-code",
+      "startedAt": "2026-10-17T06:21:58Z",
+      "uploadedAt": "2026-11-17T20:20:16Z",
+      "durationMs": 3004341,
+      "calls": 37,
+      "errors": 3,
+      "prs": 0,
+      "commits": 0,
+      "mcpCalls": 5,
+      "costUsd": 1.7499,
+      "tokens": 2956458,
+      "filesTouched": 12,
+      "sparkline": [
+        {
+          "calls": 3,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 5,
+          "errors": 0
+        },
+        {
+          "calls": 11,
+          "errors": 1
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 2,
+          "errors": 0
+        },
+        {
+          "calls": 1,
+          "errors": 0
+        },
+        {
+          "calls": 3,
+          "errors": 0
+        },
+        {
+          "calls": 1,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 4,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 2,
+          "errors": 0
+        },
+        {
+          "calls": 1,
+          "errors": 1
+        },
+        {
+          "calls": 4,
+          "errors": 1
+        },
+        {
+          "calls": 1,
+          "errors": 0
+        }
+      ],
+      "facts": {
+        "outcome": "interrupted",
+        "edited": true,
+        "prsCreated": 0,
+        "prsMerged": 0,
+        "costUsd": 1.7499,
+        "hasCost": true,
+        "tokens": {
+          "in": 64,
+          "cw": 94328,
+          "cr": 2826432,
+          "out": 35634
+        },
+        "costByModel": {
+          "claude-opus-5-5": 1.749863
+        },
+        "calls": 37,
+        "errors": 3,
+        "retries": 0,
+        "cmd": {
+          "echo": {
+            "calls": 1,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 939
+          },
+          "python": {
+            "calls": 6,
+            "fails": 1,
+            "retries": 0,
+            "byClass": {
+              "permission_denied": 1
+            },
+            "verify": false,
+            "outBytes": 7483
+          },
+          "sleep": {
+            "calls": 3,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 826
+          },
+          "mkdir": {
+            "calls": 1,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 1741
+          },
+          "curl": {
+            "calls": 1,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 307
+          },
+          "env": {
+            "calls": 1,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 59
+          }
+        },
+        "errorsByClass": {
+          "interrupted": 1,
+          "permission_denied": 1,
+          "validation": 1
+        },
+        "errorsBySource": {
+          "tool": {
+            "validation": 1,
+            "permission_denied": 1
+          },
+          "orchestration": {
+            "interrupted": 1
+          }
+        },
+        "files": {
+          "s1ced-playground:README.md": {
+            "hits": 0,
+            "reads": 1,
+            "edits": 0
+          },
+          "s1ced-playground:pyproject.toml": {
+            "hits": 0,
+            "reads": 1,
+            "edits": 0
+          },
+          "s1ced-playground:docs/CONTRACT.md": {
+            "hits": 0,
+            "reads": 1,
+            "edits": 0
+          },
+          "s1ced-playground:src/s1ced/__init__.py": {
+            "hits": 0,
+            "reads": 1,
+            "edits": 0
+          },
+          "s1ced-playground:src/s1ced/models.py": {
+            "hits": 1,
+            "reads": 2,
+            "edits": 0
+          },
+          "s1ced-playground:src/s1ced/contract.py": {
+            "hits": 0,
+            "reads": 1,
+            "edits": 0
+          },
+          "s1ced-playground:examples/injection_gate/corpus.json": {
+            "hits": 2,
+            "reads": 0,
+            "edits": 1
+          },
+          "s1ced-playground:examples/injection_gate/gate.py": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 2
+          },
+          "s1ced-playground:examples/injection_gate/llm.py": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 5
+          },
+          "s1ced-playground:examples/injection_gate/demo.py": {
+            "hits": 2,
+            "reads": 1,
+            "edits": 4
+          },
+          "s1ced-playground:examples/injection_gate/README.md": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 1
+          },
+          "s1ced-playground:o": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 2
+          }
+        },
+        "compactions": 0,
+        "preTokens": [],
+        "maxContext": 122515,
+        "rereadsAfterCompaction": 0,
+        "verifyAfterLastEdit": false,
+        "waste": {
+          "retry": 0.083613,
+          "abandoned": 0.0,
+          "cacheMiss": 0.000224,
+          "reread": 0.192175,
+          "deadSubagent": 0.0
+        },
+        "stallMs": 605422,
+        "firstPromptChars": 291,
+        "userTurns": 4,
+        "mcp": {
+          "claude_ai_Google_Drive": {
+            "calls": 1,
+            "fails": 0
+          }
+        },
+        "hookFails": {},
+        "subagents": {},
+        "explore": 7,
+        "act": 26,
+        "editedFiles": 6,
+        "blindEdits": 5,
+        "reworkEdits": 5,
+        "stepsToFirstEdit": 8
+      },
+      "topTools": [
+        {
+          "name": "Bash",
+          "count": 20
+        },
+        {
+          "name": "Write",
+          "count": 7
+        },
+        {
+          "name": "Edit",
+          "count": 6
+        },
+        {
+          "name": "ToolSearch",
+          "count": 2
+        },
+        {
+          "name": "read_file_content",
+          "count": 1
+        },
+        {
+          "name": "Monitor",
+          "count": 1
+        },
+        {
+          "name": "Tool",
+          "count": 1
+        }
+      ],
+      "mentorAlert": false,
+      "mentorReason": ""
+    },
+    {
+      "sessionId": "local:claude-code:cf04715b-6987-4e18-a6c8-e2d9c96fe316",
+      "participant": "Akhil",
+      "team": "Observability",
+      "repo": "MyFirstFlightAI",
+      "agentTool": "claude-code",
+      "startedAt": "2026-09-27T13:23:21Z",
+      "uploadedAt": "2026-11-17T20:20:16Z",
+      "durationMs": 1062802381,
+      "calls": 969,
+      "errors": 49,
+      "prs": 0,
+      "commits": 1,
+      "mcpCalls": 201,
+      "costUsd": 116.2942,
+      "tokens": 305536326,
+      "filesTouched": 115,
+      "sparkline": [
+        {
+          "calls": 172,
+          "errors": 19
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 132,
+          "errors": 5
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 16,
+          "errors": 1
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 48,
+          "errors": 1
+        },
+        {
+          "calls": 39,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 63,
+          "errors": 3
+        },
+        {
+          "calls": 3,
+          "errors": 3
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 2,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 19,
+          "errors": 1
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 36,
+          "errors": 0
+        },
+        {
+          "calls": 91,
+          "errors": 2
+        },
+        {
+          "calls": 13,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 362,
+          "errors": 14
+        }
+      ],
+      "facts": {
+        "outcome": "completed",
+        "edited": true,
+        "prsCreated": 0,
+        "prsMerged": 0,
+        "costUsd": 116.2942,
+        "hasCost": true,
+        "tokens": {
+          "in": 1356,
+          "cw": 8534737,
+          "cr": 296282303,
+          "out": 717930
+        },
+        "costByModel": {
+          "claude-opus-5-5": 116.294162
+        },
+        "calls": 969,
+        "errors": 49,
+        "retries": 16,
+        "cmd": {
+          "python": {
+            "calls": 44,
+            "fails": 1,
+            "retries": 1,
+            "byClass": {
+              "exit_code": 1
+            },
+            "verify": true,
+            "outBytes": 16913
+          },
+          "cat": {
+            "calls": 11,
+            "fails": 1,
+            "retries": 0,
+            "byClass": {
+              "exit_code": 1
+            },
+            "verify": true,
+            "outBytes": 1684
+          },
+          "echo": {
+            "calls": 9,
+            "fails": 1,
+            "retries": 0,
+            "byClass": {
+              "permission_denied": 1
+            },
+            "verify": false,
+            "outBytes": 5739
+          },
+          "git add": {
+            "calls": 9,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 4965
+          },
+          "git commit": {
+            "calls": 1,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 501
+          },
+          "git branch": {
+            "calls": 2,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 857
+          },
+          "git push": {
+            "calls": 1,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 565
+          },
+          "sed": {
+            "calls": 6,
+            "fails": 1,
+            "retries": 0,
+            "byClass": {
+              "permission_denied": 1
+            },
+            "verify": true,
+            "outBytes": 2748
+          },
+          "powershell.exe": {
+            "calls": 1,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 198
+          },
+          "printf": {
+            "calls": 3,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": true,
+            "outBytes": 1993
+          },
+          "curl": {
+            "calls": 8,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 1847
+          },
+          "grep": {
+            "calls": 2,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": true,
+            "outBytes": 971
+          },
+          "mkdir": {
+            "calls": 2,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 523
+          },
+          "node": {
+            "calls": 12,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": true,
+            "outBytes": 8401
+          },
+          "git status": {
+            "calls": 11,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 8332
+          },
+          "git checkout": {
+            "calls": 10,
+            "fails": 1,
+            "retries": 0,
+            "byClass": {
+              "other": 1
+            },
+            "verify": true,
+            "outBytes": 2471
+          },
+          "git fetch": {
+            "calls": 5,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": true,
+            "outBytes": 3689
+          },
+          "git log": {
+            "calls": 2,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 1301
+          },
+          "git show": {
+            "calls": 4,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 15148
+          },
+          "sleep": {
+            "calls": 1,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 15021
+          },
+          "git diff": {
+            "calls": 2,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": true,
+            "outBytes": 3177
+          },
+          "gh 2>&1": {
+            "calls": 1,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 163
+          },
+          "docker": {
+            "calls": 1,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 155
+          }
+        },
+        "errorsByClass": {
+          "api_error": 14,
+          "exit_code": 13,
+          "interrupted": 11,
+          "other": 1,
+          "permission_denied": 8,
+          "server_error": 2
+        },
+        "errorsBySource": {
+          "orchestration": {
+            "interrupted": 11
+          },
+          "tool": {
+            "permission_denied": 8,
+            "exit_code": 13,
+            "other": 1
+          },
+          "llm": {
+            "api_error": 14,
+            "server_error": 2
+          }
+        },
+        "files": {
+          "MyFirstFlightAI:frontend/src/App.jsx": {
+            "hits": 6,
+            "reads": 12,
+            "edits": 36
+          },
+          "MyFirstFlightAI:frontend/src/components/Chatbot.jsx": {
+            "hits": 0,
+            "reads": 2,
+            "edits": 1
+          },
+          "MyFirstFlightAI:frontend/src/index.css": {
+            "hits": 0,
+            "reads": 1,
+            "edits": 1
+          },
+          "MyFirstFlightAI:backend/schemas.py": {
+            "hits": 4,
+            "reads": 2,
+            "edits": 6
+          },
+          "MyFirstFlightAI:backend/gemini.py": {
+            "hits": 5,
+            "reads": 10,
+            "edits": 21
+          },
+          "MyFirstFlightAI:backend/validation.py": {
+            "hits": 4,
+            "reads": 2,
+            "edits": 2
+          },
+          "MyFirstFlightAI:backend/checklist.py": {
+            "hits": 2,
+            "reads": 3,
+            "edits": 19
+          },
+          "MyFirstFlightAI:backend/db.py": {
+            "hits": 6,
+            "reads": 2,
+            "edits": 7
+          },
+          "MyFirstFlightAI:backend/main.py": {
+            "hits": 20,
+            "reads": 16,
+            "edits": 25
+          },
+          "MyFirstFlightAI:backend/requirements.txt": {
+            "hits": 2,
+            "reads": 1,
+            "edits": 3
+          },
+          "MyFirstFlightAI:backend/.dockerignore": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 1
+          },
+          "MyFirstFlightAI:backend/tests/conftest.py": {
+            "hits": 1,
+            "reads": 1,
+            "edits": 1
+          },
+          "MyFirstFlightAI:backend/tests/test_validation.py": {
+            "hits": 3,
+            "reads": 0,
+            "edits": 5
+          },
+          "MyFirstFlightAI:backend/tests/test_api.py": {
+            "hits": 6,
+            "reads": 3,
+            "edits": 8
+          },
+          "MyFirstFlightAI:frontend/src/api.js": {
+            "hits": 2,
+            "reads": 2,
+            "edits": 7
+          },
+          "MyFirstFlightAI:frontend/src/i18n.jsx": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 1
+          },
+          "MyFirstFlightAI:frontend/src/screens/LanguageScreen.jsx": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 1
+          },
+          "MyFirstFlightAI:frontend/src/screens/TravellersScreen.jsx": {
+            "hits": 1,
+            "reads": 2,
+            "edits": 3
+          },
+          "MyFirstFlightAI:frontend/src/screens/CheckScreen.jsx": {
+            "hits": 0,
+            "reads": 3,
+            "edits": 15
+          },
+          "MyFirstFlightAI:frontend/src/screens/ChecklistScreen.jsx": {
+            "hits": 0,
+            "reads": 2,
+            "edits": 2
+          },
+          "MyFirstFlightAI:frontend/src/App.css": {
+            "hits": 6,
+            "reads": 8,
+            "edits": 12
+          },
+          "MyFirstFlightAI:frontend/index.html": {
+            "hits": 0,
+            "reads": 1,
+            "edits": 1
+          },
+          "MyFirstFlightAI:frontend/src/strings.js": {
+            "hits": 0,
+            "reads": 1,
+            "edits": 3
+          },
+          "MyFirstFlightAI:frontend/src/i18n.js": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 1
+          },
+          "MyFirstFlightAI:frontend/src/I18nProvider.jsx": {
+            "hits": 0,
+            "reads": 2,
+            "edits": 3
+          },
+          "MyFirstFlightAI:README.md": {
+            "hits": 0,
+            "reads": 1,
+            "edits": 2
+          },
+          "MyFirstFlightAI:backend/.env.example": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 3
+          },
+          "MyFirstFlightAI:backend/.gitignore": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 2
+          },
+          "MyFirstFlightAI:backend/.env": {
+            "hits": 1,
+            "reads": 0,
+            "edits": 1
+          },
+          "MyFirstFlightAI:backend/sa-key.json": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 1
+          },
+          "MyFirstFlightAI:backend/.venv/Lib/site-packages/google/genai": {
+            "hits": 2,
+            "reads": 0,
+            "edits": 0
+          },
+          "MyFirstFlightAI:.vscode/settings.json": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 1
+          },
+          "MyFirstFlightAI:backend": {
+            "hits": 10,
+            "reads": 0,
+            "edits": 0
+          },
+          "MyFirstFlightAI:frontend/package-lock.json": {
+            "hits": 4,
+            "reads": 0,
+            "edits": 0
+          },
+          "MyFirstFlightAI:backend/dict": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 2
+          },
+          "MyFirstFlightAI:backend/advice.py": {
+            "hits": 1,
+            "reads": 2,
+            "edits": 3
+          },
+          "MyFirstFlightAI:backend/journey.py": {
+            "hits": 5,
+            "reads": 5,
+            "edits": 5
+          },
+          "MyFirstFlightAI:backend/SIN": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 1
+          },
+          "MyFirstFlightAI:backend/Singapore": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 1
+          },
+          "MyFirstFlightAI:backend/Dubai": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 1
+          },
+          "MyFirstFlightAI:frontend/public/sw.js": {
+            "hits": 0,
+            "reads": 1,
+            "edits": 3
+          },
+          "MyFirstFlightAI:frontend/nginx.conf": {
+            "hits": 1,
+            "reads": 2,
+            "edits": 4
+          },
+          "MyFirstFlightAI:frontend/src/main.jsx": {
+            "hits": 0,
+            "reads": 1,
+            "edits": 1
+          },
+          "MyFirstFlightAI:frontend/src/screens/ContactsScreen.jsx": {
+            "hits": 0,
+            "reads": 1,
+            "edits": 2
+          },
+          "MyFirstFlightAI:frontend/src/screens/JourneyScreen.jsx": {
+            "hits": 1,
+            "reads": 2,
+            "edits": 12
+          },
+          "MyFirstFlightAI:frontend/src/components/LostCard.jsx": {
+            "hits": 3,
+            "reads": 1,
+            "edits": 2
+          },
+          "MyFirstFlightAI:frontend/setToastMsg": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 1
+          },
+          "MyFirstFlightAI:frontend/run": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 1
+          },
+          "MyFirstFlightAI:frontend/applyTrip": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 1
+          },
+          "MyFirstFlightAI:frontend/setStep": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 1
+          },
+          "MyFirstFlightAI:frontend/setLostOpen": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 3
+          },
+          "MyFirstFlightAI:frontend/s": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 1
+          },
+          "MyFirstFlightAI:frontend/src/screens": {
+            "hits": 1,
+            "reads": 1,
+            "edits": 0
+          },
+          "MyFirstFlightAI:frontend/div": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 2
+          },
+          "MyFirstFlightAI:frontend/span": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 1
+          },
+          "MyFirstFlightAI:backend/tests": {
+            "hits": 3,
+            "reads": 0,
+            "edits": 0
+          },
+          "MyFirstFlightAI:backend/gcp.py": {
+            "hits": 2,
+            "reads": 2,
+            "edits": 1
+          },
+          "MyFirstFlightAI:backend/MAX_UPLOAD": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 1
+          },
+          "MyFirstFlightAI:frontend/src/voice.js": {
+            "hits": 0,
+            "reads": 1,
+            "edits": 2
+          },
+          "MyFirstFlightAI:frontend/src/components/HelpSheet.jsx": {
+            "hits": 2,
+            "reads": 1,
+            "edits": 1
+          },
+          "MyFirstFlightAI:frontend/setHelpOpen": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 1
+          },
+          "MyFirstFlightAI:every": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 1
+          },
+          "MyFirstFlightAI:frontend": {
+            "hits": 3,
+            "reads": 0,
+            "edits": 0
+          },
+          "MyFirstFlightAI:backend/play": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 1
+          },
+          "MyFirstFlightAI:backend/tools/gen_ui_locales.py": {
+            "hits": 2,
+            "reads": 1,
+            "edits": 3
+          },
+          "MyFirstFlightAI:frontend/dist/assets": {
+            "hits": 1,
+            "reads": 0,
+            "edits": 0
+          },
+          "MyFirstFlightAI:frontend/src": {
+            "hits": 11,
+            "reads": 0,
+            "edits": 0
+          },
+          "MyFirstFlightAI:frontend/src/locales/en.json": {
+            "hits": 5,
+            "reads": 1,
+            "edits": 11
+          },
+          "MyFirstFlightAI:frontend/package.json": {
+            "hits": 1,
+            "reads": 0,
+            "edits": 0
+          },
+          "MyFirstFlightAI:frontend/.env": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 1
+          },
+          "MyFirstFlightAI:frontend/src/firebase.js": {
+            "hits": 0,
+            "reads": 2,
+            "edits": 0
+          },
+          "MyFirstFlightAI:cloudbuild-frontend.yaml": {
+            "hits": 1,
+            "reads": 1,
+            "edits": 0
+          },
+          "MyFirstFlightAI:frontend/Dockerfile": {
+            "hits": 1,
+            "reads": 0,
+            "edits": 0
+          },
+          "MyFirstFlightAI:cloudbuild-backend.yaml": {
+            "hits": 1,
+            "reads": 1,
+            "edits": 1
+          },
+          "MyFirstFlightAI:frontend/src/screens/DocsFoundScreen.jsx": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 1
+          },
+          "MyFirstFlightAI:frontend/src/AuthContext.jsx": {
+            "hits": 1,
+            "reads": 1,
+            "edits": 1
+          },
+          "MyFirstFlightAI:backend/Karachi": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 1
+          },
+          "MyFirstFlightAI:backend/flight_status.py": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 1
+          },
+          "MyFirstFlightAI:frontend/src/components/FlightAlert.jsx": {
+            "hits": 1,
+            "reads": 0,
+            "edits": 1
+          },
+          "MyFirstFlightAI:backend/auth_error.txt": {
+            "hits": 1,
+            "reads": 0,
+            "edits": 0
+          },
+          "MyFirstFlightAI:frontend/src/locales": {
+            "hits": 2,
+            "reads": 0,
+            "edits": 0
+          },
+          "MyFirstFlightAI:ui_new/styles.css": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 1
+          },
+          "MyFirstFlightAI:ui_new/1-home.html": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 1
+          },
+          "MyFirstFlightAI:ui_new/2-documents.html": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 1
+          },
+          "MyFirstFlightAI:ui_new/3-ready.html": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 1
+          },
+          "MyFirstFlightAI:ui_new/4-airport.html": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 1
+          },
+          "MyFirstFlightAI:ui_new/5-lost.html": {
+            "hits": 0,
+            "reads": 1,
+            "edits": 1
+          },
+          "MyFirstFlightAI:ui_new/index.html": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 1
+          },
+          "MyFirstFlightAI:ui_new": {
+            "hits": 5,
+            "reads": 6,
+            "edits": 0
+          },
+          "MyFirstFlightAI:ui_new/themes.css": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 10
+          },
+          "MyFirstFlightAI:ui_new/theme.js": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 3
+          },
+          "MyFirstFlightAI:ui_new/themes.html": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 3
+          },
+          "MyFirstFlightAI:ui_new/errs.push": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 1
+          },
+          "MyFirstFlightAI:ui_new/MyFirstFlight": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 1
+          },
+          "MyFirstFlightAI:ui_new/iframe": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 2
+          },
+          "MyFirstFlightAI:ui_new/share/01-Golden-Hour.png": {
+            "hits": 0,
+            "reads": 2,
+            "edits": 0
+          },
+          "MyFirstFlightAI:ui_new/reimagined.html": {
+            "hits": 0,
+            "reads": 1,
+            "edits": 2
+          },
+          "MyFirstFlightAI:errs.push": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 1
+          },
+          "MyFirstFlightAI:m.type": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 1
+          },
+          "MyFirstFlightAI:p.locator": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 1
+          },
+          "MyFirstFlightAI:MyFirstFlight": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 1
+          },
+          "MyFirstFlightAI:img": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 1
+          },
+          "MyFirstFlightAI:ui_new/share/11-Reimagined-flow-2.png": {
+            "hits": 0,
+            "reads": 1,
+            "edits": 0
+          },
+          "MyFirstFlightAI:ui_new/video-demo.html": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 8
+          },
+          "MyFirstFlightAI:frontend/src/components/Listen.jsx": {
+            "hits": 0,
+            "reads": 1,
+            "edits": 0
+          },
+          "MyFirstFlightAI:ui_new/veo/index.html": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 1
+          },
+          "MyFirstFlightAI:frontend/src/components/TripVideo.jsx": {
+            "hits": 0,
+            "reads": 2,
+            "edits": 14
+          },
+          "MyFirstFlightAI:frontend/vt.html": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 7
+          },
+          "MyFirstFlightAI:frontend/src/vt.jsx": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 7
+          },
+          "MyFirstFlightAI:frontend/src/components/Walkthrough.jsx": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 17
+          },
+          "MyFirstFlightAI:frontend/vite.config.js": {
+            "hits": 0,
+            "reads": 1,
+            "edits": 0
+          },
+          "MyFirstFlightAI:frontend/vite.record.config.js": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 1
+          },
+          "MyFirstFlightAI:frontend/src/screens/TripsScreen.jsx": {
+            "hits": 0,
+            "reads": 1,
+            "edits": 0
+          },
+          "MyFirstFlightAI:backend/Dockerfile": {
+            "hits": 0,
+            "reads": 1,
+            "edits": 1
+          },
+          "MyFirstFlightAI:backend/walkthrough_video.py": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 3
+          }
+        },
+        "compactions": 1,
+        "preTokens": [
+          967199
+        ],
+        "maxContext": 965044,
+        "rereadsAfterCompaction": 2,
+        "verifyAfterLastEdit": false,
+        "waste": {
+          "retry": 7.245561,
+          "abandoned": 0.0,
+          "cacheMiss": 0.004808,
+          "reread": 4.733021,
+          "deadSubagent": 0.0
+        },
+        "stallMs": 3358863,
+        "firstPromptChars": 2,
+        "userTurns": 116,
+        "mcp": {},
+        "hookFails": {},
+        "subagents": {},
+        "explore": 303,
+        "act": 501,
+        "editedFiles": 95,
+        "blindEdits": 54,
+        "reworkEdits": 123,
+        "stepsToFirstEdit": 16
+      },
+      "topTools": [
+        {
+          "name": "Edit",
+          "count": 247
+        },
+        {
+          "name": "Bash",
+          "count": 217
+        },
+        {
+          "name": "Read",
+          "count": 173
+        },
+        {
+          "name": "PowerShell",
+          "count": 163
+        },
+        {
+          "name": "Write",
+          "count": 106
+        },
+        {
+          "name": "Grep",
+          "count": 52
+        },
+        {
+          "name": "Tool",
+          "count": 27
+        },
+        {
+          "name": "Glob",
+          "count": 9
+        }
+      ],
+      "mentorAlert": true,
+      "mentorReason": "Stuck in failure loop: 6 consecutive errors"
+    },
+    {
+      "sessionId": "local:claude-code:2b4ac41a-01e0-449b-b459-9d60c5f78bd6",
+      "participant": "Akhil",
+      "team": "Observability",
+      "repo": "MyFirstFlightAI",
+      "agentTool": "claude-code",
+      "startedAt": "2026-09-27T13:23:21Z",
+      "uploadedAt": "2026-11-17T20:20:15Z",
+      "durationMs": 2357807888,
+      "calls": 1725,
+      "errors": 211,
+      "prs": 0,
+      "commits": 3,
+      "mcpCalls": 468,
+      "costUsd": 233.4628,
+      "tokens": 576322236,
+      "filesTouched": 123,
+      "sparkline": [
+        {
+          "calls": 168,
+          "errors": 50
+        },
+        {
+          "calls": 148,
+          "errors": 37
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 85,
+          "errors": 13
+        },
+        {
+          "calls": 61,
+          "errors": 6
+        },
+        {
+          "calls": 3,
+          "errors": 3
+        },
+        {
+          "calls": 2,
+          "errors": 0
+        },
+        {
+          "calls": 16,
+          "errors": 1
+        },
+        {
+          "calls": 3,
+          "errors": 1
+        },
+        {
+          "calls": 139,
+          "errors": 13
+        },
+        {
+          "calls": 386,
+          "errors": 50
+        },
+        {
+          "calls": 125,
+          "errors": 5
+        },
+        {
+          "calls": 108,
+          "errors": 11
+        },
+        {
+          "calls": 268,
+          "errors": 5
+        },
+        {
+          "calls": 47,
+          "errors": 5
+        },
+        {
+          "calls": 183,
+          "errors": 11
+        },
+        {
+          "calls": 6,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 16,
+          "errors": 0
+        }
+      ],
+      "facts": {
+        "outcome": "completed",
+        "edited": true,
+        "prsCreated": 0,
+        "prsMerged": 0,
+        "costUsd": 233.4628,
+        "hasCost": true,
+        "tokens": {
+          "in": 2380,
+          "cw": 19689552,
+          "cr": 555434371,
+          "out": 1195933
+        },
+        "costByModel": {
+          "claude-opus-5-5": 233.462796
+        },
+        "calls": 1725,
+        "errors": 211,
+        "retries": 116,
+        "cmd": {
+          "python": {
+            "calls": 44,
+            "fails": 1,
+            "retries": 1,
+            "byClass": {
+              "exit_code": 1
+            },
+            "verify": true,
+            "outBytes": 16913
+          },
+          "cat": {
+            "calls": 11,
+            "fails": 1,
+            "retries": 0,
+            "byClass": {
+              "exit_code": 1
+            },
+            "verify": true,
+            "outBytes": 1684
+          },
+          "echo": {
+            "calls": 10,
+            "fails": 1,
+            "retries": 0,
+            "byClass": {
+              "permission_denied": 1
+            },
+            "verify": false,
+            "outBytes": 5745
+          },
+          "git add": {
+            "calls": 9,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 4965
+          },
+          "git commit": {
+            "calls": 1,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 501
+          },
+          "git branch": {
+            "calls": 2,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 857
+          },
+          "git push": {
+            "calls": 1,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 565
+          },
+          "sed": {
+            "calls": 6,
+            "fails": 1,
+            "retries": 0,
+            "byClass": {
+              "permission_denied": 1
+            },
+            "verify": true,
+            "outBytes": 2748
+          },
+          "powershell.exe": {
+            "calls": 1,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 198
+          },
+          "printf": {
+            "calls": 3,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": true,
+            "outBytes": 1993
+          },
+          "curl": {
+            "calls": 8,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 1847
+          },
+          "grep": {
+            "calls": 2,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": true,
+            "outBytes": 971
+          },
+          "mkdir": {
+            "calls": 2,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 523
+          },
+          "node": {
+            "calls": 12,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": true,
+            "outBytes": 8401
+          },
+          "git status": {
+            "calls": 11,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 8332
+          },
+          "git checkout": {
+            "calls": 10,
+            "fails": 1,
+            "retries": 0,
+            "byClass": {
+              "other": 1
+            },
+            "verify": true,
+            "outBytes": 2471
+          },
+          "git fetch": {
+            "calls": 5,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": true,
+            "outBytes": 3689
+          },
+          "git log": {
+            "calls": 2,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 1301
+          },
+          "git show": {
+            "calls": 4,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 15148
+          },
+          "sleep": {
+            "calls": 1,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 15021
+          },
+          "git diff": {
+            "calls": 2,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": true,
+            "outBytes": 3177
+          },
+          "gh 2>&1": {
+            "calls": 1,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 163
+          },
+          "docker": {
+            "calls": 1,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 155
+          }
+        },
+        "errorsByClass": {
+          "api_error": 19,
+          "exit_code": 38,
+          "interrupted": 15,
+          "no_result": 122,
+          "not_found": 2,
+          "other": 3,
+          "permission_denied": 9,
+          "server_error": 2,
+          "stale_file": 1
+        },
+        "errorsBySource": {
+          "orchestration": {
+            "interrupted": 15
+          },
+          "tool": {
+            "no_result": 122,
+            "permission_denied": 9,
+            "exit_code": 38,
+            "other": 3,
+            "not_found": 2,
+            "stale_file": 1
+          },
+          "llm": {
+            "api_error": 19,
+            "server_error": 2
+          }
+        },
+        "files": {
+          "MyFirstFlightAI:frontend/src/App.jsx": {
+            "hits": 11,
+            "reads": 23,
+            "edits": 68
+          },
+          "MyFirstFlightAI:frontend/src/components/Chatbot.jsx": {
+            "hits": 0,
+            "reads": 2,
+            "edits": 1
+          },
+          "MyFirstFlightAI:frontend/src/index.css": {
+            "hits": 1,
+            "reads": 1,
+            "edits": 1
+          },
+          "MyFirstFlightAI:backend/schemas.py": {
+            "hits": 7,
+            "reads": 5,
+            "edits": 13
+          },
+          "MyFirstFlightAI:backend/gemini.py": {
+            "hits": 6,
+            "reads": 12,
+            "edits": 25
+          },
+          "MyFirstFlightAI:backend/validation.py": {
+            "hits": 4,
+            "reads": 2,
+            "edits": 2
+          },
+          "MyFirstFlightAI:backend/checklist.py": {
+            "hits": 2,
+            "reads": 4,
+            "edits": 23
+          },
+          "MyFirstFlightAI:backend/db.py": {
+            "hits": 5,
+            "reads": 3,
+            "edits": 8
+          },
+          "MyFirstFlightAI:backend/main.py": {
+            "hits": 21,
+            "reads": 17,
+            "edits": 30
+          },
+          "MyFirstFlightAI:backend/requirements.txt": {
+            "hits": 2,
+            "reads": 0,
+            "edits": 3
+          },
+          "MyFirstFlightAI:backend/.dockerignore": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 1
+          },
+          "MyFirstFlightAI:backend/tests/conftest.py": {
+            "hits": 1,
+            "reads": 1,
+            "edits": 1
+          },
+          "MyFirstFlightAI:backend/tests/test_validation.py": {
+            "hits": 3,
+            "reads": 0,
+            "edits": 4
+          },
+          "MyFirstFlightAI:backend/tests/test_api.py": {
+            "hits": 7,
+            "reads": 5,
+            "edits": 13
+          },
+          "MyFirstFlightAI:frontend/src/api.js": {
+            "hits": 2,
+            "reads": 3,
+            "edits": 9
+          },
+          "MyFirstFlightAI:frontend/src/i18n.jsx": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 1
+          },
+          "MyFirstFlightAI:frontend/src/screens/LanguageScreen.jsx": {
+            "hits": 0,
+            "reads": 3,
+            "edits": 12
+          },
+          "MyFirstFlightAI:frontend/src/screens/TravellersScreen.jsx": {
+            "hits": 3,
+            "reads": 2,
+            "edits": 3
+          },
+          "MyFirstFlightAI:frontend/src/screens/CheckScreen.jsx": {
+            "hits": 0,
+            "reads": 5,
+            "edits": 23
+          },
+          "MyFirstFlightAI:frontend/src/screens/ChecklistScreen.jsx": {
+            "hits": 0,
+            "reads": 3,
+            "edits": 3
+          },
+          "MyFirstFlightAI:frontend/src/App.css": {
+            "hits": 8,
+            "reads": 10,
+            "edits": 23
+          },
+          "MyFirstFlightAI:frontend/index.html": {
+            "hits": 0,
+            "reads": 1,
+            "edits": 1
+          },
+          "MyFirstFlightAI:frontend/src/strings.js": {
+            "hits": 0,
+            "reads": 1,
+            "edits": 3
+          },
+          "MyFirstFlightAI:frontend/src/i18n.js": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 1
+          },
+          "MyFirstFlightAI:frontend/src/I18nProvider.jsx": {
+            "hits": 0,
+            "reads": 2,
+            "edits": 3
+          },
+          "MyFirstFlightAI:README.md": {
+            "hits": 0,
+            "reads": 1,
+            "edits": 1
+          },
+          "MyFirstFlightAI:backend/.env.example": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 3
+          },
+          "MyFirstFlightAI:backend/.gitignore": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 2
+          },
+          "MyFirstFlightAI:backend/.env": {
+            "hits": 1,
+            "reads": 0,
+            "edits": 1
+          },
+          "MyFirstFlightAI:backend/sa-key.json": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 1
+          },
+          "MyFirstFlightAI:backend/.venv/Lib/site-packages/google/genai": {
+            "hits": 2,
+            "reads": 0,
+            "edits": 0
+          },
+          "MyFirstFlightAI:.vscode/settings.json": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 1
+          },
+          "MyFirstFlightAI:backend": {
+            "hits": 15,
+            "reads": 0,
+            "edits": 0
+          },
+          "MyFirstFlightAI:frontend/package-lock.json": {
+            "hits": 4,
+            "reads": 0,
+            "edits": 0
+          },
+          "MyFirstFlightAI:backend/dict": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 2
+          },
+          "MyFirstFlightAI:backend/advice.py": {
+            "hits": 1,
+            "reads": 2,
+            "edits": 3
+          },
+          "MyFirstFlightAI:backend/journey.py": {
+            "hits": 5,
+            "reads": 5,
+            "edits": 5
+          },
+          "MyFirstFlightAI:backend/SIN": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 1
+          },
+          "MyFirstFlightAI:backend/Singapore": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 1
+          },
+          "MyFirstFlightAI:backend/Dubai": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 1
+          },
+          "MyFirstFlightAI:frontend/public/sw.js": {
+            "hits": 0,
+            "reads": 1,
+            "edits": 3
+          },
+          "MyFirstFlightAI:frontend/nginx.conf": {
+            "hits": 1,
+            "reads": 2,
+            "edits": 4
+          },
+          "MyFirstFlightAI:frontend/src/main.jsx": {
+            "hits": 0,
+            "reads": 1,
+            "edits": 1
+          },
+          "MyFirstFlightAI:frontend/src/screens/ContactsScreen.jsx": {
+            "hits": 0,
+            "reads": 5,
+            "edits": 14
+          },
+          "MyFirstFlightAI:frontend/src/screens/JourneyScreen.jsx": {
+            "hits": 2,
+            "reads": 5,
+            "edits": 22
+          },
+          "MyFirstFlightAI:frontend/src/components/LostCard.jsx": {
+            "hits": 3,
+            "reads": 1,
+            "edits": 2
+          },
+          "MyFirstFlightAI:frontend/setToastMsg": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 1
+          },
+          "MyFirstFlightAI:frontend/run": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 1
+          },
+          "MyFirstFlightAI:frontend/applyTrip": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 1
+          },
+          "MyFirstFlightAI:frontend/setStep": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 1
+          },
+          "MyFirstFlightAI:frontend/setLostOpen": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 3
+          },
+          "MyFirstFlightAI:frontend/s": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 1
+          },
+          "MyFirstFlightAI:frontend/src/screens": {
+            "hits": 3,
+            "reads": 1,
+            "edits": 0
+          },
+          "MyFirstFlightAI:frontend/div": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 2
+          },
+          "MyFirstFlightAI:frontend/span": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 1
+          },
+          "MyFirstFlightAI:backend/tests": {
+            "hits": 3,
+            "reads": 0,
+            "edits": 0
+          },
+          "MyFirstFlightAI:backend/gcp.py": {
+            "hits": 3,
+            "reads": 2,
+            "edits": 2
+          },
+          "MyFirstFlightAI:backend/MAX_UPLOAD": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 1
+          },
+          "MyFirstFlightAI:frontend/src/voice.js": {
+            "hits": 1,
+            "reads": 1,
+            "edits": 2
+          },
+          "MyFirstFlightAI:frontend/src/components/HelpSheet.jsx": {
+            "hits": 1,
+            "reads": 1,
+            "edits": 1
+          },
+          "MyFirstFlightAI:frontend/setHelpOpen": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 1
+          },
+          "MyFirstFlightAI:every": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 1
+          },
+          "MyFirstFlightAI:frontend": {
+            "hits": 6,
+            "reads": 0,
+            "edits": 0
+          },
+          "MyFirstFlightAI:backend/play": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 1
+          },
+          "MyFirstFlightAI:backend/tools/gen_ui_locales.py": {
+            "hits": 2,
+            "reads": 1,
+            "edits": 3
+          },
+          "MyFirstFlightAI:frontend/dist/assets": {
+            "hits": 1,
+            "reads": 0,
+            "edits": 0
+          },
+          "MyFirstFlightAI:frontend/src": {
+            "hits": 39,
+            "reads": 0,
+            "edits": 0
+          },
+          "MyFirstFlightAI:frontend/src/locales/en.json": {
+            "hits": 10,
+            "reads": 1,
+            "edits": 11
+          },
+          "MyFirstFlightAI:frontend/package.json": {
+            "hits": 1,
+            "reads": 0,
+            "edits": 0
+          },
+          "MyFirstFlightAI:frontend/.env": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 1
+          },
+          "MyFirstFlightAI:frontend/src/firebase.js": {
+            "hits": 0,
+            "reads": 2,
+            "edits": 0
+          },
+          "MyFirstFlightAI:cloudbuild-frontend.yaml": {
+            "hits": 1,
+            "reads": 0,
+            "edits": 0
+          },
+          "MyFirstFlightAI:frontend/Dockerfile": {
+            "hits": 1,
+            "reads": 0,
+            "edits": 0
+          },
+          "MyFirstFlightAI:cloudbuild-backend.yaml": {
+            "hits": 1,
+            "reads": 0,
+            "edits": 0
+          },
+          "MyFirstFlightAI:frontend/src/screens/DocsFoundScreen.jsx": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 1
+          },
+          "MyFirstFlightAI:frontend/src/AuthContext.jsx": {
+            "hits": 1,
+            "reads": 1,
+            "edits": 0
+          },
+          "MyFirstFlightAI:backend/Karachi": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 1
+          },
+          "MyFirstFlightAI:backend/flight_status.py": {
+            "hits": 1,
+            "reads": 2,
+            "edits": 1
+          },
+          "MyFirstFlightAI:frontend/src/components/FlightAlert.jsx": {
+            "hits": 0,
+            "reads": 1,
+            "edits": 2
+          },
+          "MyFirstFlightAI:backend/auth_error.txt": {
+            "hits": 1,
+            "reads": 0,
+            "edits": 0
+          },
+          "MyFirstFlightAI:frontend/src/locales": {
+            "hits": 2,
+            "reads": 0,
+            "edits": 0
+          },
+          "MyFirstFlightAI:ui_new/styles.css": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 1
+          },
+          "MyFirstFlightAI:ui_new/1-home.html": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 1
+          },
+          "MyFirstFlightAI:ui_new/2-documents.html": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 1
+          },
+          "MyFirstFlightAI:ui_new/3-ready.html": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 1
+          },
+          "MyFirstFlightAI:ui_new/4-airport.html": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 1
+          },
+          "MyFirstFlightAI:ui_new/5-lost.html": {
+            "hits": 0,
+            "reads": 1,
+            "edits": 1
+          },
+          "MyFirstFlightAI:ui_new/index.html": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 1
+          },
+          "MyFirstFlightAI:ui_new": {
+            "hits": 5,
+            "reads": 6,
+            "edits": 0
+          },
+          "MyFirstFlightAI:ui_new/themes.css": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 10
+          },
+          "MyFirstFlightAI:ui_new/theme.js": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 3
+          },
+          "MyFirstFlightAI:ui_new/themes.html": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 3
+          },
+          "MyFirstFlightAI:ui_new/errs.push": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 1
+          },
+          "MyFirstFlightAI:ui_new/MyFirstFlight": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 1
+          },
+          "MyFirstFlightAI:ui_new/iframe": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 2
+          },
+          "MyFirstFlightAI:ui_new/share/01-Golden-Hour.png": {
+            "hits": 0,
+            "reads": 2,
+            "edits": 0
+          },
+          "MyFirstFlightAI:ui_new/reimagined.html": {
+            "hits": 0,
+            "reads": 1,
+            "edits": 2
+          },
+          "MyFirstFlightAI:errs.push": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 1
+          },
+          "MyFirstFlightAI:m.type": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 1
+          },
+          "MyFirstFlightAI:p.locator": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 1
+          },
+          "MyFirstFlightAI:MyFirstFlight": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 1
+          },
+          "MyFirstFlightAI:img": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 1
+          },
+          "MyFirstFlightAI:ui_new/share/11-Reimagined-flow-2.png": {
+            "hits": 0,
+            "reads": 1,
+            "edits": 0
+          },
+          "MyFirstFlightAI:ui_new/video-demo.html": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 7
+          },
+          "MyFirstFlightAI:frontend/src/components/Listen.jsx": {
+            "hits": 0,
+            "reads": 2,
+            "edits": 0
+          },
+          "MyFirstFlightAI:ui_new/veo/index.html": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 1
+          },
+          "MyFirstFlightAI:frontend/src/components/TripVideo.jsx": {
+            "hits": 0,
+            "reads": 6,
+            "edits": 26
+          },
+          "MyFirstFlightAI:frontend/vt.html": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 6
+          },
+          "MyFirstFlightAI:frontend/src/vt.jsx": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 6
+          },
+          "MyFirstFlightAI:frontend/src/components/Walkthrough.jsx": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 23
+          },
+          "MyFirstFlightAI:frontend/vite.config.js": {
+            "hits": 0,
+            "reads": 1,
+            "edits": 0
+          },
+          "MyFirstFlightAI:frontend/vite.record.config.js": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 21
+          },
+          "MyFirstFlightAI:frontend/src/screens/TripsScreen.jsx": {
+            "hits": 0,
+            "reads": 1,
+            "edits": 0
+          },
+          "MyFirstFlightAI:frontend/src/screens/AuthScreen.jsx": {
+            "hits": 3,
+            "reads": 4,
+            "edits": 28
+          },
+          "MyFirstFlightAI:frontend/src/components/TourPlayer.jsx": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 2
+          },
+          "MyFirstFlightAI:frontend/src/components/FeedbackForm.jsx": {
+            "hits": 0,
+            "reads": 1,
+            "edits": 5
+          },
+          "MyFirstFlightAI:frontend/src/screens/LandingScreen.jsx": {
+            "hits": 1,
+            "reads": 1,
+            "edits": 8
+          },
+          "MyFirstFlightAI:frontend/src/theme.css": {
+            "hits": 1,
+            "reads": 2,
+            "edits": 4
+          },
+          "MyFirstFlightAI:frontend/src/components/Stage.jsx": {
+            "hits": 0,
+            "reads": 1,
+            "edits": 0
+          },
+          "MyFirstFlightAI:frontend/src/phone.js": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 5
+          },
+          "MyFirstFlightAI:frontend/src/components/FlightChip.jsx": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 1
+          },
+          "MyFirstFlightAI:frontend/src/components/PhoneInput.jsx": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 2
+          },
+          "MyFirstFlightAI:frontend/src/components/Icon.jsx": {
+            "hits": 1,
+            "reads": 0,
+            "edits": 1
+          }
+        },
+        "compactions": 2,
+        "preTokens": [
+          967199,
+          970157
+        ],
+        "maxContext": 965801,
+        "rereadsAfterCompaction": 2,
+        "verifyAfterLastEdit": false,
+        "waste": {
+          "retry": 35.916171,
+          "abandoned": 0.0,
+          "cacheMiss": 0.007032,
+          "reread": 6.835596,
+          "deadSubagent": 0.0
+        },
+        "stallMs": 35267402,
+        "firstPromptChars": 2,
+        "userTurns": 217,
+        "mcp": {},
+        "hookFails": {},
+        "subagents": {},
+        "explore": 498,
+        "act": 807,
+        "editedFiles": 100,
+        "blindEdits": 61,
+        "reworkEdits": 271,
+        "stepsToFirstEdit": 15
+      },
+      "topTools": [
+        {
+          "name": "Edit",
+          "count": 435
+        },
+        {
+          "name": "PowerShell",
+          "count": 394
+        },
+        {
+          "name": "Read",
+          "count": 295
+        },
+        {
+          "name": "Write",
+          "count": 223
+        },
+        {
+          "name": "Bash",
+          "count": 218
+        },
+        {
+          "name": "Grep",
+          "count": 125
+        },
+        {
+          "name": "Tool",
+          "count": 36
+        },
+        {
+          "name": "WebSearch",
+          "count": 14
+        }
+      ],
+      "mentorAlert": true,
+      "mentorReason": "Stuck in failure loop: 7 consecutive errors"
+    },
+    {
+      "sessionId": "local:claude-code:d5d57023-ba2d-4d50-9247-57afdf4941b9",
+      "participant": "Akhil",
+      "team": "Observability",
+      "repo": "PlaySprint",
+      "agentTool": "claude-code",
+      "startedAt": "2026-10-26T14:52:06Z",
+      "uploadedAt": "2026-11-17T20:20:15Z",
+      "durationMs": 2914548,
+      "calls": 34,
+      "errors": 4,
+      "prs": 0,
+      "commits": 0,
+      "mcpCalls": 21,
+      "costUsd": 1.6069,
+      "tokens": 3144756,
+      "filesTouched": 8,
+      "sparkline": [
+        {
+          "calls": 4,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 5,
+          "errors": 1
+        },
+        {
+          "calls": 1,
+          "errors": 0
+        },
+        {
+          "calls": 4,
+          "errors": 0
+        },
+        {
+          "calls": 3,
+          "errors": 2
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 1,
+          "errors": 1
+        },
+        {
+          "calls": 3,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 8,
+          "errors": 0
+        },
+        {
+          "calls": 3,
+          "errors": 0
+        },
+        {
+          "calls": 1,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 1,
+          "errors": 0
+        }
+      ],
+      "facts": {
+        "outcome": "completed",
+        "edited": true,
+        "prsCreated": 0,
+        "prsMerged": 0,
+        "costUsd": 1.6069,
+        "hasCost": true,
+        "tokens": {
+          "in": 96,
+          "cw": 72353,
+          "cr": 3040476,
+          "out": 31831
+        },
+        "costByModel": {
+          "claude-opus-5-5": 1.606866
+        },
+        "calls": 34,
+        "errors": 4,
+        "retries": 4,
+        "cmd": {},
+        "errorsByClass": {
+          "exit_code": 4
+        },
+        "errorsBySource": {
+          "tool": {
+            "exit_code": 4
+          }
+        },
+        "files": {
+          "PlaySprint:package.json": {
+            "hits": 0,
+            "reads": 1,
+            "edits": 1
+          },
+          "PlaySprint:client/src/lib/api.js": {
+            "hits": 0,
+            "reads": 1,
+            "edits": 1
+          },
+          "PlaySprint:server/index.js": {
+            "hits": 1,
+            "reads": 1,
+            "edits": 0
+          },
+          "PlaySprint:server/db.js": {
+            "hits": 0,
+            "reads": 1,
+            "edits": 0
+          },
+          "PlaySprint:server/security.js": {
+            "hits": 0,
+            "reads": 1,
+            "edits": 0
+          },
+          "PlaySprint:client/src": {
+            "hits": 1,
+            "reads": 0,
+            "edits": 0
+          },
+          "PlaySprint:client/src/lib/localApi.js": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 1
+          },
+          "PlaySprint:leaf.toml": {
+            "hits": 0,
+            "reads": 0,
+            "edits": 1
+          }
+        },
+        "compactions": 0,
+        "preTokens": [],
+        "maxContext": 100540,
+        "rereadsAfterCompaction": 0,
+        "verifyAfterLastEdit": false,
+        "waste": {
+          "retry": 0.136336,
+          "abandoned": 0.0,
+          "cacheMiss": 0.00032,
+          "reread": 0.0,
+          "deadSubagent": 0.0
+        },
+        "stallMs": 0,
+        "firstPromptChars": 27,
+        "userTurns": 16,
+        "mcp": {},
+        "hookFails": {},
+        "subagents": {},
+        "explore": 8,
+        "act": 5,
+        "editedFiles": 4,
+        "blindEdits": 2,
+        "reworkEdits": 0,
+        "stepsToFirstEdit": 25
+      },
+      "topTools": [
+        {
+          "name": "PowerShell",
+          "count": 17
+        },
+        {
+          "name": "Read",
+          "count": 6
+        },
+        {
+          "name": "WebFetch",
+          "count": 3
+        },
+        {
+          "name": "Edit",
+          "count": 3
+        },
+        {
+          "name": "Grep",
+          "count": 2
+        },
+        {
+          "name": "Write",
+          "count": 2
+        },
+        {
+          "name": "ToolSearch",
+          "count": 1
+        }
+      ],
+      "mentorAlert": false,
+      "mentorReason": ""
+    },
+    {
+      "sessionId": "local:cursor:1c6af7f9-b822-48c4-8fd1-78949025b509",
+      "participant": "Dev 2",
+      "team": "Observability",
+      "repo": "local-workspace",
+      "agentTool": "cursor",
+      "startedAt": "2025-09-13T07:52:03Z",
+      "uploadedAt": "2026-11-17T20:17:44Z",
+      "durationMs": 5220256135,
+      "calls": 56,
+      "errors": 0,
+      "prs": 0,
+      "commits": 0,
+      "mcpCalls": 54,
+      "costUsd": 0.0,
+      "tokens": 0,
+      "filesTouched": 0,
+      "sparkline": [
+        {
+          "calls": 3,
+          "errors": 0
+        },
+        {
+          "calls": 3,
+          "errors": 0
+        },
+        {
+          "calls": 2,
+          "errors": 0
+        },
+        {
+          "calls": 2,
+          "errors": 0
+        },
+        {
+          "calls": 3,
+          "errors": 0
+        },
+        {
+          "calls": 3,
+          "errors": 0
+        },
+        {
+          "calls": 2,
+          "errors": 0
+        },
+        {
+          "calls": 2,
+          "errors": 0
+        },
+        {
+          "calls": 3,
+          "errors": 0
+        },
+        {
+          "calls": 3,
+          "errors": 0
+        },
+        {
+          "calls": 2,
+          "errors": 0
+        },
+        {
+          "calls": 2,
+          "errors": 0
+        },
+        {
+          "calls": 3,
+          "errors": 0
+        },
+        {
+          "calls": 2,
+          "errors": 0
+        },
+        {
+          "calls": 3,
+          "errors": 0
+        },
+        {
+          "calls": 2,
+          "errors": 0
+        },
+        {
+          "calls": 2,
+          "errors": 0
+        },
+        {
+          "calls": 3,
+          "errors": 0
+        },
+        {
+          "calls": 1,
+          "errors": 0
+        },
+        {
+          "calls": 3,
+          "errors": 0
+        },
+        {
+          "calls": 2,
+          "errors": 0
+        },
+        {
+          "calls": 1,
+          "errors": 0
+        },
+        {
+          "calls": 0,
+          "errors": 0
+        },
+        {
+          "calls": 4,
+          "errors": 0
+        }
+      ],
+      "facts": {
+        "outcome": "incomplete",
+        "edited": false,
+        "prsCreated": 0,
+        "prsMerged": 0,
+        "costUsd": 0.0,
+        "hasCost": false,
+        "tokens": {
+          "in": 0,
+          "cw": 0,
+          "cr": 0,
+          "out": 0
+        },
+        "costByModel": {},
+        "calls": 56,
+        "errors": 0,
+        "retries": 0,
+        "cmd": {
+          "chmod": {
+            "calls": 1,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 515
+          },
+          "mkdir": {
+            "calls": 1,
+            "fails": 0,
+            "retries": 0,
+            "byClass": {},
+            "verify": false,
+            "outBytes": 167
+          }
+        },
+        "errorsByClass": {},
+        "errorsBySource": {},
+        "files": {},
+        "compactions": 0,
+        "preTokens": [],
+        "maxContext": 0,
+        "rereadsAfterCompaction": 0,
+        "verifyAfterLastEdit": false,
+        "waste": {
+          "retry": 0.0,
+          "abandoned": 0.0,
+          "cacheMiss": 0.0,
+          "reread": 0.0,
+          "deadSubagent": 0.0
+        },
+        "stallMs": 4526656084,
+        "firstPromptChars": 1267,
+        "userTurns": 2,
+        "mcp": {},
+        "hookFails": {},
+        "subagents": {},
+        "explore": 0,
+        "act": 2,
+        "editedFiles": 0,
+        "blindEdits": 0,
+        "reworkEdits": 0,
+        "stepsToFirstEdit": null
+      },
+      "topTools": [
+        {
+          "name": "write",
+          "count": 47
+        },
+        {
+          "name": "todo_write",
+          "count": 5
+        },
+        {
+          "name": "search_replace",
+          "count": 2
+        },
+        {
+          "name": "Bash",
+          "count": 2
+        }
+      ],
+      "mentorAlert": false,
+      "mentorReason": ""
+    }
+  ],
+  "liveActivity": [
+    {
+      "id": "act:1795015134.330918",
+      "participant": "TestUser",
+      "team": "AlphaSquad",
+      "repo": "event-end-logistics-application",
+      "agentTool": "antigravity-cli",
+      "calls": 124,
+      "mcpCalls": 13,
+      "commits": 1,
+      "errors": 12,
+      "mentorAlert": true,
+      "at": "just now",
+      "iso": "2026-11-18T15:18:54Z"
+    },
+    {
+      "id": "act:1794946816.914715",
+      "participant": "Akhil",
+      "team": "Observability",
+      "repo": "local-workspace",
+      "agentTool": "antigravity-cli",
+      "calls": 91,
+      "mcpCalls": 11,
+      "commits": 0,
+      "errors": 6,
+      "mentorAlert": false,
+      "at": "just now",
+      "iso": "2026-11-17T20:20:16Z"
+    },
+    {
+      "id": "act:1794946816.85507",
+      "participant": "Akhil",
+      "team": "Observability",
+      "repo": "agentplay",
+      "agentTool": "antigravity-cli",
+      "calls": 153,
+      "mcpCalls": 38,
+      "commits": 0,
+      "errors": 12,
+      "mentorAlert": true,
+      "at": "just now",
+      "iso": "2026-11-17T20:20:16Z"
+    },
+    {
+      "id": "act:1794946816.804392",
+      "participant": "Akhil",
+      "team": "Observability",
+      "repo": "local-workspace",
+      "agentTool": "cursor",
+      "calls": 25,
+      "mcpCalls": 1,
+      "commits": 0,
+      "errors": 0,
+      "mentorAlert": false,
+      "at": "just now",
+      "iso": "2026-11-17T20:20:16Z"
+    },
+    {
+      "id": "act:1794946816.74957",
+      "participant": "Akhil",
+      "team": "Observability",
+      "repo": "local-workspace",
+      "agentTool": "cursor",
+      "calls": 15,
+      "mcpCalls": 5,
+      "commits": 0,
+      "errors": 1,
+      "mentorAlert": false,
+      "at": "just now",
+      "iso": "2026-11-17T20:20:16Z"
+    },
+    {
+      "id": "act:1794946816.7184",
+      "participant": "Akhil",
+      "team": "Observability",
+      "repo": "local-workspace",
+      "agentTool": "cursor",
+      "calls": 30,
+      "mcpCalls": 12,
+      "commits": 0,
+      "errors": 0,
+      "mentorAlert": false,
+      "at": "just now",
+      "iso": "2026-11-17T20:20:16Z"
+    },
+    {
+      "id": "act:1794946816.657988",
+      "participant": "Akhil",
+      "team": "Observability",
+      "repo": "local-workspace",
+      "agentTool": "cursor",
+      "calls": 10,
+      "mcpCalls": 7,
+      "commits": 0,
+      "errors": 0,
+      "mentorAlert": false,
+      "at": "just now",
+      "iso": "2026-11-17T20:20:16Z"
+    },
+    {
+      "id": "act:1794946816.605846",
+      "participant": "Akhil",
+      "team": "Observability",
+      "repo": "local-workspace",
+      "agentTool": "copilot-vscode",
+      "calls": 1,
+      "mcpCalls": 0,
+      "commits": 0,
+      "errors": 0,
+      "mentorAlert": false,
+      "at": "just now",
+      "iso": "2026-11-17T20:20:16Z"
+    },
+    {
+      "id": "act:1794946816.53699",
+      "participant": "Akhil",
+      "team": "Observability",
+      "repo": "local-workspace",
+      "agentTool": "cursor",
+      "calls": 56,
+      "mcpCalls": 54,
+      "commits": 0,
+      "errors": 0,
+      "mentorAlert": false,
+      "at": "just now",
+      "iso": "2026-11-17T20:20:16Z"
+    },
+    {
+      "id": "act:1794946816.409178",
+      "participant": "Akhil",
+      "team": "Observability",
+      "repo": "local-workspace",
+      "agentTool": "copilot-vscode",
+      "calls": 3,
+      "mcpCalls": 0,
+      "commits": 0,
+      "errors": 0,
+      "mentorAlert": false,
+      "at": "just now",
+      "iso": "2026-11-17T20:20:16Z"
+    },
+    {
+      "id": "act:1794946816.362699",
+      "participant": "Akhil",
+      "team": "Observability",
+      "repo": "local-workspace",
+      "agentTool": "copilot-vscode",
+      "calls": 42,
+      "mcpCalls": 16,
+      "commits": 0,
+      "errors": 0,
+      "mentorAlert": false,
+      "at": "just now",
+      "iso": "2026-11-17T20:20:16Z"
+    },
+    {
+      "id": "act:1794946816.314689",
+      "participant": "Akhil",
+      "team": "Observability",
+      "repo": "local-workspace",
+      "agentTool": "copilot-vscode",
+      "calls": 10,
+      "mcpCalls": 3,
+      "commits": 0,
+      "errors": 0,
+      "mentorAlert": false,
+      "at": "just now",
+      "iso": "2026-11-17T20:20:16Z"
+    },
+    {
+      "id": "act:1794946816.249423",
+      "participant": "Akhil",
+      "team": "Observability",
+      "repo": "local-workspace",
+      "agentTool": "claude-code",
+      "calls": 235,
+      "mcpCalls": 10,
+      "commits": 1,
+      "errors": 8,
+      "mentorAlert": false,
+      "at": "just now",
+      "iso": "2026-11-17T20:20:16Z"
+    },
+    {
+      "id": "act:1794946816.193444",
+      "participant": "Akhil",
+      "team": "Observability",
+      "repo": "local-workspace",
+      "agentTool": "claude-code",
+      "calls": 10,
+      "mcpCalls": 2,
+      "commits": 0,
+      "errors": 0,
+      "mentorAlert": false,
+      "at": "just now",
+      "iso": "2026-11-17T20:20:16Z"
+    },
+    {
+      "id": "act:1794946816.143063",
+      "participant": "Akhil",
+      "team": "Observability",
+      "repo": "local-workspace",
+      "agentTool": "copilot-vscode",
+      "calls": 35,
+      "mcpCalls": 18,
+      "commits": 0,
+      "errors": 0,
+      "mentorAlert": false,
+      "at": "just now",
+      "iso": "2026-11-17T20:20:16Z"
+    },
+    {
+      "id": "act:1794946816.078624",
+      "participant": "Akhil",
+      "team": "Observability",
+      "repo": "s1ced-playground",
+      "agentTool": "claude-code",
+      "calls": 37,
+      "mcpCalls": 5,
+      "commits": 0,
+      "errors": 3,
+      "mentorAlert": false,
+      "at": "just now",
+      "iso": "2026-11-17T20:20:16Z"
+    },
+    {
+      "id": "act:1794946816.028654",
+      "participant": "Akhil",
+      "team": "Observability",
+      "repo": "MyFirstFlightAI",
+      "agentTool": "claude-code",
+      "calls": 969,
+      "mcpCalls": 201,
+      "commits": 1,
+      "errors": 49,
+      "mentorAlert": true,
+      "at": "just now",
+      "iso": "2026-11-17T20:20:16Z"
+    },
+    {
+      "id": "act:1794946815.931215",
+      "participant": "Akhil",
+      "team": "Observability",
+      "repo": "MyFirstFlightAI",
+      "agentTool": "claude-code",
+      "calls": 1725,
+      "mcpCalls": 468,
+      "commits": 3,
+      "errors": 211,
+      "mentorAlert": true,
+      "at": "just now",
+      "iso": "2026-11-17T20:20:15Z"
+    },
+    {
+      "id": "act:1794946815.804732",
+      "participant": "Akhil",
+      "team": "Observability",
+      "repo": "PlaySprint",
+      "agentTool": "claude-code",
+      "calls": 34,
+      "mcpCalls": 21,
+      "commits": 0,
+      "errors": 4,
+      "mentorAlert": false,
+      "at": "just now",
+      "iso": "2026-11-17T20:20:15Z"
+    },
+    {
+      "id": "act:1794946664.062494",
+      "participant": "Dev 2",
+      "team": "Observability",
+      "repo": "local-workspace",
+      "agentTool": "cursor",
+      "calls": 56,
+      "mcpCalls": 54,
+      "commits": 0,
+      "errors": 0,
+      "mentorAlert": false,
+      "at": "just now",
+      "iso": "2026-11-17T20:17:44Z"
+    },
+    {
+      "id": "act:1794946664.032077",
+      "participant": "Akhil",
+      "team": "Observability",
+      "repo": "agentplay",
+      "agentTool": "antigravity-cli",
+      "calls": 140,
+      "mcpCalls": 34,
+      "commits": 0,
+      "errors": 12,
+      "mentorAlert": true,
+      "at": "just now",
+      "iso": "2026-11-17T20:17:44Z"
+    },
+    {
+      "at": "11:57:03 PM",
+      "participant": "Akhil",
+      "team": "Observability",
+      "repo": "local-workspace",
+      "agentTool": "cursor",
+      "calls": 56,
+      "errors": 0,
+      "sessionId": "local:cursor:1c6af7f9-b822-48c4-8fd1-78949025b509"
+    },
+    {
+      "at": "11:56:17 PM",
+      "participant": "Akhil",
+      "team": "Observability",
+      "repo": "local-workspace",
+      "agentTool": "cursor",
+      "calls": 56,
+      "errors": 0,
+      "sessionId": "local:cursor:1c6af7f9-b822-48c4-8fd1-78949025b509"
+    },
+    {
+      "at": "11:37:24 PM",
+      "participant": "Akhil",
+      "team": "Observability",
+      "repo": "agentplay",
+      "agentTool": "antigravity-cli",
+      "calls": 140,
+      "errors": 12,
+      "sessionId": "local:antigravity-cli:5f10a40e-f81b-4bd1-933c-2d5299b1b290"
+    }
+  ]
+}
