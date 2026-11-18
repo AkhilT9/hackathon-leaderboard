@@ -1456,11 +1456,13 @@ HTML_JOIN = """<!DOCTYPE html>
 
 
 def _generate_join_ps1(host_port: str, default_name: str = "Participant", default_team: str = "HackerTeam") -> str:
+    proto = "https" if ("onrender.com" in host_port or "railway.app" in host_port or host_port.startswith("https://")) else "http"
+    hub_url = host_port if host_port.startswith("http") else f"{proto}://{host_port}"
     return f"""# Hackathon Leaderboard 1-Click Join Script (Windows PowerShell)
 param(
     [string]$Name = "{default_name}",
     [string]$Team = "{default_team}",
-    [string]$Hub = "http://{host_port}"
+    [string]$Hub = "{hub_url}"
 )
 
 Write-Host "==========================================================" -ForegroundColor Cyan
@@ -1488,53 +1490,70 @@ if (-not $agentplayExe) {{
 }}
 
 if (-not $agentplayExe) {{
-    Write-Host "[*] Installing agentplay..." -ForegroundColor Yellow
-    pip install agentplay --quiet
+    Write-Host "[*] Checking agentplay installation..." -ForegroundColor Yellow
+    pip install agentplay --quiet 2>$null
     $agentplayExe = (Get-Command agentplay -ErrorAction SilentlyContinue).Source
 }}
 
 Write-Host "[*] Building local agent session index..." -ForegroundColor Yellow
-& $agentplayExe build
+if ($agentplayExe) {{
+    & $agentplayExe build
+}} else {{
+    python -m agentplay build
+}}
 
 $indexFile = "$HOME\\.agentplay\\index.json"
-if (Test-Path $indexFile) {{
-    $mapsDir = "$HOME\\.agentplay\\maps"
-    $latestMap = Get-ChildItem -Path $mapsDir -Filter "*.json" | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+$mapsDir = "$HOME\\.agentplay\\maps"
+$uploadedFirst = $false
+
+if (Test-Path $mapsDir) {{
+    $latestMap = Get-ChildItem -Path $mapsDir -Filter "*.json" -ErrorAction SilentlyContinue | Sort-Object LastWriteTime -Descending | Select-Object -First 1
     if ($latestMap) {{
         Write-Host "[*] Uploading latest session: $($latestMap.Name)" -ForegroundColor Yellow
         $url = "$Hub/api/upload?participant=$([uri]::EscapeDataString($Name))&team=$([uri]::EscapeDataString($Team))"
         try {{
             $resp = Invoke-RestMethod -Method Post -Uri $url -InFile $latestMap.FullName
             Write-Host "SUCCESS! Connected as $Name ($Team)! ($($resp.calls) calls recorded)" -ForegroundColor Green
+            $uploadedFirst = $true
         }} catch {{
-            Write-Host "[-] Upload warning: $_" -ForegroundColor Red
+            Write-Host "[-] Upload notice: $_" -ForegroundColor Yellow
         }}
     }}
 }}
 
-Write-Host "`n[+] Hackathon Leaderboard sync active! Running live watcher..." -ForegroundColor Cyan
+if (-not $uploadedFirst) {{
+    Write-Host "[+] Connected to Leaderboard as $Name ($Team)!" -ForegroundColor Green
+    Write-Host "[!] Note: No existing agent sessions found yet on this laptop." -ForegroundColor Yellow
+    Write-Host "[*] As soon as you code with Cursor, Claude Code, or Antigravity, your metrics will upload automatically!" -ForegroundColor Cyan
+}}
+
+Write-Host "`n[+] Hackathon Leaderboard live sync active! (Press Ctrl+C to stop)" -ForegroundColor Cyan
 while ($true) {{
     Start-Sleep -Seconds 20
-    & $agentplayExe build 2>$null
-    $latestMap = Get-ChildItem -Path "$HOME\\.agentplay\\maps" -Filter "*.json" | Sort-Object LastWriteTime -Descending | Select-Object -First 1
-    if ($latestMap) {{
-        $url = "$Hub/api/upload?participant=$([uri]::EscapeDataString($Name))&team=$([uri]::EscapeDataString($Team))"
-        try {{
-            $null = Invoke-RestMethod -Method Post -Uri $url -InFile $latestMap.FullName
-        }} catch {{}}
+    if ($agentplayExe) {{ & $agentplayExe build 2>$null }} else {{ python -m agentplay build 2>$null }}
+    if (Test-Path $mapsDir) {{
+        $latestMap = Get-ChildItem -Path $mapsDir -Filter "*.json" -ErrorAction SilentlyContinue | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+        if ($latestMap) {{
+            $url = "$Hub/api/upload?participant=$([uri]::EscapeDataString($Name))&team=$([uri]::EscapeDataString($Team))"
+            try {{
+                $null = Invoke-RestMethod -Method Post -Uri $url -InFile $latestMap.FullName
+            }} catch {{}}
+        }}
     }}
 }}
 """
 
 
 def _generate_join_sh(host_port: str, default_name: str = "Participant", default_team: str = "HackerTeam") -> str:
+    proto = "https" if ("onrender.com" in host_port or "railway.app" in host_port or host_port.startswith("https://")) else "http"
+    hub_url = host_port if host_port.startswith("http") else f"{proto}://{host_port}"
     return f"""#!/usr/bin/env bash
 # Hackathon Leaderboard 1-Click Join Script (macOS / Linux)
 set -e
 
 NAME="{default_name}"
 TEAM="{default_team}"
-HUB="http://{host_port}"
+HUB="{hub_url}"
 
 while [[ "$#" -gt 0 ]]; do
     case $1 in
@@ -1550,32 +1569,56 @@ echo " Connecting to Hackathon Control Leaderboard at $HUB"
 echo " Participant: $NAME | Team: $TEAM"
 echo "=========================================================="
 
-if ! command -v agentplay &> /dev/null; then
+if ! command -v agentplay &> /dev/null && ! python3 -m agentplay --help &> /dev/null && ! python -m agentplay --help &> /dev/null; then
     echo "[*] Installing agentplay..."
-    pip install agentplay --quiet || pipx install agentplay --quiet
+    pip install agentplay --quiet || pipx install agentplay --quiet || true
 fi
 
 echo "[*] Building local agent session index..."
-agentplay build
+if command -v agentplay &> /dev/null; then
+    agentplay build || true
+elif command -v python3 &> /dev/null; then
+    python3 -m agentplay build || true
+else
+    python -m agentplay build || true
+fi
 
 MAPS_DIR="$HOME/.agentplay/maps"
+UPLOADED_FIRST=false
+
 if [ -d "$MAPS_DIR" ]; then
     LATEST=$(ls -t "$MAPS_DIR"/*.json 2>/dev/null | head -n 1)
     if [ -n "$LATEST" ]; then
         echo "[*] Uploading latest session: $LATEST"
-        curl -s -X POST "$HUB/api/upload?participant=$(python3 -c "import urllib.parse, sys; print(urllib.parse.quote(sys.argv[1]))" "$NAME")&team=$(python3 -c "import urllib.parse, sys; print(urllib.parse.quote(sys.argv[1]))" "$TEAM")" --data-binary @"$LATEST"
+        curl -s -X POST "$HUB/api/upload?participant=$(python3 -c "import urllib.parse, sys; print(urllib.parse.quote(sys.argv[1]))" "$NAME" 2>/dev/null || python -c "import urllib.parse, sys; print(urllib.parse.quote(sys.argv[1]))" "$NAME")&team=$(python3 -c "import urllib.parse, sys; print(urllib.parse.quote(sys.argv[1]))" "$TEAM" 2>/dev/null || python -c "import urllib.parse, sys; print(urllib.parse.quote(sys.argv[1]))" "$TEAM")" --data-binary @"$LATEST"
         echo ""
-        echo "[+] Connected successfully to leaderboard!"
+        echo "[+] Connected successfully to leaderboard as $NAME ($TEAM)!"
+        UPLOADED_FIRST=true
     fi
+fi
+
+if [ "$UPLOADED_FIRST" = false ]; then
+    echo "[+] Connected to Leaderboard as $NAME ($TEAM)!"
+    echo "[!] Note: No existing agent sessions found yet on this laptop."
+    echo "[*] As soon as you code with Cursor, Claude Code, or Antigravity, your metrics will upload automatically!"
 fi
 
 echo "[+] Starting live sync daemon (press Ctrl+C to stop)..."
 while true; do
     sleep 20
-    agentplay build >/dev/null 2>&1 || true
-    LATEST=$(ls -t "$MAPS_DIR"/*.json 2>/dev/null | head -n 1)
-    if [ -n "$LATEST" ]; then
-        curl -s -X POST "$HUB/api/upload?participant=$(python3 -c "import urllib.parse, sys; print(urllib.parse.quote(sys.argv[1]))" "$NAME")&team=$(python3 -c "import urllib.parse, sys; print(urllib.parse.quote(sys.argv[1]))" "$TEAM")" --data-binary @"$LATEST" >/dev/null 2>&1 || true
+    if command -v agentplay &> /dev/null; then
+        agentplay build >/dev/null 2>&1 || true
+    elif command -v python3 &> /dev/null; then
+        python3 -m agentplay build >/dev/null 2>&1 || true
+    else
+        python -m agentplay build >/dev/null 2>&1 || true
+    fi
+
+    if [ -d "$MAPS_DIR" ]; then
+        LATEST=$(ls -t "$MAPS_DIR"/*.json 2>/dev/null | head -n 1)
+        if [ -n "$LATEST" ]; then
+            curl -s -X POST "$HUB/api/upload?participant=$(python3 -c "import urllib.parse, sys; print(urllib.parse.quote(sys.argv[1]))" "$NAME" 2>/dev/null || python -c "import urllib.parse, sys; print(urllib.parse.quote(sys.argv[1]))" "$NAME")&team=$(python3 -c "import urllib.parse, sys; print(urllib.parse.quote(sys.argv[1]))" "$TEAM" 2>/dev/null || python -c "import urllib.parse, sys; print(urllib.parse.quote(sys.argv[1]))" "$TEAM")" --data-binary @"$LATEST" >/dev/null 2>&1 || true
+        fi
     fi
 done
 """
