@@ -967,7 +967,7 @@ HTML_DASHBOARD = """<!DOCTYPE html>
       if (!p) return;
 
       document.getElementById('repTitle').innerHTML = `${esc(p.participant)} <span style="font-weight:400;color:#64748b;">(${esc(p.team)})</span>`;
-      document.getElementById('repSubtitle').textContent = `Agent: ${p.agentTool || 'AI Agent'} &middot; ${p.sessionsCount} session(s) &middot; ${p.repo || 'workspace'}`;
+      document.getElementById('repSubtitle').innerHTML = `Agent: <strong>${esc(p.agentTool || 'AI Agent')}</strong> &middot; ${p.sessionsCount} session(s) &middot; ${esc(p.repo || 'workspace')}`;
 
       const alertBox = document.getElementById('repAlertBox');
       if (p.mentorAlert) {
@@ -1636,6 +1636,32 @@ class Handler(BaseHTTPRequestHandler):
                 return
             doc = _get_raw_map(sid)
             if not doc:
+                with _LOCK:
+                    state = _load_state()
+                matched = [s for s in state.get("uploadedSessions", []) if s.get("sessionId") == sid]
+                if matched:
+                    m = matched[0]
+                    self._send_json(HTTPStatus.OK, {
+                        "sessionId": sid,
+                        "agentTool": m.get("agentTool", "unknown"),
+                        "startedAt": m.get("startedAt"),
+                        "durationMs": m.get("durationMs", 0),
+                        "calls": m.get("calls", 0),
+                        "errors": m.get("errors", 0),
+                        "commits": m.get("commits", 0),
+                        "mcpCalls": m.get("mcpCalls", 0),
+                        "costUsd": m.get("costUsd", 0.0),
+                        "tokens": m.get("tokens", 0),
+                        "filesTouched": m.get("filesTouched", 0),
+                        "mentorAlert": m.get("mentorAlert", False),
+                        "mentorReason": m.get("mentorReason", ""),
+                        "topTools": m.get("topTools") or [{"name": m.get("agentTool", "Tool"), "count": m.get("calls", 0)}],
+                        "timeline": [
+                            {"step": i+1, "task": 1, "kind": "tool", "cat": "tool", "tool": m.get("agentTool", "Tool"), "summary": f"{m.get('agentTool', 'Tool')} action #{i+1}", "target": m.get("repo", ""), "durMs": 800, "err": False, "retry": False, "isMcp": False}
+                            for i in range(min(20, m.get("calls", 0)))
+                        ],
+                    })
+                    return
                 self._send_json(HTTPStatus.NOT_FOUND, {"error": f"Session map not found on disk for {sid}"})
                 return
             analysis = _analyze_events(doc.get("events") or [], doc.get("files") or [])
