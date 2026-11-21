@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Team · {event}</title>
+  <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/static/theme.css">
+</head>
+<body>
+  <header id="nav"></header>
+  <section class="hero" style="padding-bottom:24px">
+    <div id="shapes"></div>
+    <div class="wrap" id="hero"><div class="empty">Loading team…</div></div>
+  </section>
+
+  <section class="section" style="padding-top:8px">
+    <div class="wrap">
+      <div class="card">
+        <div class="card-head"><div><span class="eyebrow">Individual usage</span><h3 class="h2" style="font-size:30px;margin-top:6px">Who's doing what.</h3></div>
+          <div class="legend" id="legend"></div></div>
+        <div id="split" style="display:grid;gap:18px"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" style="padding-top:8px">
+    <div class="wrap">
+      <div class="section-head"><h2 class="h2" style="font-size:32px">Members.</h2></div>
+      <div class="card table-card"><table class="lb" id="members"></table></div>
+    </div>
+  </section>
+
+  <section class="section" style="padding-top:8px">
+    <div class="wrap grid-2">
+      <div class="card"><div class="card-head"><h3 class="h3">Team badges</h3></div><div id="teamBadges" style="display:grid;gap:14px"></div></div>
+      <div class="card"><div class="card-head"><h3 class="h3">When the team works</h3><span class="chip">Tool calls by hour</span></div><div id="hourly"></div></div>
+    </div>
+  </section>
+
+  <footer id="footer"></footer>
+  <script src="/static/app.js"></script>
+  <script src="/static/team.js"></script>
+</body>
+</html>

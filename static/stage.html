@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Stage · {event}</title>
+  <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/static/theme.css">
+  <link rel="stylesheet" href="/static/stage.css">
+</head>
+<body>
+  <div class="stage">
+    <div class="stage-top">
+      <span class="brand"><span class="brand-mark"><i></i><i></i><i></i><i></i></span><span id="eventName"></span></span>
+      <span class="spacer"></span>
+      <span class="chip"><span class="live-dot" id="liveDot"></span><span id="liveCount">0 building now</span></span>
+      <span class="chip dark hidden" id="countdown"></span>
+      <span class="chip" id="clock"></span>
+    </div>
+    <main class="scene" id="scene"></main>
+    <div class="dots" id="dots"></div>
+    <div class="ticker"><div class="ticker-track" id="ticker"></div></div>
+  </div>
+  <div class="spotlight" id="spotlight"><div class="inner" id="spotInner"></div></div>
+  <div class="confetti" id="confetti"></div>
+  <div class="hint">← → scenes · space pause · F fullscreen</div>
+  <script src="/static/app.js"></script>
+  <script src="/static/stage.js"></script>
+</body>
+</html>

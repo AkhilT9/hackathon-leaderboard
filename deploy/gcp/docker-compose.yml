@@ -1,0 +1,29 @@
+# Runs on the Compute Engine VM from /opt/hub/deploy/gcp (see deploy.sh).
+services:
+  hub:
+    build: ../..
+    env_file: .env
+    volumes:
+      - hub-data:/data
+    restart: unless-stopped
+    expose:
+      - "7400"
+
+  caddy:  # HTTPS (Let's Encrypt) in front of the hub
+    image: caddy:2.8.4
+    depends_on: [hub]
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      HUB_DOMAIN: ${HUB_DOMAIN}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    restart: unless-stopped
+
+volumes:
+  hub-data:
+  caddy-data:
+  caddy-config:
