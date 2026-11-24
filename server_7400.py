@@ -820,6 +820,20 @@ HTML_DASHBOARD = """<!DOCTYPE html>
     .timeline-row .dur { color: #64748b; font-size: 11px; min-width: 45px; text-align: right; }
     .timeline-row .err-tag { background: #dc2626; color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; }
     .timeline-row .retry-tag { background: #f59e0b; color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; }
+    .champion-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; margin-bottom: 16px; }
+    .champ-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 14px; display: flex; align-items: center; gap: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); transition: transform 0.15s, border-color 0.15s; }
+    .champ-card:hover { transform: translateY(-2px); border-color: #6366f1; }
+    .champ-icon { font-size: 22px; width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+    .champ-icon.gold { background: #fef3c7; }
+    .champ-icon.purple { background: #f3e8ff; }
+    .champ-icon.green { background: #dcfce7; }
+    .champ-icon.blue { background: #e0f2fe; }
+    .champ-info { flex: 1; min-width: 0; }
+    .champ-label { font-size: 10.5px; text-transform: uppercase; font-weight: 700; color: #64748b; letter-spacing: 0.5px; }
+    .champ-name { font-size: 13.5px; font-weight: 700; color: #0f172a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .champ-stat { font-size: 11.5px; color: #475569; }
+    .export-btn { background: #fff; border: 1px solid #cbd5e1; color: #334155; padding: 7px 12px; font-size: 12.5px; border-radius: 6px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+    .export-btn:hover { background: #f8fafc; border-color: #94a3b8; color: #0f172a; }
   </style>
 </head>
 <body>
@@ -837,6 +851,9 @@ HTML_DASHBOARD = """<!DOCTYPE html>
     <div class="subtitle" id="summarySubtitle">Loading leaderboard...</div>
   </div>
 
+  <!-- Category Champions Showcase -->
+  <div class="champion-cards" id="championCards"></div>
+
   <div class="controls">
     <div class="tab-group">
       <button class="tab-btn active" id="tabPeople" onclick="setTab('people')">People</button>
@@ -850,6 +867,7 @@ HTML_DASHBOARD = """<!DOCTYPE html>
       <option value="all">Everyone</option>
       <option value="real">Uploaded sessions only</option>
     </select>
+    <button class="export-btn" onclick="exportJudgingCSV()" title="Download CSV Scoring Sheet for Judges">&#128229; Export CSV</button>
     <button class="upload-btn" onclick="openUploadModal()">+ Upload session</button>
 
     <div class="legend">
@@ -1079,6 +1097,8 @@ HTML_DASHBOARD = """<!DOCTYPE html>
         `<strong>${s.toolCalls} tool calls</strong> (${s.mcpCalls || 0} MCP) &middot; ` +
         `<strong>${s.commits} git commits</strong> &middot; <strong>$${s.spendUsd.toFixed(2)}</strong> model spend.`;
 
+      updateChampions();
+
       const q = document.getElementById('searchBox').value.trim().toLowerCase();
       const teamFilter = document.getElementById('teamFilter').value;
       const thead = document.getElementById('tableHead');
@@ -1222,6 +1242,79 @@ HTML_DASHBOARD = """<!DOCTYPE html>
         status.style.color = '#dc2626';
         status.textContent = e.message;
       }
+    }
+
+    function updateChampions() {
+      const box = document.getElementById('championCards');
+      if (!box || !cachedData || !cachedData.participants || !cachedData.participants.length) return;
+      const pts = cachedData.participants;
+      const topCalls = [...pts].sort((a,b) => b.toolCalls - a.toolCalls)[0];
+      const topCommits = [...pts].sort((a,b) => (b.commits || 0) - (a.commits || 0))[0];
+      const topMcp = [...pts].sort((a,b) => (b.mcpCalls || 0) - (a.mcpCalls || 0))[0];
+      const topHealth = [...pts].filter(p => p.toolCalls >= 10).sort((a,b) => (b.runHealth || 0) - (a.runHealth || 0))[0] || pts[0];
+
+      box.innerHTML = `
+        <div class="champ-card" onclick="openParticipantReplay('${esc(topCalls.participant)}')">
+          <div class="champ-icon gold">&#128081;</div>
+          <div class="champ-info">
+            <div class="champ-label">Speed Demon</div>
+            <div class="champ-name">${esc(topCalls.participant)}</div>
+            <div class="champ-stat">${topCalls.toolCalls} calls &middot; ${esc(topCalls.team)}</div>
+          </div>
+        </div>
+        <div class="champ-card" onclick="openParticipantReplay('${esc(topCommits.participant)}')">
+          <div class="champ-icon purple">&#128230;</div>
+          <div class="champ-info">
+            <div class="champ-label">Commit Machine</div>
+            <div class="champ-name">${esc(topCommits.participant)}</div>
+            <div class="champ-stat">${topCommits.commits || 0} git commits</div>
+          </div>
+        </div>
+        <div class="champ-card" onclick="openParticipantReplay('${esc(topMcp.participant)}')">
+          <div class="champ-icon blue">&#129513;</div>
+          <div class="champ-info">
+            <div class="champ-label">MCP Architect</div>
+            <div class="champ-name">${esc(topMcp.participant)}</div>
+            <div class="champ-stat">${topMcp.mcpCalls || 0} MCP queries</div>
+          </div>
+        </div>
+        <div class="champ-card" onclick="openParticipantReplay('${esc(topHealth.participant)}')">
+          <div class="champ-icon green">&#128737;</div>
+          <div class="champ-info">
+            <div class="champ-label">Cleanest Execution</div>
+            <div class="champ-name">${esc(topHealth.participant)}</div>
+            <div class="champ-stat">${topHealth.runHealth || 0}/100 Health Score</div>
+          </div>
+        </div>
+      `;
+    }
+
+    function exportJudgingCSV() {
+      if (!cachedData || !cachedData.participants) return;
+      const headers = ["Rank", "Participant", "Team", "Agent Tool", "Tool Calls", "MCP Calls", "Git Commits", "Errors", "Model Spend USD", "Run Health", "Mentor SOS"];
+      const rows = cachedData.participants.map((p, idx) => [
+        idx + 1,
+        `"${p.participant.replace(/"/g, '""')}"`,
+        `"${p.team.replace(/"/g, '""')}"`,
+        `"${(p.agentTool || '').replace(/"/g, '""')}"`,
+        p.toolCalls,
+        p.mcpCalls || 0,
+        p.commits || 0,
+        p.errors || 0,
+        p.spendUsd.toFixed(2),
+        p.runHealth || 0,
+        p.mentorAlert ? "YES" : "NO"
+      ]);
+      const csv = [headers.join(","), ...rows.map(r => r.join(","))].join("\r\n");
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `hackathon_judging_scores_${new Date().toISOString().slice(0,10)}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
     }
 
     loadLeaderboard();
