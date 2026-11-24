@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Hackathon AI Observability & Leaderboard — Quickstart Guide</title>
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --primary-light: #eef2ff;
+      --text: #1e293b;
+      --text-muted: #64748b;
+      --bg: #ffffff;
+      --border: #e2e8f0;
+      --code-bg: #0f172a;
+      --code-text: #f8fafc;
+      --accent-red: #ef4444;
+      --accent-green: #10b981;
+      --accent-amber: #f59e0b;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      color: var(--text);
+      background: #f8fafc;
+      line-height: 1.6;
+      padding: 40px 20px;
+    }
+
+    .container {
+      max-width: 860px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 48px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+      border: 1px solid var(--border);
+    }
+
+    h1 {
+      font-size: 28px;
+      color: #0f172a;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .subtitle {
+      font-size: 15px;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    h2 {
+      font-size: 20px;
+      color: #0f172a;
+      margin-top: 32px;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--primary-light);
+    }
+
+    h3 {
+      font-size: 16px;
+      color: #334155;
+      margin-top: 20px;
+      margin-bottom: 10px;
+    }
+
+    p { margin-bottom: 14px; font-size: 14px; }
+    ul { margin-bottom: 16px; padding-left: 20px; font-size: 14px; }
+    li { margin-bottom: 6px; }
+
+    .link-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0 24px;
+      font-size: 13.5px;
+    }
+
+    .link-table th, .link-table td {
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      text-align: left;
+    }
+
+    .link-table th {
+      background: #f1f5f9;
+      font-weight: 600;
+      color: #334155;
+    }
+
+    .link-table tr:hover { background: #f8fafc; }
+
+    a {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 500;
+    }
+    a:hover { text-decoration: underline; }
+
+    .card {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 18px 20px;
+      margin: 16px 0;
+    }
+
+    .code-block {
+      background: var(--code-bg);
+      color: var(--code-text);
+      padding: 14px 18px;
+      border-radius: 8px;
+      font-family: Consolas, Monaco, "Courier New", monospace;
+      font-size: 13px;
+      overflow-x: auto;
+      margin: 10px 0 16px;
+      word-break: break-all;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .badge-blue { background: #e0e7ff; color: #4338ca; }
+    .badge-green { background: #d1fae5; color: #065f46; }
+    .badge-red { background: #fee2e2; color: #991b1b; }
+
+    .alert {
+      background: #fef2f2;
+      border-left: 4px solid var(--accent-red);
+      padding: 14px 18px;
+      border-radius: 0 8px 8px 0;
+      margin: 16px 0;
+      font-size: 13.5px;
+      color: #7f1d1d;
+    }
+
+    .info-box {
+      background: #eff6ff;
+      border-left: 4px solid var(--primary);
+      padding: 14px 18px;
+      border-radius: 0 8px 8px 0;
+      margin: 16px 0;
+      font-size: 13.5px;
+      color: #1e3a8a;
+    }
+
+    @media print {
+      body { background: #fff; padding: 0; }
+      .container { border: none; box-shadow: none; padding: 20px; max-width: 100%; }
+      .code-block { background: #1e293b; color: #fff; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>🚀 Hackathon AI Agent Observability & Leaderboard</h1>
+  <div class="subtitle">
+    Live multi-agent telemetry, 1-click participant onboarding, interactive session replay, and mentor alert platform.
+  </div>
+
+  <h2>🔗 Live Working Links</h2>
+  <table class="link-table">
+    <thead>
+      <tr>
+        <th>Portal</th>
+        <th>URL</th>
+        <th>Purpose</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>🌐 Main Leaderboard</strong></td>
+        <td><a href="https://hackathon-leaderboard-6m5i.onrender.com/">hackathon-leaderboard-6m5i.onrender.com</a></td>
+        <td>Live participant ranking, tools, commits & session replays</td>
+      </tr>
+      <tr>
+        <td><strong>📺 Stage Projector View</strong></td>
+        <td><a href="https://hackathon-leaderboard-6m5i.onrender.com/stage">/stage</a></td>
+        <td>Auditorium HUD with live podium & scrolling action ticker</td>
+      </tr>
+      <tr>
+        <td><strong>⚡ 1-Click Join Form</strong></td>
+        <td><a href="https://hackathon-leaderboard-6m5i.onrender.com/join">/join</a></td>
+        <td>Generate custom terminal join commands for your team</td>
+      </tr>
+      <tr>
+        <td><strong>💻 GitHub Repository</strong></td>
+        <td><a href="https://github.com/AkhilT9/hackathon-leaderboard">github.com/AkhilT9/hackathon-leaderboard</a></td>
+        <td>Open-source code, Dockerfile, and setup instructions</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>👤 Part 1: For Hackathon Participants (10-Second Join)</h2>
+  <p>Connect your laptop's AI coding assistant to the leaderboard in just 1 terminal command. <strong>No accounts, no plugins, and no Wi-Fi restrictions needed.</strong></p>
+
+  <p><strong>Supported AI Coding Assistants:</strong> Cursor IDE, Anthropic Claude Code, Google Antigravity, GitHub Copilot (CLI & VS Code), OpenCode, and OpenAI Codex.</p>
+
+  <h3>🪟 Windows (PowerShell):</h3>
+  <div class="code-block">
+irm "https://hackathon-leaderboard-6m5i.onrender.com/join.ps1?name=YOUR_NAME&team=YOUR_TEAM" | iex
+  </div>
+
+  <h3>🍎 macOS / 🐧 Linux (Terminal):</h3>
+  <div class="code-block">
+curl -fsSL "https://hackathon-leaderboard-6m5i.onrender.com/join.sh?name=YOUR_NAME&team=YOUR_TEAM" | bash
+  </div>
+
+  <div class="info-box">
+    <strong>🔒 Privacy &amp; Security Built-In:</strong><br>
+    The local <code>agentplay</code> engine runs completely on your machine. It only sends numerical telemetry: tool names (<code>bash</code>, <code>read_file</code>), step durations, error counts, and git commit hashes. <strong>All code files, prompts, passwords, and API keys are automatically stripped before transmission.</strong>
+  </div>
+
+  <h3>Automatic Background Sync (Continuous Updates):</h3>
+  <p>To have your score, tools, and commits stream continuously as you build during the event:</p>
+  <div class="code-block">
+python sync_to_hub.py --hub https://hackathon-leaderboard-6m5i.onrender.com --name "YOUR_NAME" --team "YOUR_TEAM" --watch
+  </div>
+
+  <h2>🏆 Part 2: For Mentors, Judges & Organizers</h2>
+
+  <div class="card">
+    <h3>1. 📺 Stage HUD for the Big Screen</h3>
+    <p>Project <code>https://hackathon-leaderboard-6m5i.onrender.com/stage</code> onto the venue auditorium screen to show live podium standings (1st, 2nd, 3rd place) and a high-energy rolling activity ticker showing commits and tool runs live.</p>
+  </div>
+
+  <div class="card">
+    <h3>2. 🔍 "See His Session" Interactive Replay Modal</h3>
+    <p>Click on any participant's name in the leaderboard table to open the full session inspector:</p>
+    <ul>
+      <li><strong>Tool Breakdown:</strong> See Bash, MCP servers, and WebSearch volume.</li>
+      <li><strong>175-Step Chronological Timeline:</strong> Inspect tool calls, execution durations, errors, and retries.</li>
+      <li><strong>Run Health Score:</strong> 0–100 benchmark evaluating stability and error recovery.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>3. 🚨 Mentor SOS Alert</h3>
+    <p>If an AI agent gets stuck in a loop (&ge;3 consecutive errors or high failure count), a red <strong>⚠️ Mentor SOS Alert</strong> lights up on the dashboard so mentors can immediately walk over and unblock the team.</p>
+  </div>
+
+  <h2>🛠️ Part 3: For Developers (Self-Host or Deploy)</h2>
+  <h3>Run Locally:</h3>
+  <div class="code-block">
+git clone https://github.com/AkhilT9/hackathon-leaderboard.git
+cd hackathon-leaderboard
+pip install -r requirements.txt
+python server_7400.py
+  </div>
+  <p>Then visit <code>http://localhost:7400</code>.</p>
+
+  <h3>Deploy Free to Cloud:</h3>
+  <p>Fork or import the repository on <strong>Render.com</strong> or <strong>Railway.app</strong>. The included <code>Procfile</code>, <code>render.yaml</code>, and <code>requirements.txt</code> deploy the entire platform in under 2 minutes.</p>
+</div>
+
+</body>
+</html>
+

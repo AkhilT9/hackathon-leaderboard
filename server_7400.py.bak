@@ -1,0 +1,1167 @@
+"""Hackathon Control / Teams Leaderboard Server.
+
+Serves an interactive multi-user Hackathon Control leaderboard on port 7400
+and accepts real `agentplay` session map uploads (.json or .json.gz) via
+POST /api/upload or the browser Upload Session button / drag-and-drop.
+"""
+
+from __future__ import annotations
+
+import argparse
+import base64
+from datetime import UTC, datetime
+import gzip
+from http import HTTPStatus
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+import json
+import os
+from pathlib import Path
+import re
+import threading
+from typing import Any
+from urllib.parse import parse_qs, urlsplit
+
+try:
+    from agentplay import facts as ap_facts
+    from agentplay import health as ap_health
+except ImportError:
+    ap_facts = None
+    ap_health = None
+
+
+BASE_DIR = Path(__file__).resolve().parent
+DATA_FILE = BASE_DIR / "leaderboard_data.json"
+UPLOADS_DIR = BASE_DIR / "uploaded_sessions"
+MAX_UPLOAD_BYTES = 25 * 1024 * 1024  # 25 MB compressed or raw map
+SPARKLINE_BUCKETS = 24
+_LOCK = threading.Lock()
+
+
+DEMO_PARTICIPANTS: list[dict[str, Any]] = [
+    {
+        "participant": "Aisha Bello",
+        "team": "Merge Conflict",
+        "repo": "pet-adopt",
+        "isDemo": True,
+        "connected": False,
+        "sessionsCount": 17,
+        "toolCalls": 474,
+        "errors": 33,
+        "failingPct": 7,
+        "prs": 14,
+        "commits": 21,
+        "spendUsd": 1.87,
+        "runHealth": 74,
+        "lastActionTs": None,
+        "lastActionLabel": "22 h ago",
+        "sparkline": [{"calls": (i % 5) + 1, "errors": 1 if i in (4, 15) else 0} for i in range(SPARKLINE_BUCKETS)],
+        "sessions": [],
+    },
+    {
+        "participant": "Diego Alvarez",
+        "team": "Null Pointers",
+        "repo": "transit-ate",
+        "isDemo": True,
+        "connected": False,
+        "sessionsCount": 15,
+        "toolCalls": 450,
+        "errors": 0,
+        "failingPct": 0,
+        "prs": 3,
+        "commits": 20,
+        "spendUsd": 1.69,
+        "runHealth": 67,
+        "lastActionTs": None,
+        "lastActionLabel": "22 h ago",
+        "sparkline": [{"calls": (i % 4) + 1, "errors": 0} for i in range(SPARKLINE_BUCKETS)],
+        "sessions": [],
+    },
+    {
+        "participant": "Kenji Sato",
+        "team": "Byte Me",
+        "repo": "recipe-remix",
+        "isDemo": True,
+        "connected": False,
+        "sessionsCount": 15,
+        "toolCalls": 428,
+        "errors": 21,
+        "failingPct": 5,
+        "prs": 7,
+        "commits": 20,
+        "spendUsd": 1.80,
+        "runHealth": 70,
+        "lastActionTs": None,
+        "lastActionLabel": "22 h ago",
+        "sparkline": [{"calls": (i % 6) + 1, "errors": 1 if i == 9 else 0} for i in range(SPARKLINE_BUCKETS)],
+        "sessions": [],
+    },
+    {
+        "participant": "Omar Haddad",
+        "team": "Stack Smashers",
+        "repo": "transit-ate",
+        "isDemo": True,
+        "connected": False,
+        "sessionsCount": 16,
+        "toolCalls": 433,
+        "errors": 69,
+        "failingPct": 16,
+        "prs": 4,
+        "commits": 12,
+        "spendUsd": 1.85,
+        "runHealth": 60,
+        "lastActionTs": None,
+        "lastActionLabel": "22 h ago",
+        "sparkline": [{"calls": (i % 4) + 2, "errors": 1 if i % 6 == 0 else 0} for i in range(SPARKLINE_BUCKETS)],
+        "sessions": [],
+    },
+    {
+        "participant": "Sofia Rossi",
+        "team": "Byte Me",
+        "repo": "carbon-calc",
+        "isDemo": True,
+        "connected": False,
+        "sessionsCount": 17,
+        "toolCalls": 424,
+        "errors": 38,
+        "failingPct": 9,
+        "prs": 8,
+        "commits": 23,
+        "spendUsd": 1.91,
+        "runHealth": 72,
+        "lastActionTs": None,
+        "lastActionLabel": "22 h ago",
+        "sparkline": [{"calls": (i % 5) + 1, "errors": 1 if i in (7, 19) else 0} for i in range(SPARKLINE_BUCKETS)],
+        "sessions": [],
+    },
+    {
+        "participant": "Tom Nguyen",
+        "team": "Merge Conflict",
+        "repo": "pet-adopt",
+        "isDemo": True,
+        "connected": False,
+        "sessionsCount": 16,
+        "toolCalls": 450,
+        "errors": 72,
+        "failingPct": 16,
+        "prs": 5,
+        "commits": 12,
+        "spendUsd": 2.00,
+        "runHealth": 61,
+        "lastActionTs": None,
+        "lastActionLabel": "22 h ago",
+        "sparkline": [{"calls": (i % 4) + 1, "errors": 1 if i in (2, 10, 18) else 0} for i in range(SPARKLINE_BUCKETS)],
+        "sessions": [],
+    },
+    {
+        "participant": "Arjun Patel",
+        "team": "Lambda Llamas",
+        "repo": "pet-adopt",
+        "isDemo": True,
+        "connected": False,
+        "sessionsCount": 14,
+        "toolCalls": 455,
+        "errors": 36,
+        "failingPct": 8,
+        "prs": 9,
+        "commits": 18,
+        "spendUsd": 1.97,
+        "runHealth": 78,
+        "lastActionTs": None,
+        "lastActionLabel": "22 h ago",
+        "sparkline": [{"calls": (i % 6) + 1, "errors": 1 if i == 12 else 0} for i in range(SPARKLINE_BUCKETS)],
+        "sessions": [],
+    },
+    {
+        "participant": "Priya Raman",
+        "team": "Null Pointers",
+        "repo": "pet-adopt",
+        "isDemo": True,
+        "connected": False,
+        "sessionsCount": 16,
+        "toolCalls": 429,
+        "errors": 56,
+        "failingPct": 13,
+        "prs": 7,
+        "commits": 22,
+        "spendUsd": 1.91,
+        "runHealth": 65,
+        "lastActionTs": None,
+        "lastActionLabel": "22 h ago",
+        "sparkline": [{"calls": (i % 5) + 1, "errors": 1 if i in (3, 14, 21) else 0} for i in range(SPARKLINE_BUCKETS)],
+        "sessions": [],
+    },
+    {
+        "participant": "Mei Chen",
+        "team": "Lambda Llamas",
+        "repo": "recipe-remix",
+        "isDemo": True,
+        "connected": False,
+        "sessionsCount": 14,
+        "toolCalls": 436,
+        "errors": 44,
+        "failingPct": 10,
+        "prs": 6,
+        "commits": 15,
+        "spendUsd": 1.92,
+        "runHealth": 65,
+        "lastActionTs": None,
+        "lastActionLabel": "22 h ago",
+        "sparkline": [{"calls": (i % 4) + 1, "errors": 1 if i in (5, 16) else 0} for i in range(SPARKLINE_BUCKETS)],
+        "sessions": [],
+    },
+    {
+        "participant": "Lena Fischer",
+        "team": "Stack Smashers",
+        "repo": "transit-ate",
+        "isDemo": True,
+        "connected": False,
+        "sessionsCount": 16,
+        "toolCalls": 459,
+        "errors": 37,
+        "failingPct": 8,
+        "prs": 4,
+        "commits": 22,
+        "spendUsd": 1.91,
+        "runHealth": 67,
+        "lastActionTs": None,
+        "lastActionLabel": "22 h ago",
+        "sparkline": [{"calls": (i % 5) + 1, "errors": 1 if i in (6, 20) else 0} for i in range(SPARKLINE_BUCKETS)],
+        "sessions": [],
+    },
+    {
+        "participant": "OpenCode Test",
+        "team": "Red Run",
+        "repo": "oo-test",
+        "isDemo": True,
+        "connected": False,
+        "sessionsCount": 1,
+        "toolCalls": 7,
+        "errors": 1,
+        "failingPct": 14,
+        "prs": 0,
+        "commits": 0,
+        "spendUsd": 0.00,
+        "runHealth": None,
+        "lastActionTs": None,
+        "lastActionLabel": "22 h ago",
+        "sparkline": [{"calls": 1 if i % 4 == 0 else 0, "errors": 1 if i == 12 else 0} for i in range(SPARKLINE_BUCKETS)],
+        "sessions": [],
+    },
+]
+
+
+def _default_state() -> dict[str, Any]:
+    return {"uploadedSessions": [], "liveActivity": []}
+
+
+def _load_state() -> dict[str, Any]:
+    if not DATA_FILE.is_file():
+        return _default_state()
+    try:
+        data = json.loads(DATA_FILE.read_text(encoding="utf-8"))
+        if isinstance(data, dict):
+            return {
+                "uploadedSessions": list(data.get("uploadedSessions") or []),
+                "liveActivity": list(data.get("liveActivity") or []),
+            }
+    except (OSError, ValueError):
+        pass
+    return _default_state()
+
+
+def _save_state(state: dict[str, Any]) -> None:
+    tmp = DATA_FILE.with_suffix(".tmp")
+    tmp.write_text(json.dumps(state, indent=2), encoding="utf-8")
+    tmp.replace(DATA_FILE)
+
+
+def _decode_map_bytes(raw: bytes) -> dict[str, Any]:
+    """Parse raw JSON or gzipped JSON bytes into a dict."""
+    if raw[:2] == b"\x1f\x8b":
+        raw = gzip.decompress(raw)
+    doc = json.loads(raw.decode("utf-8"))
+    if not isinstance(doc, dict):
+        raise ValueError("Uploaded file must contain a JSON object.")
+    return doc
+
+
+def _validate_map(doc: dict[str, Any]) -> None:
+    if not isinstance(doc.get("session"), dict) or not isinstance(doc.get("events"), list):
+        raise ValueError("Not a valid agentplay session map (missing 'session' or 'events').")
+
+
+def _sparkline_from_events(events: list[dict[str, Any]], duration_ms: int) -> list[dict[str, int]]:
+    """Bin tool-call events across 24 buckets for the activity sparkline."""
+    buckets = [{"calls": 0, "errors": 0} for _ in range(SPARKLINE_BUCKETS)]
+    non_call = {"user", "llm", "compaction", "delay", "interrupt", "turn_end"}
+    tool_events = [e for e in events if isinstance(e, dict) and e.get("kind") not in non_call]
+    if not tool_events:
+        return buckets
+    max_t = max([duration_ms, *(int(e.get("t") or 0) for e in tool_events), 1])
+    for e in tool_events:
+        t = max(0, int(e.get("t") or 0))
+        idx = min(SPARKLINE_BUCKETS - 1, int((t / max_t) * SPARKLINE_BUCKETS))
+        buckets[idx]["calls"] += 1
+        if e.get("err"):
+            buckets[idx]["errors"] += 1
+    return buckets
+
+
+def _compute_run_health(session_facts_list: list[dict[str, Any]]) -> int | None:
+    """Compute 0-100 Run Health using agentplay's own health module when available."""
+    if not session_facts_list:
+        return None
+    if ap_health is not None:
+        rows = [{"facts": f} for f in session_facts_list if isinstance(f, dict)]
+        if not rows:
+            return None
+        totals = ap_health.totals(rows)
+        if totals.calls == 0 and totals.sessions == 0:
+            return None
+        comps = ap_health.components(totals)
+        return round(sum(20.0 * (v if v is not None else 1.0) for v in comps.values()))
+    total_calls = sum(int(f.get("calls") or 0) for f in session_facts_list)
+    total_errors = sum(int(f.get("errors") or 0) for f in session_facts_list)
+    if total_calls <= 0:
+        return None
+    return max(0, min(100, round(100 * (1.0 - min(1.0, 4.0 * total_errors / total_calls)))))
+
+
+def _format_relative_age(iso_ts: str | None) -> str:
+    if not iso_ts:
+        return "just now"
+    try:
+        dt = datetime.fromisoformat(iso_ts.replace("Z", "+00:00"))
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=UTC)
+        delta_s = max(0, int((datetime.now(UTC) - dt).total_seconds()))
+    except ValueError:
+        return "just now"
+    if delta_s < 60:
+        return "just now"
+    if delta_s < 3600:
+        return f"{delta_s // 60} m ago"
+    if delta_s < 86400:
+        return f"{delta_s // 3600} h ago"
+    return f"{delta_s // 86400} d ago"
+
+
+def _extract_session_record(doc: dict[str, Any], participant: str, team: str, repo_override: str | None) -> dict[str, Any]:
+    _validate_map(doc)
+    sess = doc["session"]
+    totals = doc.get("totals") or {}
+    events = doc.get("events") or []
+    repos = doc.get("repos") or []
+
+    detected_repo = ""
+    if repos and isinstance(repos[0], dict):
+        detected_repo = str(repos[0].get("name") or repos[0].get("remote") or "")
+    repo = (repo_override or detected_repo or "local-workspace").strip()
+
+    facts_data: dict[str, Any] = {}
+    if ap_facts is not None:
+        try:
+            facts_data = ap_facts.compute(doc)
+        except Exception:
+            facts_data = {}
+
+    session_id = str(sess.get("id") or f"upload:{datetime.now(UTC).timestamp()}")
+    calls = int(totals.get("calls") or facts_data.get("calls") or 0)
+    errors = int(totals.get("errors") or facts_data.get("errors") or 0)
+    prs = int(totals.get("prsCreated") or facts_data.get("prsCreated") or len(doc.get("prs") or []))
+    commits = int(totals.get("commits") or 0)
+    cost_usd = float(totals.get("costUsd") or facts_data.get("costUsd") or 0.0)
+    duration_ms = int(sess.get("durationMs") or 0)
+    agent_tool = str(sess.get("agentTool") or "unknown")
+    started_at = str(sess.get("startedAt") or datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ"))
+    uploaded_at = datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+    if not facts_data:
+        facts_data = {
+            "calls": calls,
+            "errors": errors,
+            "retries": int(totals.get("retries") or 0),
+            "prsCreated": prs,
+            "edited": int(totals.get("filesTouched") or 0) > 0,
+            "compactions": int(totals.get("compactions") or 0),
+        }
+
+    return {
+        "sessionId": session_id,
+        "participant": participant.strip(),
+        "team": team.strip(),
+        "repo": repo,
+        "agentTool": agent_tool,
+        "startedAt": started_at,
+        "uploadedAt": uploaded_at,
+        "durationMs": duration_ms,
+        "calls": calls,
+        "errors": errors,
+        "prs": prs,
+        "commits": commits,
+        "costUsd": round(cost_usd, 4),
+        "tokens": int(totals.get("tokens") or 0),
+        "filesTouched": int(totals.get("filesTouched") or 0),
+        "sparkline": _sparkline_from_events(events, duration_ms),
+        "facts": facts_data,
+    }
+
+
+def _save_raw_map(session_id: str, doc: dict[str, Any]) -> None:
+    UPLOADS_DIR.mkdir(parents=True, exist_ok=True)
+    safe_name = re.sub(r"[^A-Za-z0-9._-]+", "_", session_id) + ".json"
+    (UPLOADS_DIR / safe_name).write_text(json.dumps(doc, separators=(",", ":")), encoding="utf-8")
+
+
+def _aggregate_participants(uploaded: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    grouped: dict[tuple[str, str], list[dict[str, Any]]] = {}
+    for rec in uploaded:
+        key = (rec["participant"].lower(), rec["team"].lower())
+        grouped.setdefault(key, []).append(rec)
+
+    real_rows: list[dict[str, Any]] = []
+    for _, recs in grouped.items():
+        latest = max(recs, key=lambda r: r.get("uploadedAt") or "")
+        total_calls = sum(int(r.get("calls") or 0) for r in recs)
+        total_errors = sum(int(r.get("errors") or 0) for r in recs)
+        total_prs = sum(int(r.get("prs") or 0) for r in recs)
+        total_commits = sum(int(r.get("commits") or 0) for r in recs)
+        total_spend = round(sum(float(r.get("costUsd") or 0.0) for r in recs), 2)
+        failing_pct = round(100 * total_errors / total_calls) if total_calls > 0 else None
+
+        combined_spark = [{"calls": 0, "errors": 0} for _ in range(SPARKLINE_BUCKETS)]
+        for r in recs:
+            sp = r.get("sparkline") or []
+            for idx in range(min(SPARKLINE_BUCKETS, len(sp))):
+                combined_spark[idx]["calls"] += int(sp[idx].get("calls") or 0)
+                combined_spark[idx]["errors"] += int(sp[idx].get("errors") or 0)
+
+        run_health = _compute_run_health([r.get("facts") or {} for r in recs])
+        last_ts = latest.get("uploadedAt")
+        real_rows.append(
+            {
+                "participant": latest["participant"],
+                "team": latest["team"],
+                "repo": latest["repo"],
+                "isDemo": False,
+                "connected": True,
+                "sessionsCount": len(recs),
+                "toolCalls": total_calls,
+                "errors": total_errors,
+                "failingPct": failing_pct,
+                "prs": total_prs,
+                "commits": total_commits,
+                "spendUsd": total_spend,
+                "runHealth": run_health,
+                "lastActionTs": last_ts,
+                "lastActionLabel": _format_relative_age(last_ts),
+                "sparkline": combined_spark,
+                "sessions": [
+                    {
+                        "sessionId": r["sessionId"],
+                        "agentTool": r["agentTool"],
+                        "repo": r["repo"],
+                        "calls": r["calls"],
+                        "errors": r["errors"],
+                        "spendUsd": round(float(r.get("costUsd") or 0.0), 2),
+                        "durationMs": r["durationMs"],
+                        "startedAt": r["startedAt"],
+                        "uploadedAt": r["uploadedAt"],
+                    }
+                    for r in sorted(recs, key=lambda x: x.get("uploadedAt") or "", reverse=True)
+                ],
+            }
+        )
+
+    real_rows.sort(key=lambda r: (r["toolCalls"], r["sessionsCount"]), reverse=True)
+
+    placeholder = (
+        []
+        if real_rows
+        else [
+            {
+                "participant": "Your Name",
+                "team": "Test",
+                "repo": "",
+                "isDemo": True,
+                "connected": False,
+                "sessionsCount": 0,
+                "toolCalls": 0,
+                "errors": 0,
+                "failingPct": None,
+                "prs": 0,
+                "commits": 0,
+                "spendUsd": 0.00,
+                "runHealth": None,
+                "lastActionTs": None,
+                "lastActionLabel": "never",
+                "sparkline": [{"calls": 0, "errors": 0} for _ in range(SPARKLINE_BUCKETS)],
+                "sessions": [],
+            }
+        ]
+    )
+
+    return [*real_rows, *DEMO_PARTICIPANTS, *placeholder]
+
+
+def _aggregate_teams(participants: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    by_team: dict[str, list[dict[str, Any]]] = {}
+    for p in participants:
+        by_team.setdefault(p["team"], []).append(p)
+
+    teams: list[dict[str, Any]] = []
+    for team_name, members in by_team.items():
+        calls = sum(int(m["toolCalls"]) for m in members)
+        errs = sum(int(m["errors"]) for m in members)
+        health_vals = [m["runHealth"] for m in members if m["runHealth"] is not None]
+        teams.append(
+            {
+                "team": team_name,
+                "members": len(members),
+                "connected": sum(1 for m in members if m["connected"]),
+                "repos": sorted({m["repo"] for m in members if m.get("repo")}),
+                "sessionsCount": sum(int(m["sessionsCount"]) for m in members),
+                "toolCalls": calls,
+                "errors": errs,
+                "failingPct": round(100 * errs / calls) if calls > 0 else None,
+                "prs": sum(int(m["prs"]) for m in members),
+                "commits": sum(int(m["commits"]) for m in members),
+                "spendUsd": round(sum(float(m["spendUsd"]) for m in members), 2),
+                "runHealth": round(sum(health_vals) / len(health_vals)) if health_vals else None,
+                "hasRealUploads": any(not m["isDemo"] for m in members),
+            }
+        )
+    teams.sort(key=lambda t: (t["hasRealUploads"], t["toolCalls"]), reverse=True)
+    return teams
+
+
+def build_leaderboard_payload(include_demo: bool = True) -> dict[str, Any]:
+    with _LOCK:
+        state = _load_state()
+    all_participants = _aggregate_participants(state["uploadedSessions"])
+    participants = all_participants if include_demo else [p for p in all_participants if not p["isDemo"]]
+    teams = _aggregate_teams(participants)
+    total_sessions = sum(int(p["sessionsCount"]) for p in participants)
+    total_calls = sum(int(p["toolCalls"]) for p in participants)
+    total_failed = sum(int(p["errors"]) for p in participants)
+    total_prs = sum(int(p["prs"]) for p in participants)
+    total_commits = sum(int(p["commits"]) for p in participants)
+    total_spend = round(sum(float(p["spendUsd"]) for p in participants), 2)
+    connected = sum(1 for p in participants if p["connected"])
+
+    return {
+        "updatedAt": datetime.now().strftime("%I:%M %p"),
+        "summary": {
+            "workingCount": connected,
+            "connectedCount": connected,
+            "participantCount": len(participants),
+            "teamCount": len(teams),
+            "sessions": total_sessions,
+            "toolCalls": total_calls,
+            "failedCalls": total_failed,
+            "prs": total_prs,
+            "commits": total_commits,
+            "spendUsd": total_spend,
+            "uploadedCount": len(state["uploadedSessions"]),
+        },
+        "participants": participants,
+        "teams": teams,
+        "liveActivity": state["liveActivity"][:15],
+    }
+
+
+def ingest_upload(doc: dict[str, Any], participant: str, team: str, repo_override: str | None) -> dict[str, Any]:
+    rec = _extract_session_record(doc, participant, team, repo_override)
+    _save_raw_map(rec["sessionId"], doc)
+    with _LOCK:
+        state = _load_state()
+        existing = [
+            s
+            for s in state["uploadedSessions"]
+            if not (
+                s.get("sessionId") == rec["sessionId"]
+                and s.get("participant", "").lower() == rec["participant"].lower()
+            )
+        ]
+        existing.append(rec)
+        state["uploadedSessions"] = existing
+        activity_entry = {
+            "at": datetime.now().strftime("%I:%M:%S %p"),
+            "participant": rec["participant"],
+            "team": rec["team"],
+            "repo": rec["repo"],
+            "agentTool": rec["agentTool"],
+            "calls": rec["calls"],
+            "errors": rec["errors"],
+            "sessionId": rec["sessionId"],
+        }
+        state["liveActivity"] = [activity_entry, *state["liveActivity"]][:30]
+        _save_state(state)
+    return rec
+
+
+HTML_CONTENT = r"""<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Hackathon control</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+    body { background-color: #fafbfc; color: #1a1f2c; padding: 32px 48px; }
+    .header { margin-bottom: 24px; }
+    .header h1 { font-size: 24px; font-weight: 700; color: #0f172a; margin-bottom: 6px; }
+    .header .subtitle { font-size: 13.5px; color: #475569; line-height: 1.5; }
+    .updated-time { float: right; font-size: 11px; color: #94a3b8; }
+    .controls { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 20px; margin-bottom: 24px; }
+    .tab-group { display: flex; border: 1px solid #cbd5e1; border-radius: 6px; overflow: hidden; background: #fff; }
+    .tab-btn { padding: 6px 14px; font-size: 13px; font-weight: 500; border: none; cursor: pointer; background: transparent; color: #475569; }
+    .tab-btn.active { background: #0f172a; color: #fff; }
+    .search-input { padding: 6px 12px; font-size: 13px; border: 1px solid #cbd5e1; border-radius: 6px; width: 210px; background: #fff; color: #0f172a; }
+    .select-dropdown { padding: 6px 12px; font-size: 13px; border: 1px solid #cbd5e1; border-radius: 6px; background: #fff; color: #334155; cursor: pointer; }
+    .upload-btn { padding: 6px 14px; font-size: 13px; font-weight: 600; border: 1px solid #0f172a; border-radius: 6px; background: #0f172a; color: #fff; cursor: pointer; }
+    .upload-btn:hover { background: #1e293b; }
+    .legend { margin-left: auto; display: flex; align-items: center; gap: 14px; font-size: 11.5px; color: #64748b; }
+    .legend-item { display: flex; align-items: center; gap: 5px; }
+    .dot-blue { width: 8px; height: 8px; border-radius: 2px; background: #3b82f6; display: inline-block; }
+    .dot-red { width: 8px; height: 8px; border-radius: 2px; background: #ef4444; display: inline-block; }
+    .line-gray { width: 12px; height: 2px; background: #94a3b8; display: inline-block; }
+    .main-grid { display: grid; grid-template-columns: 1fr 300px; gap: 24px; align-items: start; }
+    @media (max-width: 1000px) { .main-grid { grid-template-columns: 1fr; } }
+    table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+    th { text-align: left; padding: 10px 8px; color: #64748b; font-weight: 500; font-size: 11.5px; border-bottom: 1px solid #e2e8f0; }
+    th.num, td.num { text-align: right; }
+    td { padding: 12px 8px; border-bottom: 1px solid #f1f5f9; color: #1e293b; }
+    tr.clickable { cursor: pointer; }
+    tr:hover td { background-color: #f8fafc; }
+    .participant-cell { display: flex; align-items: center; gap: 8px; }
+    .status-dot { width: 6px; height: 6px; border-radius: 50%; background: #94a3b8; flex-shrink: 0; }
+    .status-dot.live { background: #22c55e; box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2); }
+    .p-name { font-weight: 600; color: #0f172a; display: flex; align-items: center; gap: 6px; }
+    .badge-real { font-size: 10px; font-weight: 600; background: #dbeafe; color: #1d4ed8; padding: 1px 6px; border-radius: 999px; }
+    .p-team { font-size: 11px; color: #64748b; }
+    .sparkline { display: flex; align-items: flex-end; gap: 1.5px; height: 18px; width: 132px; background: #f1f5f9; padding: 2px; border-radius: 3px; }
+    .spark-bar { width: 3.5px; border-radius: 1px; min-height: 2px; }
+    .health-bar-container { display: flex; align-items: center; gap: 8px; justify-content: flex-end; }
+    .health-track { width: 42px; height: 4px; background: #e2e8f0; border-radius: 2px; overflow: hidden; }
+    .health-line { height: 4px; background: #0f172a; border-radius: 2px; }
+    .live-activity-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; box-shadow: 0 1px 2px rgba(0,0,0,0.03); }
+    .live-activity-card h3 { font-size: 13px; font-weight: 600; color: #0f172a; margin-bottom: 10px; }
+    .live-empty { font-size: 12px; color: #64748b; line-height: 1.4; }
+    .activity-item { padding: 8px 0; border-top: 1px solid #f1f5f9; font-size: 12px; }
+    .activity-item:first-child { border-top: none; padding-top: 0; }
+    .activity-meta { font-size: 11px; color: #64748b; margin-top: 2px; }
+    .commands-dropdown { margin-top: 24px; padding: 12px 16px; background: #fff; border: 1px solid #e2e8f0; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; color: #334155; user-select: none; }
+    .commands-content { margin-top: 10px; padding: 16px; background: #0f172a; color: #e2e8f0; border-radius: 6px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; line-height: 1.65; display: none; overflow-x: auto; }
+    .commands-content h4 { color: #93c5fd; margin-top: 10px; margin-bottom: 4px; font-family: sans-serif; font-size: 12px; }
+    .commands-content h4:first-child { margin-top: 0; }
+    .modal-backdrop { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.45); display: none; align-items: center; justify-content: center; z-index: 50; }
+    .modal-backdrop.open { display: flex; }
+    .modal { background: #fff; border-radius: 10px; padding: 24px; width: 460px; max-width: 92vw; box-shadow: 0 20px 45px rgba(15, 23, 42, 0.25); }
+    .modal h2 { font-size: 17px; margin-bottom: 6px; }
+    .modal p.desc { font-size: 12.5px; color: #475569; margin-bottom: 16px; line-height: 1.45; }
+    .field { margin-bottom: 12px; }
+    .field label { display: block; font-size: 12px; font-weight: 600; color: #334155; margin-bottom: 4px; }
+    .field input { width: 100%; padding: 8px 10px; font-size: 13px; border: 1px solid #cbd5e1; border-radius: 6px; }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
+    .btn-secondary { padding: 7px 14px; font-size: 13px; border: 1px solid #cbd5e1; background: #fff; border-radius: 6px; cursor: pointer; }
+    .status-msg { margin-top: 10px; font-size: 12px; }
+    .status-msg.err { color: #dc2626; }
+    .status-msg.ok { color: #16a34a; }
+    .drop-banner { border: 2px dashed #3b82f6; background: #eff6ff; padding: 10px; border-radius: 6px; text-align: center; font-size: 12px; color: #1d4ed8; margin-bottom: 12px; display: none; }
+    body.dragging .drop-banner { display: block; }
+    .sessions-list { margin-top: 10px; max-height: 260px; overflow-y: auto; }
+    .sess-card { border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px; margin-bottom: 8px; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <div class="drop-banner">Drop an exported agentplay session (.json or .json.gz) to upload it to the leaderboard</div>
+
+  <div class="header">
+    <span class="updated-time" id="updatedTime">Updated --</span>
+    <h1>Hackathon control</h1>
+    <div class="subtitle" id="summarySubtitle">Loading leaderboard...</div>
+  </div>
+
+  <div class="controls">
+    <div class="tab-group">
+      <button class="tab-btn active" id="tabPeople" onclick="setTab('people')">People</button>
+      <button class="tab-btn" id="tabTeams" onclick="setTab('teams')">Teams</button>
+    </div>
+    <input type="text" class="search-input" id="searchBox" placeholder="Find a participant or repo" oninput="render()">
+    <select class="select-dropdown" id="teamFilter" onchange="render()">
+      <option value="all">All teams</option>
+    </select>
+    <select class="select-dropdown" id="scopeFilter" onchange="loadLeaderboard()">
+      <option value="all">Everyone</option>
+      <option value="real">Uploaded sessions only</option>
+    </select>
+    <button class="upload-btn" onclick="openUploadModal()">+ Upload session</button>
+
+    <div class="legend">
+      <div class="legend-item"><span class="dot-blue"></span> tool call</div>
+      <div class="legend-item"><span class="dot-red"></span> failed call</div>
+      <div class="legend-item"><span class="line-gray"></span> session span</div>
+    </div>
+  </div>
+
+  <div class="main-grid">
+    <div class="table-container">
+      <table id="mainTable">
+        <thead id="tableHead"></thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+
+    <div class="live-activity-card">
+      <h3>Live activity</h3>
+      <div id="liveActivityBody">
+        <p class="live-empty">Activity shows up here as soon as a participant's agent uploads a session.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="commands-dropdown" onclick="toggleCommands()">
+    &#9654; Participant install &amp; upload commands
+  </div>
+  <div class="commands-content" id="commandsContent">
+    <h4>1. Install / run agentplay and build your local sessions</h4>
+    <div>pip install agentplay &nbsp;&nbsp;# or: uvx agentplay@latest</div>
+    <div>agentplay build &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# scans ~/.claude, ~/.cursor, ~/.codex, ~/.copilot, ~/.gemini</div>
+    <div>agentplay list &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# copy the sessionId you want to share</div>
+
+    <h4>2. Export a redacted session map (no prompt or file contents leave your machine)</h4>
+    <div>agentplay export &lt;session-id&gt; -o my_session.json.gz</div>
+
+    <h4>3. Upload manually to the Hackathon leaderboard (macOS / Linux / Git Bash)</h4>
+    <div>curl -X POST "http://127.0.0.1:7400/api/upload?participant=YourName&amp;team=YourTeam" --data-binary @my_session.json.gz</div>
+
+    <h4>4. Upload manually in Windows PowerShell</h4>
+    <div>Invoke-RestMethod -Method Post -Uri "http://127.0.0.1:7400/api/upload?participant=YourName&amp;team=YourTeam" -InFile .\my_session.json.gz</div>
+  </div>
+
+  <!-- Upload Modal -->
+  <div class="modal-backdrop" id="uploadModal">
+    <div class="modal">
+      <h2>Upload agentplay session</h2>
+      <p class="desc">
+        Choose a redacted map exported by <code>agentplay export &lt;id&gt; -o session.json.gz</code>
+        (or any <code>.json</code> file in <code>~/.agentplay/maps/</code>).
+      </p>
+      <div class="field">
+        <label for="upName">Participant name</label>
+        <input type="text" id="upName" placeholder="e.g. Akhil" value="Akhil">
+      </div>
+      <div class="field">
+        <label for="upTeam">Team name</label>
+        <input type="text" id="upTeam" placeholder="e.g. Observability" value="Observability">
+      </div>
+      <div class="field">
+        <label for="upRepo">Repo override (optional, auto-detected from map)</label>
+        <input type="text" id="upRepo" placeholder="Leave blank to use repo from session map">
+      </div>
+      <div class="field">
+        <label for="upFile">Session map file (.json or .json.gz)</label>
+        <input type="file" id="upFile" accept=".json,.gz,application/json,application/gzip">
+      </div>
+      <div class="status-msg" id="uploadStatus"></div>
+      <div class="modal-actions">
+        <button class="btn-secondary" onclick="closeUploadModal()">Cancel</button>
+        <button class="upload-btn" onclick="submitUpload()">Upload session</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Participant Session Details Modal -->
+  <div class="modal-backdrop" id="detailModal">
+    <div class="modal" style="width: 560px;">
+      <h2 id="detailTitle">Participant</h2>
+      <p class="desc" id="detailSubtitle"></p>
+      <div class="sessions-list" id="detailSessions"></div>
+      <div class="modal-actions">
+        <button class="btn-secondary" onclick="closeDetailModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentTab = 'people';
+    let cachedData = null;
+
+    function esc(s) {
+      return String(s ?? '').replace(/[&<>"']/g, c => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      }[c]));
+    }
+
+    function setTab(tab) {
+      currentTab = tab;
+      document.getElementById('tabPeople').classList.toggle('active', tab === 'people');
+      document.getElementById('tabTeams').classList.toggle('active', tab === 'teams');
+      render();
+    }
+
+    function toggleCommands() {
+      const el = document.getElementById('commandsContent');
+      el.style.display = el.style.display === 'block' ? 'none' : 'block';
+    }
+
+    function openUploadModal() {
+      document.getElementById('uploadStatus').textContent = '';
+      document.getElementById('uploadModal').classList.add('open');
+    }
+
+    function closeUploadModal() {
+      document.getElementById('uploadModal').classList.remove('open');
+    }
+
+    function closeDetailModal() {
+      document.getElementById('detailModal').classList.remove('open');
+    }
+
+    function openParticipantDetail(participantName) {
+      if (!cachedData) return;
+      const p = cachedData.participants.find(x => x.participant === participantName);
+      if (!p) return;
+      document.getElementById('detailTitle').textContent = p.participant + ' (' + p.team + ')';
+      document.getElementById('detailSubtitle').textContent =
+        p.sessions.length
+          ? `${p.sessionsCount} uploaded session(s), ${p.toolCalls} tool calls, $${p.spendUsd.toFixed(2)} spend.`
+          : 'Sample demo participant (no raw map uploaded).';
+      const box = document.getElementById('detailSessions');
+      if (!p.sessions.length) {
+        box.innerHTML = '<div class="sess-card">Upload a real session with <code>+ Upload session</code> or <code>curl</code> to inspect sessions here.</div>';
+      } else {
+        box.innerHTML = p.sessions.map(s => `
+          <div class="sess-card">
+            <div><strong>${esc(s.agentTool)}</strong> &middot; ${esc(s.repo)}</div>
+            <div style="color:#64748b;margin:4px 0;"><code>${esc(s.sessionId)}</code></div>
+            <div>${s.calls} calls (${s.errors} err) &middot; $${s.spendUsd.toFixed(2)} &middot; ${Math.round((s.durationMs || 0)/60000)}m</div>
+            <div style="margin-top:6px;">
+              <a href="http://127.0.0.1:7317/?session=${encodeURIComponent(s.sessionId)}" target="_blank" style="color:#2563eb;text-decoration:none;font-weight:600;">Open replay map on :7317 &rarr;</a>
+            </div>
+          </div>
+        `).join('');
+      }
+      document.getElementById('detailModal').classList.add('open');
+    }
+
+    async function loadLeaderboard() {
+      const scope = document.getElementById('scopeFilter').value;
+      const includeDemo = scope === 'all' ? '1' : '0';
+      const res = await fetch('/api/leaderboard?demo=' + includeDemo);
+      cachedData = await res.json();
+      updateTeamDropdown();
+      render();
+    }
+
+    function updateTeamDropdown() {
+      if (!cachedData) return;
+      const sel = document.getElementById('teamFilter');
+      const prev = sel.value;
+      const teams = cachedData.teams.map(t => t.team).sort();
+      sel.innerHTML = '<option value="all">All teams</option>' +
+        teams.map(t => `<option value="${esc(t)}">${esc(t)}</option>`).join('');
+      if (teams.includes(prev)) sel.value = prev;
+    }
+
+    function sparklineHtml(points) {
+      const maxCalls = Math.max(1, ...(points || []).map(p => p.calls || 0));
+      return '<div class="sparkline">' + (points || []).map(p => {
+        const calls = p.calls || 0;
+        const errs = p.errors || 0;
+        if (calls === 0) return '<div class="spark-bar" style="height:2px;background:#e2e8f0;"></div>';
+        const h = Math.max(3, Math.round((calls / maxCalls) * 14));
+        const color = errs > 0 ? '#ef4444' : '#3b82f6';
+        return `<div class="spark-bar" style="height:${h}px;background:${color};" title="${calls} calls, ${errs} errors"></div>`;
+      }).join('') + '</div>';
+    }
+
+    function healthHtml(score) {
+      if (score === null || score === undefined) return '&mdash;';
+      const w = Math.max(0, Math.min(100, score));
+      return `<div class="health-bar-container"><div class="health-track"><div class="health-line" style="width:${w}%;"></div></div> ${score}</div>`;
+    }
+
+    function render() {
+      if (!cachedData) return;
+      const s = cachedData.summary;
+      document.getElementById('updatedTime').textContent = 'Updated ' + cachedData.updatedAt;
+      document.getElementById('summarySubtitle').innerHTML =
+        `<strong>${s.workingCount} of ${s.participantCount} participants</strong> in <strong>${s.teamCount} teams</strong> are working right now, ${s.connectedCount} are connected. ` +
+        `So far: <strong>${s.sessions} sessions</strong>, <strong>${s.toolCalls} tool calls</strong> (${s.failedCalls} failed), ` +
+        `<strong>${s.prs} PRs</strong>, <strong>${s.commits} commits</strong> and <strong>$${s.spendUsd.toFixed(2)}</strong> of model spend.`;
+
+      const q = document.getElementById('searchBox').value.trim().toLowerCase();
+      const teamFilter = document.getElementById('teamFilter').value;
+      const thead = document.getElementById('tableHead');
+      const tbody = document.getElementById('tableBody');
+
+      if (currentTab === 'people') {
+        thead.innerHTML = `
+          <tr>
+            <th>Participant</th>
+            <th>Activity</th>
+            <th class="num">Sessions</th>
+            <th class="num">Tool calls</th>
+            <th class="num">Failing</th>
+            <th class="num">PRs</th>
+            <th class="num">Commits</th>
+            <th class="num">Spend</th>
+            <th class="num">Run health</th>
+            <th class="num">Last action</th>
+          </tr>`;
+        const rows = cachedData.participants.filter(p => {
+          const matchQ = !q || p.participant.toLowerCase().includes(q) || p.team.toLowerCase().includes(q) || (p.repo || '').toLowerCase().includes(q);
+          const matchT = teamFilter === 'all' || p.team === teamFilter;
+          return matchQ && matchT;
+        });
+        tbody.innerHTML = rows.map(p => `
+          <tr class="clickable" onclick="openParticipantDetail('${esc(p.participant)}')">
+            <td>
+              <div class="participant-cell">
+                <span class="status-dot ${p.connected ? 'live' : ''}"></span>
+                <div>
+                  <div class="p-name">${esc(p.participant)} ${!p.isDemo ? '<span class="badge-real">uploaded</span>' : ''}</div>
+                  <div class="p-team">${esc(p.team)}${p.repo ? ' / ' + esc(p.repo) : ''}</div>
+                </div>
+              </div>
+            </td>
+            <td>${sparklineHtml(p.sparkline)}</td>
+            <td class="num">${p.sessionsCount}</td>
+            <td class="num">${p.toolCalls}</td>
+            <td class="num">${p.failingPct === null ? '&mdash;' : p.failingPct + '%'}</td>
+            <td class="num">${p.prs}</td>
+            <td class="num">${p.commits}</td>
+            <td class="num">$${p.spendUsd.toFixed(2)}</td>
+            <td class="num">${healthHtml(p.runHealth)}</td>
+            <td class="num">${esc(p.lastActionLabel)}</td>
+          </tr>
+        `).join('');
+      } else {
+        thead.innerHTML = `
+          <tr>
+            <th>Team</th>
+            <th class="num">Members</th>
+            <th class="num">Sessions</th>
+            <th class="num">Tool calls</th>
+            <th class="num">Failing</th>
+            <th class="num">PRs</th>
+            <th class="num">Commits</th>
+            <th class="num">Spend</th>
+            <th class="num">Run health</th>
+          </tr>`;
+        const rows = cachedData.teams.filter(t => {
+          const matchQ = !q || t.team.toLowerCase().includes(q) || t.repos.join(',').toLowerCase().includes(q);
+          const matchT = teamFilter === 'all' || t.team === teamFilter;
+          return matchQ && matchT;
+        });
+        tbody.innerHTML = rows.map(t => `
+          <tr>
+            <td>
+              <div class="p-name">${esc(t.team)} ${t.hasRealUploads ? '<span class="badge-real">uploaded</span>' : ''}</div>
+              <div class="p-team">${esc(t.repos.join(', ') || 'no repos yet')}</div>
+            </td>
+            <td class="num">${t.members}</td>
+            <td class="num">${t.sessionsCount}</td>
+            <td class="num">${t.toolCalls}</td>
+            <td class="num">${t.failingPct === null ? '&mdash;' : t.failingPct + '%'}</td>
+            <td class="num">${t.prs}</td>
+            <td class="num">${t.commits}</td>
+            <td class="num">$${t.spendUsd.toFixed(2)}</td>
+            <td class="num">${healthHtml(t.runHealth)}</td>
+          </tr>
+        `).join('');
+      }
+
+      const actBox = document.getElementById('liveActivityBody');
+      if (!cachedData.liveActivity.length) {
+        actBox.innerHTML = '<p class="live-empty">Activity shows up here as soon as a participant\'s agent uploads a session.</p>';
+      } else {
+        actBox.innerHTML = cachedData.liveActivity.map(a => `
+          <div class="activity-item">
+            <div><strong>${esc(a.participant)}</strong> (${esc(a.team)}) uploaded <code>${esc(a.agentTool)}</code></div>
+            <div class="activity-meta">${a.calls} calls (${a.errors} failed) &middot; ${esc(a.repo)} &middot; ${esc(a.at)}</div>
+          </div>
+        `).join('');
+      }
+    }
+
+    async function uploadFileBlob(file, participant, team, repo) {
+      const buf = await file.arrayBuffer();
+      const bytes = new Uint8Array(buf);
+      let binary = '';
+      const chunk = 0x8000;
+      for (let i = 0; i < bytes.length; i += chunk) {
+        binary += String.fromCharCode(...bytes.subarray(i, i + chunk));
+      }
+      const b64 = btoa(binary);
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ participant, team, repo, mapBase64: b64 })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Upload failed');
+      return data;
+    }
+
+    async function submitUpload() {
+      const status = document.getElementById('uploadStatus');
+      const file = document.getElementById('upFile').files[0];
+      const participant = document.getElementById('upName').value.trim();
+      const team = document.getElementById('upTeam').value.trim();
+      const repo = document.getElementById('upRepo').value.trim();
+      if (!participant || !team) {
+        status.className = 'status-msg err';
+        status.textContent = 'Please enter both participant name and team name.';
+        return;
+      }
+      if (!file) {
+        status.className = 'status-msg err';
+        status.textContent = 'Please choose an exported .json or .json.gz session map file.';
+        return;
+      }
+      status.className = 'status-msg';
+      status.textContent = 'Uploading...';
+      try {
+        const res = await uploadFileBlob(file, participant, team, repo || null);
+        status.className = 'status-msg ok';
+        status.textContent = `Uploaded ${res.sessionId} (${res.calls} calls)!`;
+        await loadLeaderboard();
+        setTimeout(closeUploadModal, 700);
+      } catch (e) {
+        status.className = 'status-msg err';
+        status.textContent = e.message;
+      }
+    }
+
+    document.addEventListener('dragover', e => { e.preventDefault(); document.body.classList.add('dragging'); });
+    document.addEventListener('dragleave', () => document.body.classList.remove('dragging'));
+    document.addEventListener('drop', e => {
+      e.preventDefault();
+      document.body.classList.remove('dragging');
+      const file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+      if (file) {
+        openUploadModal();
+        const dt = new DataTransfer();
+        dt.items.add(file);
+        document.getElementById('upFile').files = dt.files;
+      }
+    });
+
+    loadLeaderboard();
+    setInterval(loadLeaderboard, 5000);
+  </script>
+</body>
+</html>
+"""
+
+
+class Handler(BaseHTTPRequestHandler):
+    def _send_json(self, status: int, payload: Any) -> None:
+        body = json.dumps(payload).encode("utf-8")
+        self.send_response(status)
+        self.send_header("Content-Type", "application/json; charset=utf-8")
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
+    def do_GET(self) -> None:
+        parsed = urlsplit(self.path)
+        if parsed.path == "/":
+            body = HTML_CONTENT.encode("utf-8")
+            self.send_response(HTTPStatus.OK)
+            self.send_header("Content-Type", "text/html; charset=utf-8")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+            return
+        if parsed.path == "/api/leaderboard":
+            qs = parse_qs(parsed.query)
+            include_demo = qs.get("demo", ["1"])[0] != "0"
+            self._send_json(HTTPStatus.OK, build_leaderboard_payload(include_demo=include_demo))
+            return
+        self._send_json(HTTPStatus.NOT_FOUND, {"error": "Not found"})
+
+    def do_POST(self) -> None:
+        parsed = urlsplit(self.path)
+        if parsed.path != "/api/upload":
+            self._send_json(HTTPStatus.NOT_FOUND, {"error": "Not found"})
+            return
+
+        try:
+            length = int(self.headers.get("Content-Length") or 0)
+        except ValueError:
+            self._send_json(HTTPStatus.BAD_REQUEST, {"error": "Invalid Content-Length"})
+            return
+        if length <= 0 or length > MAX_UPLOAD_BYTES:
+            self._send_json(HTTPStatus.BAD_REQUEST, {"error": "Upload body empty or exceeds 25 MB limit"})
+            return
+
+        raw = self.rfile.read(length)
+        qs = parse_qs(parsed.query)
+        participant = (qs.get("participant") or [""])[0].strip()
+        team = (qs.get("team") or [""])[0].strip()
+        repo_override = (qs.get("repo") or [""])[0].strip() or None
+
+        try:
+            # 1) Try gzipped raw map directly (e.g. curl --data-binary @session.json.gz)
+            if raw[:2] == b"\x1f\x8b":
+                doc = _decode_map_bytes(raw)
+            else:
+                obj = json.loads(raw.decode("utf-8"))
+                if not isinstance(obj, dict):
+                    raise ValueError("JSON body must be an object.")
+                # 2) Wrapper envelope from UI or API client
+                if "mapBase64" in obj or "map" in obj:
+                    participant = str(obj.get("participant") or participant).strip()
+                    team = str(obj.get("team") or team).strip()
+                    repo_override = str(obj.get("repo") or repo_override or "").strip() or None
+                    if obj.get("mapBase64"):
+                        doc = _decode_map_bytes(base64.b64decode(obj["mapBase64"]))
+                    else:
+                        doc = obj["map"]
+                else:
+                    # 3) Raw uncompressed agentplay-v1 JSON map
+                    doc = obj
+
+            if not participant:
+                participant = "Your Name"
+            if not team:
+                team = "Test"
+            rec = ingest_upload(doc, participant=participant, team=team, repo_override=repo_override)
+        except (ValueError, KeyError, TypeError, OSError) as exc:
+            self._send_json(HTTPStatus.BAD_REQUEST, {"error": str(exc)})
+            return
+
+        self._send_json(
+            HTTPStatus.OK,
+            {
+                "ok": True,
+                "participant": rec["participant"],
+                "team": rec["team"],
+                "repo": rec["repo"],
+                "sessionId": rec["sessionId"],
+                "calls": rec["calls"],
+                "errors": rec["errors"],
+                "costUsd": rec["costUsd"],
+            },
+        )
+
+    def log_message(self, format: str, *args: Any) -> None:
+        pass
+
+
+def main() -> None:
+    ap = argparse.ArgumentParser(description="Hackathon Control / Teams Leaderboard Server")
+    ap.add_argument("--host", default=os.environ.get("AGENTPLAY_HUB_HOST", "127.0.0.1"))
+    ap.add_argument("--port", type=int, default=int(os.environ.get("AGENTPLAY_HUB_PORT", "7400")))
+    args = ap.parse_args()
+
+    server = ThreadingHTTPServer((args.host, args.port), Handler)
+    print(f"Hackathon Control server running on http://{args.host}:{args.port}")
+    server.serve_forever()
+
+
+if __name__ == "__main__":
+    main()
