@@ -3,9 +3,12 @@
   const { esc, fmt, fmtMetric, avatar, link, badge, badgeRow, countUp, METRICS } = HC;
   const SORTS = ["calls", "tokens", "outputTokens", "commits", "mcpCalls", "linesChanged", "verifyRuns", "badges"];
   const state = { view: "people", sort: "calls", q: "", team: "all", data: null };
+  const cfg = await HC.nav("home");
   const me = HC.me();
-
-  await HC.nav("home");
+  if (cfg.rankBy && cfg.rankBy !== "calls") {  // the session ranks by another metric: open sorted by it
+    if (!SORTS.includes(cfg.rankBy)) SORTS.splice(1, 0, cfg.rankBy);
+    state.sort = cfg.rankBy;
+  }
   await HC.badges();
   document.getElementById("shapes").innerHTML = HC.shapes();
 
@@ -71,7 +74,7 @@
     const chips = [];
     if (d.event.end) chips.push(`<span class="chip dark" id="countdown"></span>`);
     if (me) chips.push(`<a class="chip" href="${link.player(me.name)}">${HC.icon("user", 14)} You: #${(d.players.find((p) => p.name === me.name) || {}).rank || "–"}</a>`);
-    chips.push(`<a class="chip" href="/stage">${HC.icon("zap", 14)} Stage view</a>`);
+    chips.push(`<a class="chip" href="${HC.withS("/stage")}">${HC.icon("zap", 14)} Stage view</a>`);
     document.getElementById("heroChips").innerHTML = chips.join("");
     tickCountdown();
   }

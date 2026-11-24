@@ -5,7 +5,7 @@ from __future__ import annotations
 import hashlib
 import threading
 import time
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass, field, replace
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
@@ -43,13 +43,78 @@ TABLE_METRICS = ("calls", "tokens", "outputTokens", "commits", "prs", "mcpCalls"
                  "linesChanged", "webCalls", "subagents", "costUsd", "activeMs", "sessions")
 
 
+# Metrics a session may rank by (all higher-is-better). Ties fall back to calls, then tokens.
+RANKABLE = ("calls", "tokens", "outputTokens", "commits", "prs", "linesChanged", "verifyRuns", "mcpCalls", "activeMs")
+# Agent names agentplay writes into maps; the admin page offers these for "agents allowed".
+KNOWN_AGENTS = ("claude-code", "codex", "cursor", "copilot", "copilot-vscode", "opencode", "kiro", "gemini-cli",
+                "antigravity-cli", "command-code", "goose")
+
+
 @dataclass
 class Config:
+    """One session's settings. Environment variables seed the first session; /admin edits them after."""
     event_name: str = "Hackathon Control"
     event_start: datetime | None = None
     event_end: datetime | None = None
     utc_offset_min: int = 330
     registration_code: str = ""
+    registration_open: bool = True
+    uploads_open: bool = True
+    archived: bool = False  # read-only: no registrations, no uploads
+    rank_by: str = "calls"
+    agents: tuple[str, ...] = field(default_factory=tuple)  # empty = every agent counts
+    announcement: str = ""
+
+    def to_json(self) -> dict[str, Any]:
+        d = asdict(self)
+        for k in ("event_start", "event_end"):
+            d[k] = d[k].astimezone(UTC).strftime("%Y-%m-%dT%H:%M:%SZ") if d[k] else None
+        d["agents"] = list(self.agents)
+        return d
+
+    @classmethod
+    def from_json(cls, d: dict[str, Any], base: "Config | None" = None) -> "Config":
+        """Validated settings; `d` may be partial (missing keys keep `base`). Raises ValueError."""
+        cfg = base or cls()
+        out: dict[str, Any] = {}
+        if "event_name" in d:
+            name = " ".join(str(d["event_name"] or "").split())[:80]
+            if not name:
+                raise ValueError("Name is required.")
+            out["event_name"] = name
+        for k in ("event_start", "event_end"):
+            if k in d:
+                v = str(d[k] or "").strip()
+                parsed = M.parse_ts(v) if v else None
+                if v and parsed is None:
+                    raise ValueError(f"{k.replace('event_', '').title()} must be an ISO time.")
+                out[k] = parsed
+        if "utc_offset_min" in d:
+            try:
+                off = int(d["utc_offset_min"])
+            except (TypeError, ValueError):
+                raise ValueError("Time zone offset must be minutes from UTC.") from None
+            if not -720 <= off <= 840:
+                raise ValueError("Time zone offset must be between -720 and 840 minutes.")
+            out["utc_offset_min"] = off
+        if "registration_code" in d:
+            out["registration_code"] = str(d["registration_code"] or "").strip()[:64]
+        for k in ("registration_open", "uploads_open", "archived"):
+            if k in d:
+                out[k] = bool(d[k])
+        if "rank_by" in d:
+            if d["rank_by"] not in RANKABLE:
+                raise ValueError("Rank by must be one of: " + ", ".join(RANKABLE))
+            out["rank_by"] = d["rank_by"]
+        if "agents" in d:
+            agents = d["agents"] if isinstance(d["agents"], list) else []
+            out["agents"] = tuple(sorted({str(a).strip()[:40] for a in agents if str(a).strip()}))[:20]
+        if "announcement" in d:
+            out["announcement"] = "".join(ch for ch in str(d["announcement"] or "") if ch.isprintable()).strip()[:280]
+        cfg = replace(cfg, **out)
+        if cfg.event_start and cfg.event_end and cfg.event_end <= cfg.event_start:
+            raise ValueError("End must be after start.")
+        return cfg
 
 
 class Rejected(ValueError):
@@ -60,14 +125,17 @@ def _pick(m: dict[str, Any]) -> dict[str, Any]:
     return {k: m.get(k, 0) for k in TABLE_METRICS}
 
 
-def _rank_key(m: dict[str, Any]) -> tuple[int, int]:
-    return (m["calls"], m["tokens"])
-
-
 class Board:
-    def __init__(self, store: Store, config: Config) -> None:
+    def __init__(self, store: Store, config: Config, slug: str = "main") -> None:
         self.store = store
-        self.cfg = config
+        self.slug = slug
+        saved = store.meta_get("settings")
+        try:
+            self.cfg = Config.from_json(saved, Config()) if isinstance(saved, dict) else config
+        except ValueError:
+            self.cfg = config
+        if not isinstance(saved, dict):
+            store.meta_set("settings", self.cfg.to_json())  # env seeds a session once; /admin owns it after
         self._lock = threading.Lock()
         self._cache: dict[str, Any] | None = None
         self._cache_version = -1
@@ -102,7 +170,12 @@ class Board:
     # -- ingest -------------------------------------------------------------
     def ingest(self, participant: dict[str, Any], raw_json: bytes, doc: Any) -> dict[str, Any]:
         M.validate_map(doc)
+        if self.cfg.archived or not self.cfg.uploads_open:
+            return {"ok": True, "skipped": "uploads are closed for this session"}
         sess = doc["session"]
+        agent = str(sess.get("agentTool") or "unknown")
+        if self.cfg.agents and agent not in self.cfg.agents:
+            return {"ok": True, "skipped": f"{agent} does not count in this session"}
         if str(sess.get("role") or "root") in ("subagent", "helper"):
             return {"ok": True, "skipped": "subagent session (counted in its parent)"}
         started = M.parse_ts(sess.get("startedAt"))
@@ -127,7 +200,31 @@ class Board:
             self.store.snapshot(pid, _pick(totals))
         return {"ok": True, "sessionId": session_id, "calls": metrics["calls"], "tokens": metrics["tokens"]}
 
+    # -- settings -------------------------------------------------------------
+    def update_settings(self, changes: dict[str, Any]) -> Config:
+        cfg = Config.from_json(changes, self.cfg)
+        self.store.meta_set("settings", cfg.to_json())
+        self.cfg = cfg
+        self.invalidate()
+        return cfg
+
+    def _rank_key(self, m: dict[str, Any]) -> tuple[int, int, int]:
+        return (m.get(self.cfg.rank_by, 0), m["calls"], m["tokens"])
+
+    def remove_session(self, name: str, session_id: str) -> bool:
+        p = self.store.by_name(name)
+        if not p or not self.store.remove_session(p["id"], session_id):
+            return False
+        self.store.snapshot(p["id"], _pick(M.merge([r["metrics"] for r in self.store.session_rows(p["id"])])))
+        self.invalidate()
+        return True
+
     # -- build --------------------------------------------------------------
+    def invalidate(self) -> None:
+        """Rebuild on the next request (after an admin removal, rather than up to MIN_REBUILD_S later)."""
+        with self._lock:
+            self._cache = None
+
     def payload(self) -> dict[str, Any]:
         with self._lock:
             now = time.time()
@@ -141,7 +238,8 @@ class Board:
             return self._cache
 
     def _build(self, now: float) -> dict[str, Any]:
-        people = self.store.participants()
+        hidden = set(self.store.hidden())
+        people = [p for p in self.store.participants() if key(p["name"]) not in hidden]
         by_pid: dict[int, list[dict[str, Any]]] = {}
         for r in self.store.session_rows():
             by_pid.setdefault(r["participant_id"], []).append(r)
@@ -162,7 +260,7 @@ class Board:
                 "sync": status, "joinedAt": p["created_at"],
             })
 
-        players.sort(key=lambda x: (_rank_key(x["totals"]), -x["joinedAt"]), reverse=True)
+        players.sort(key=lambda x: (self._rank_key(x["totals"]), -x["joinedAt"]), reverse=True)
         for i, pl in enumerate(players, start=1):
             pl["rank"] = i
         checkpoint = self._rank_checkpoint({pl["key"]: pl["rank"] for pl in players}, now)
@@ -214,7 +312,7 @@ class Board:
                 "totals": team_view, "badges": B.evaluate(B.TEAM, team_view),
                 "live": any(m["live"] for m in members),
             })
-        teams.sort(key=lambda t: _rank_key(t["totals"]), reverse=True)
+        teams.sort(key=lambda t: self._rank_key(t["totals"]), reverse=True)
         for i, t in enumerate(teams, start=1):
             t["rank"] = i
         return teams
@@ -276,10 +374,24 @@ class Board:
         return self._event_info(time.time())
 
     def _event_info(self, now: float) -> dict[str, Any]:
-        iso = lambda d: d.strftime("%Y-%m-%dT%H:%M:%SZ") if d else None  # noqa: E731
-        return {"name": self.cfg.event_name, "start": iso(self.cfg.event_start), "end": iso(self.cfg.event_end),
-                "utcOffsetMin": self.cfg.utc_offset_min, "requiresCode": bool(self.cfg.registration_code),
-                "now": int(now)}
+        iso = lambda d: d.astimezone(UTC).strftime("%Y-%m-%dT%H:%M:%SZ") if d else None  # noqa: E731
+        c = self.cfg
+        return {"name": c.event_name, "slug": self.slug, "start": iso(c.event_start), "end": iso(c.event_end),
+                "utcOffsetMin": c.utc_offset_min, "requiresCode": bool(c.registration_code),
+                "registrationOpen": c.registration_open and not c.archived,
+                "uploadsOpen": c.uploads_open and not c.archived, "archived": c.archived,
+                "status": self.status(now), "rankBy": c.rank_by, "agents": list(c.agents),
+                "announcement": c.announcement, "now": int(now)}
+
+    def status(self, now: float | None = None) -> str:
+        now = time.time() if now is None else now
+        if self.cfg.archived:
+            return "archived"
+        if self.cfg.event_start and now < self.cfg.event_start.timestamp():
+            return "upcoming"
+        if self.cfg.event_end and now >= self.cfg.event_end.timestamp():
+            return "ended"
+        return "live"
 
     @staticmethod
     def _public_player(pl: dict[str, Any]) -> dict[str, Any]:
@@ -371,7 +483,7 @@ class Board:
         }
 
     def session_timeline(self, name: str, session_id: str) -> dict[str, Any] | None:
-        p = self.store.by_name(name)
+        p = self.store.by_name(name) if key(name) in self.payload()["_players"] else None  # hidden stay hidden
         doc = self.store.session_map(p["id"], session_id) if p else None
         if doc is None:
             return None

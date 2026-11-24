@@ -6,6 +6,7 @@
   await HC.badges();
   document.title = `Stage · ${cfg.name}`;
   document.getElementById("eventName").textContent = cfg.name;
+  HC.announce(cfg.announcement);
 
   // ?scene=N pins one scene (organisers can keep e.g. the podium up during announcements).
   const pinned = new URLSearchParams(location.search).get("scene");

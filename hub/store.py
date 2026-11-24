@@ -12,6 +12,10 @@ import time
 from pathlib import Path
 from typing import Any
 
+from hub.badges import TEAM as TEAM_BADGES
+
+_TEAM_BADGE_IDS = {b.id for b in TEAM_BADGES}
+
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS participants (
     id INTEGER PRIMARY KEY,
@@ -71,6 +75,11 @@ def hash_token(token: str) -> str:
     return hashlib.sha256(token.encode("utf-8")).hexdigest()
 
 
+def _is_team_event(e: dict[str, Any]) -> bool:
+    # badge events say subjectType; crown events only name the badge, and team badges are their own set
+    return e.get("subjectType") == "team" or (e.get("type") == "crown" and e.get("badge") in _TEAM_BADGE_IDS)
+
+
 class NameTaken(Exception):
     pass
 
@@ -119,11 +128,122 @@ class Store:
         return token if cur.rowcount else None
 
     def remove(self, name: str) -> bool:
+        """Delete a participant with their sessions, badges and live-feed lines."""
         with self.lock:
-            cur = self.db.execute("DELETE FROM participants WHERE name_key=?", (key(name),))
+            row = self.db.execute("SELECT name, team_key FROM participants WHERE name_key=?", (key(name),)).fetchone()
+            if not row:
+                return False
+            self._purge([key(name)])
+            self._drop_empty_team(row["team_key"])
+            self.version += 1
+        return True
+
+    def remove_team(self, team: str) -> list[str]:
+        """Delete a team and every member; returns the names removed."""
+        with self.lock:
+            names = [r["name"] for r in self.db.execute("SELECT name FROM participants WHERE team_key=?", (key(team),))]
+            if not names:
+                return []
+            self._purge([key(n) for n in names])
+            self._drop_empty_team(key(team))
+            self.version += 1
+        return names
+
+    def _purge(self, name_keys: list[str]) -> None:
+        # sessions, snapshots and sync_status go with the participant (ON DELETE CASCADE)
+        for nk in name_keys:
+            self.db.execute("DELETE FROM participants WHERE name_key=?", (nk,))
+            self.db.execute("DELETE FROM badge_state WHERE subject=?", (f"player:{nk}",))
+        if set(self.hidden()) & set(name_keys):
+            self.meta_set("hidden", sorted(set(self.hidden()) - set(name_keys)))
+        self._drop_events(lambda e: not _is_team_event(e) and key(str(e.get("name") or "")) in name_keys)
+
+    def _drop_empty_team(self, team_key: str) -> None:
+        if self.db.execute("SELECT 1 FROM participants WHERE team_key=?", (team_key,)).fetchone():
+            return
+        self.db.execute("DELETE FROM badge_state WHERE subject=?", (f"team:{team_key}",))
+        self._drop_events(lambda e: _is_team_event(e) and key(str(e.get("name") or "")) == team_key)
+
+    def _drop_events(self, match) -> None:
+        rows = self.db.execute("SELECT id, type, payload FROM events").fetchall()
+        ids = [(r["id"],) for r in rows if match({"type": r["type"], **json.loads(r["payload"])})]
+        self.db.executemany("DELETE FROM events WHERE id=?", ids)
+
+    def rename(self, name: str, new_name: str, new_team: str) -> dict[str, Any] | None:
+        """Rename a participant and/or move them to another team. Raises NameTaken."""
+        old = key(name)
+        with self.lock:
+            row = self.db.execute("SELECT team_key FROM participants WHERE name_key=?", (old,)).fetchone()
+            if not row:
+                return None
+            try:
+                self.db.execute("UPDATE participants SET name=?, name_key=?, team=?, team_key=? WHERE name_key=?",
+                                (new_name, key(new_name), new_team, key(new_team), old))
+            except sqlite3.IntegrityError as exc:
+                raise NameTaken(new_name) from exc
+            if key(new_name) != old:
+                self.db.execute("UPDATE badge_state SET subject=? WHERE subject=?", (f"player:{key(new_name)}", f"player:{old}"))
+                hidden = self.hidden()
+                if old in hidden:
+                    self.meta_set("hidden", sorted((set(hidden) - {old}) | {key(new_name)}))
+            if key(new_team) != row["team_key"]:
+                self._drop_empty_team(row["team_key"])
+            self.version += 1
+        return {"name": new_name, "team": new_team}
+
+    def hidden(self) -> list[str]:
+        return list(self.meta_get("hidden", []))
+
+    def set_hidden(self, name: str, hide: bool) -> bool:
+        with self.lock:
+            if not self.by_name(name):
+                return False
+            cur = set(self.hidden())
+            cur = cur | {key(name)} if hide else cur - {key(name)}
+            self.meta_set("hidden", sorted(cur))
+            self.version += 1
+        return True
+
+    def remove_session(self, pid: int, session_id: str) -> bool:
+        with self.lock:
+            cur = self.db.execute("DELETE FROM sessions WHERE participant_id=? AND session_id=?", (pid, session_id))
             if cur.rowcount:
                 self.version += 1
         return bool(cur.rowcount)
+
+    def clear_events(self) -> None:
+        with self.lock:
+            self.db.execute("DELETE FROM events")
+
+    def export_bytes(self, tmp_dir: Path) -> bytes:
+        """A consistent copy of the whole database (SQLite online backup)."""
+        tmp = tmp_dir / f".export-{secrets.token_hex(6)}.db"
+        try:
+            dst = sqlite3.connect(str(tmp))
+            with self.lock:
+                self.db.backup(dst)
+            dst.close()
+            return tmp.read_bytes()
+        finally:
+            tmp.unlink(missing_ok=True)
+
+    def close(self) -> None:
+        with self.lock:
+            self.db.close()
+
+    def admin_rows(self) -> list[dict[str, Any]]:
+        """Every participant with upload totals and their sync loop's last report, for /admin."""
+        with self.lock:
+            rows = self.db.execute(
+                "SELECT p.id, p.name, p.team, p.created_at, COUNT(s.session_id) AS sessions, MAX(s.uploaded_at) AS last_upload,"
+                " y.ts AS sync_ts, y.payload AS sync FROM participants p"
+                " LEFT JOIN sessions s ON s.participant_id = p.id LEFT JOIN sync_status y ON y.participant_id = p.id"
+                " GROUP BY p.id ORDER BY p.team_key, p.name_key"
+            ).fetchall()
+        hidden = set(self.hidden())
+        return [{**{k: r[k] for k in ("name", "team", "created_at", "sessions", "last_upload", "sync_ts")},
+                 "hidden": key(r["name"]) in hidden,
+                 "sync": json.loads(r["sync"]) if r["sync"] else None} for r in rows]
 
     def participants(self) -> list[dict[str, Any]]:
         with self.lock:

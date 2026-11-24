@@ -49,8 +49,20 @@ const HC = (() => {
     return Math.round(s / 86400) + "d ago";
   }
 
+  // ---------- sessions: ?s=<slug> picks one; without it the server uses the active session ----------
+  const S = new URLSearchParams(location.search).get("s") || "";
+  function withS(href) {
+    if (!S || !href.startsWith("/") || /[?&]s=/.test(href)) return href;
+    return href + (href.includes("?") ? "&" : "?") + "s=" + encodeURIComponent(S);
+  }
+  // Every internal link keeps the session, including ones the pages build themselves.
+  document.addEventListener("click", (e) => {
+    const a = e.target.closest && e.target.closest('a[href^="/"]');
+    if (a && S) a.setAttribute("href", withS(a.getAttribute("href")));
+  }, true);
+
   async function api(path, opts) {
-    const res = await fetch(path, opts);
+    const res = await fetch(path.startsWith("/api/") && !path.startsWith("/api/admin/") ? withS(path) : path, opts);
     let body = null;
     try { body = await res.json(); } catch (_) { /* non-JSON */ }
     if (!res.ok) throw new Error((body && body.error) || `Request failed (${res.status})`);
@@ -73,8 +85,8 @@ const HC = (() => {
   }
 
   const link = {
-    player: (n) => "/player?name=" + encodeURIComponent(n),
-    team: (n) => "/team?name=" + encodeURIComponent(n),
+    player: (n) => withS("/player?name=" + encodeURIComponent(n)),
+    team: (n) => withS("/team?name=" + encodeURIComponent(n)),
   };
 
   // ---------- SVG badges ----------
@@ -154,14 +166,15 @@ const HC = (() => {
   async function nav(active) {
     try { config = await api("/api/config"); } catch (_) { config = { name: "Hackathon Control" }; }
     document.title = document.title.replace("{event}", config.name);
+    announce(config.announcement);
     const links = [["/", "Leaderboard", "home"], ["/awards", "Awards", "awards"], ["/stage", "Stage", "stage"]];
     const el = document.getElementById("nav");
     if (el) {
       el.className = "nav";
       el.innerHTML = `<div class="wrap">
-        <a class="brand" href="/"><span class="brand-mark"><i></i><i></i><i></i><i></i></span><span>${esc(config.name)}</span></a>
-        <nav class="nav-links">${links.map(([h, l, k]) => `<a href="${h}" class="${k === active ? "active" : ""}">${l}</a>`).join("")}
-        <a href="/join" class="cta">${me() ? "My sync" : "Join"}</a></nav></div>`;
+        <a class="brand" href="${withS("/")}"><span class="brand-mark"><i></i><i></i><i></i><i></i></span><span>${esc(config.name)}</span></a>
+        <nav class="nav-links">${links.map(([h, l, k]) => `<a href="${withS(h)}" class="${k === active ? "active" : ""}">${l}</a>`).join("")}
+        <a href="${withS("/join")}" class="cta">${me() ? "My sync" : "Join"}</a></nav></div>`;
     }
     const foot = document.getElementById("footer");
     if (foot) {
@@ -171,8 +184,28 @@ const HC = (() => {
     return config;
   }
 
+  // The saved identity belongs to one session; on another session's pages there is none.
   function me() {
-    try { return JSON.parse(localStorage.getItem("hc_me") || "null"); } catch (_) { return null; }
+    let m = null;
+    try { m = JSON.parse(localStorage.getItem("hc_me") || "null"); } catch (_) { return null; }
+    const here = S || (config && config.slug);
+    return m && here && (m.slug || "main") !== here ? null : m;
+  }
+
+  // Organisers' announcement, set in /admin: a strip under the nav on every page.
+  function announce(text) {
+    const slot = document.getElementById("announceSlot");  // the stage has its own place for it
+    if (slot) { slot.textContent = text || ""; slot.classList.toggle("hidden", !text); return; }
+    let el = document.getElementById("announce");
+    if (!text) { if (el) el.remove(); return; }
+    if (!el) {
+      el = document.createElement("div");
+      el.id = "announce";
+      el.className = "announce";
+      const nav = document.getElementById("nav");
+      if (nav) nav.after(el); else document.body.prepend(el);
+    }
+    el.innerHTML = `<div class="wrap">${icon("zap", 16)}<span>${esc(text)}</span></div>`;
   }
 
   function countUp(el, to, format = fmt, ms = 900) {
@@ -241,6 +274,7 @@ const HC = (() => {
     const poll = async () => {
       try {
         const d = await api("/api/events?since=" + (since ?? 0));
+        if ("announcement" in d) announce(d.announcement);
         if (since === null) { since = d.events.length ? d.events[d.events.length - 1].id : 0; onEvents([], d.events); }
         else if (d.events.length) { since = d.events[d.events.length - 1].id; onEvents(d.events, d.events); }
       } catch (_) { /* retry next tick */ }
@@ -265,5 +299,5 @@ const HC = (() => {
 
   return { esc, fmt, fmtFull, fmtUsd, fmtHours, fmtPct, fmtMetric, fmtBadgeValue, ago, api, avatar, colorFor, memberColor, link,
     icon, badge, badges, badgeRow, nav, me, countUp, shapes, describe, feedItem, toast, listen, hourlyBars,
-    copyButtons, METRICS, TIER, COLORS };
+    copyButtons, withS, announce, METRICS, TIER, COLORS };
 })();

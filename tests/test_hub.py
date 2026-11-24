@@ -7,12 +7,14 @@ from __future__ import annotations
 
 import gzip
 import json
+import os
 import shlex
 import tempfile
 import threading
 import unittest
 import urllib.error
 import urllib.request
+from unittest import mock
 from http.server import ThreadingHTTPServer
 from pathlib import Path
 
@@ -21,6 +23,7 @@ from hub import badges as B
 from hub import join_scripts
 from hub import metrics as M
 from hub.board import Board, Config
+from hub.registry import Registry
 from hub.store import NameTaken, Store
 
 
@@ -136,6 +139,29 @@ class BoardTests(unittest.TestCase):
         self.assertTrue({"badge", "crown", "milestone"} <= types or {"badge", "crown"} <= types)
         self.assertIn("tool_maestro", data["players"][0]["crowns"])
 
+    def test_remove_participant_and_team_leaves_nothing_behind(self):
+        a, _ = self.store.register("Ada", "Team A")
+        b, _ = self.store.register("Bob", "team a")
+        c, _ = self.store.register("Cy", "Team C")
+        for p, sid in ((a, "s1"), (b, "s2"), (c, "s3")):
+            self.upload(p, make_map(sid, calls=150))
+        self.store.add_event("joined", {"name": "Ada", "team": "Team A"})
+        self.board.payload()
+        self.assertTrue(self.store.remove("ADA"))
+        self.assertFalse(self.store.remove("Ada"))
+        self.assertEqual(self.store.remove_team("TEAM A"), ["Bob"])
+        self.assertEqual(self.store.remove_team("Team A"), [])
+        self.board.invalidate()
+        data = self.board.payload()
+        self.assertEqual([p["name"] for p in data["players"]], ["Cy"])
+        self.assertEqual([t["name"] for t in data["teams"]], ["Team C"])
+        gone = {"ada", "bob", "team a"}
+        self.assertFalse([e for e in self.store.events_since(0) if str(e.get("name", "")).lower() in gone])
+        self.assertFalse(any(s.split(":", 1)[1] in gone for s, _ in self.store.badge_tiers()))
+        for table in ("sessions", "snapshots"):
+            self.assertEqual(self.store.db.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0], 1)
+        self.store.register("Ada", "New team")  # the name is free again
+
     def test_same_content_is_unchanged(self):
         a, _ = self.store.register("Ada", "T")
         self.upload(a, make_map("s1"))
@@ -154,7 +180,8 @@ class BoardTests(unittest.TestCase):
         self.assertIn("skipped", self.upload(m, make_map("shared", calls=70)))
 
     def test_subagent_and_pre_event_sessions_skipped(self):
-        board = Board(self.store, Config(event_start=M.parse_ts("2026-12-06T00:00:00Z")))
+        board = self.board
+        board.update_settings({"event_start": "2026-12-06T00:00:00Z"})
         a, _ = self.store.register("Ada", "T")
         self.assertIn("skipped", board.ingest(a, b"x", make_map(role="subagent")))
         self.assertIn("skipped", board.ingest(a, b"y", make_map(started="2026-12-05T00:00:00Z")))
@@ -184,9 +211,129 @@ class BoardTests(unittest.TestCase):
         self.assertEqual(self.board.team("t")["members"][0]["name"], "Ada")
         self.assertIsNone(self.board.player("nobody"))
 
+    def test_settings_validate_and_persist(self):
+        with self.assertRaises(ValueError):
+            self.board.update_settings({"rank_by": "errors"})
+        with self.assertRaises(ValueError):
+            self.board.update_settings({"event_start": "2026-12-06T10:00:00Z", "event_end": "2026-12-06T09:00:00Z"})
+        with self.assertRaises(ValueError):
+            self.board.update_settings({"event_name": "   "})
+        self.board.update_settings({"event_name": "Batch 2", "announcement": "Lunch\x07 at 1", "agents": ["codex", "codex"]})
+        again = Board(self.store, Config(event_name="ignored once saved"))
+        self.assertEqual((again.cfg.event_name, again.cfg.announcement, again.cfg.agents), ("Batch 2", "Lunch at 1", ("codex",)))
+
+    def test_closed_uploads_and_agent_filter(self):
+        a, _ = self.store.register("Ada", "T")
+        self.board.update_settings({"uploads_open": False})
+        self.assertIn("closed", self.upload(a, make_map("s1"))["skipped"])
+        self.board.update_settings({"uploads_open": True, "agents": ["codex"]})
+        self.assertIn("does not count", self.upload(a, make_map("s1"))["skipped"])
+        self.board.update_settings({"agents": []})
+        self.assertEqual(self.upload(a, make_map("s1"))["calls"], 10)
+
+    def test_event_times_are_published_in_utc(self):
+        self.board.update_settings({"event_start": "2026-11-24T09:00:00+05:30"})
+        self.assertEqual(self.board.event_info()["start"], "2026-11-24T03:30:00Z")
+
+    def test_rank_by_setting(self):
+        a, _ = self.store.register("Ada", "T")
+        b, _ = self.store.register("Bob", "T")
+        self.upload(a, make_map("s1", calls=100))
+        self.upload(b, make_map("s2", calls=10, tokens=10**6))
+        self.assertEqual(self.board.payload()["players"][0]["name"], "Ada")
+        self.board.update_settings({"rank_by": "tokens"})
+        self.assertEqual(self.board.payload()["players"][0]["name"], "Bob")
+
+    def test_hide_rename_and_remove_session(self):
+        a, _ = self.store.register("Ada", "Team A")
+        self.store.register("Bob", "Team B")
+        self.upload(a, make_map("s1", calls=150))
+        self.upload(a, make_map("s2", calls=5))
+        self.board.payload()
+        self.assertTrue(self.store.set_hidden("ada", True))
+        self.board.invalidate()
+        self.assertEqual([p["name"] for p in self.board.payload()["players"]], ["Bob"])
+        self.assertIsNone(self.board.player("Ada"))
+        self.assertIsNone(self.board.session_timeline("Ada", "s1"))
+        self.store.set_hidden("Ada", False)
+        with self.assertRaises(NameTaken):
+            self.store.rename("Ada", "bob", "Team A")
+        self.store.rename("Ada", "Ada L", "Team B")
+        self.assertTrue(any(s == "player:ada l" for s, _ in self.store.badge_tiers()))
+        self.assertTrue(self.board.remove_session("Ada L", "s1"))
+        self.assertFalse(self.board.remove_session("Ada L", "s1"))
+        data = self.board.payload()
+        self.assertEqual([t["name"] for t in data["teams"]], ["Team B"])
+        self.assertEqual(next(p for p in data["players"] if p["name"] == "Ada L")["metrics"]["calls"], 5)
+
+
+class RegistryTests(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.dir = Path(self.tmp.name)
+
+    def tearDown(self):
+        for r in getattr(self, "regs", []):
+            for b in r.boards.values():
+                b.store.close()
+        self.tmp.cleanup()
+
+    def open(self):
+        r = Registry(self.dir, Config(event_name="From env"))
+        self.regs = [*getattr(self, "regs", []), r]
+        return r
+
+    def test_adopts_existing_db_and_routes_tokens(self):
+        legacy = Store(self.dir / "hub.db")
+        _, old_token = legacy.register("Ada", "T")
+        legacy.close()
+        reg = self.open()
+        self.assertEqual(reg.active_slug, "main")
+        self.assertEqual(reg.get().cfg.event_name, "From env")
+        self.assertEqual(reg.find_token(old_token)[0].slug, "main")
+        b2 = reg.create("batch-2", {"event_name": "Batch 2"}, copy_from="main")
+        _, new_token = b2.store.register("Ada", "T")  # same name, different session
+        self.assertEqual(reg.find_token(new_token)[0].slug, "batch-2")
+        self.assertIsNone(reg.find_token("nope"))
+        with self.assertRaises(ValueError):
+            reg.create("Bad Slug", {})
+        with self.assertRaises(ValueError):
+            reg.create("batch-2", {})
+        reg.set_active("batch-2")
+        with self.assertRaises(ValueError):
+            reg.delete("batch-2")
+        reopened = self.open()
+        self.assertEqual((reopened.active_slug, sorted(reopened.boards)), ("batch-2", ["batch-2", "main"]))
+        self.assertEqual(reopened.get().cfg.event_name, "Batch 2")
+
+    def test_delete_session_removes_its_files(self):
+        reg = self.open()
+        reg.create("old", {"event_name": "Old"})
+        self.assertTrue((self.dir / "sessions" / "old" / "hub.db").is_file())
+        reg.delete("old")
+        self.assertFalse((self.dir / "sessions" / "old").exists())
+        self.assertEqual([s["slug"] for s in reg.list()], ["main"])
+
 
 class JoinScriptTests(unittest.TestCase):
     PAYLOADS = ["$(echo PWNED)", "x'; echo PWNED; '", "`echo PWNED`", 'a"b\\c', "x’; Write-Host PWNED; ‘"]
+
+    def test_sync_counts_only_sessions_in_launch_folder(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            proj = os.path.join(tmp, "proj")
+            env = {"HC_HUB": "http://x", "HC_TOKEN": "t", "HC_FOLDER": proj}
+            with mock.patch.dict(os.environ, env):
+                g: dict = {}
+                exec(join_scripts.SYNC_PY.split('print("[*] Counting')[0], g)
+            g["ROOT"] = tmp
+            with open(os.path.join(tmp, "repos.json"), "w", encoding="utf-8") as f:
+                json.dump({"mine": os.path.join(proj, "sub"), "other": os.path.join(tmp, "proj2")}, f)
+            g["session_folders"] = lambda: {"a": os.path.join(proj, "x"), "b": os.path.join(tmp, "proj2")}
+            self.assertTrue(g["in_folder"]({"sessionId": "a"}))
+            self.assertFalse(g["in_folder"]({"sessionId": "b"}))  # sibling folder with a shared prefix
+            self.assertTrue(g["in_folder"]({"sessionId": "c", "repos": ["mine"]}))  # no cwd: repo fallback
+            self.assertFalse(g["in_folder"]({"sessionId": "d", "repos": ["other"]}))
+            self.assertIsNone(g["in_folder"]({"sessionId": "e"}))
 
     def test_sh_quote_round_trips(self):
         for p in self.PAYLOADS:
@@ -204,9 +351,7 @@ class HttpTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.tmp = tempfile.TemporaryDirectory()
-        store = Store(Path(cls.tmp.name) / "hub.db")
-        srv.Handler.store = store
-        srv.Handler.board = Board(store, Config())
+        srv.Handler.registry = Registry(Path(cls.tmp.name), Config())
         cls.httpd = ThreadingHTTPServer(("127.0.0.1", 0), srv.Handler)
         cls.base = f"http://127.0.0.1:{cls.httpd.server_address[1]}"
         threading.Thread(target=cls.httpd.serve_forever, daemon=True).start()
@@ -214,7 +359,8 @@ class HttpTests(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         cls.httpd.shutdown()
-        srv.Handler.store.db.close()
+        for b in srv.Handler.registry.boards.values():
+            b.store.close()
         cls.tmp.cleanup()
 
     def req(self, path, body=None, headers=None, method=None):
@@ -255,6 +401,7 @@ class HttpTests(unittest.TestCase):
         status, _, body = self.req("/api/upload", gzip.compress(json.dumps(make_map("h1", calls=33)).encode()),
                                    {"X-Upload-Token": token})
         self.assertEqual(status, 200, body)
+        srv.Handler.registry.get().invalidate()  # skip the 3 s rebuild throttle another test may have started
         lb = json.loads(self.req("/api/leaderboard")[2])
         self.assertNotIn("_players", lb)
         self.assertIn("Http Ada", [p["name"] for p in lb["players"]])
@@ -286,6 +433,58 @@ class HttpTests(unittest.TestCase):
         self.register("Dup")
         status, _, _ = self.req("/api/register", json.dumps({"name": "DUP", "team": "T"}).encode())
         self.assertEqual(status, 409)
+
+    def test_admin_list_and_remove_team(self):
+        hdr = {"X-Admin-Token": "s3cret"}
+        self.register("Rem One", "Doomed")
+        self.register("Rem Two", "doomed")
+        with mock.patch.dict(os.environ, {"HUB_ADMIN_TOKEN": "s3cret"}):
+            self.assertEqual(self.req("/api/admin/participants", headers={"X-Admin-Token": "wrong"})[0], 403)
+            status, _, body = self.req("/api/admin/participants", headers=hdr)
+            self.assertEqual(status, 200)
+            self.assertIn("Rem One", [p["name"] for p in json.loads(body)["participants"]])
+            status, _, body = self.req("/api/admin/remove-team", json.dumps({"team": "DOOMED"}).encode(), hdr)
+            self.assertEqual((status, sorted(json.loads(body)["removed"])), (200, ["Rem One", "Rem Two"]))
+            self.assertEqual(self.req("/api/admin/remove-team", json.dumps({"team": "Doomed"}).encode(), hdr)[0], 404)
+        self.assertEqual(self.req("/api/admin/participants")[0], 403)
+        self.assertEqual(self.req("/admin")[0], 200)
+
+    def test_sessions_routing_and_admin(self):
+        hdr = {"X-Admin-Token": "s3cret", "Content-Type": "application/json"}
+        post = lambda path, body: self.req(path, json.dumps(body).encode(), hdr)  # noqa: E731
+        with mock.patch.dict(os.environ, {"HUB_ADMIN_TOKEN": "s3cret"}):
+            status, _, body = post("/api/admin/sessions", {"action": "create", "slug": "round-2",
+                                                            "settings": {"event_name": "Round 2", "registration_code": "go"}})
+            self.assertEqual(status, 200, body)
+            reg = lambda code: self.req("/api/register?s=round-2", json.dumps(  # noqa: E731
+                {"name": "Rounder", "team": "R", "code": code}).encode(), {"Content-Type": "application/json"})
+            self.assertEqual(reg("wrong")[0], 403)
+            status, _, body = reg("go")
+            self.assertEqual((status, json.loads(body)["slug"]), (200, "round-2"))
+            token = json.loads(body)["token"]
+            names = lambda q: [p["name"] for p in json.loads(self.req("/api/leaderboard" + q)[2])["players"]]  # noqa: E731
+            self.assertIn("Rounder", names("?s=round-2"))
+            self.assertNotIn("Rounder", names(""))
+            self.assertEqual(json.loads(self.req("/api/me", headers={"X-Upload-Token": token})[2])["slug"], "round-2")
+            self.assertEqual(self.req("/api/leaderboard?s=nope")[0], 404)
+            post("/api/admin/sessions", {"action": "update", "slug": "round-2",
+                                         "settings": {"registration_open": False, "announcement": "Demos at 5"}})
+            self.assertEqual(reg("go")[0], 403)
+            events = json.loads(self.req("/api/events?s=round-2")[2])
+            self.assertEqual(events["announcement"], "Demos at 5")
+            self.assertEqual(post("/api/admin/sessions", {"action": "update", "slug": "round-2",
+                                                          "settings": {"rank_by": "nope"}})[0], 400)
+            listed = json.loads(self.req("/api/admin/sessions", headers=hdr)[2])
+            self.assertEqual({s["slug"] for s in listed["sessions"]} >= {"main", "round-2"}, True)
+            status, headers, body = self.req("/api/admin/export?s=round-2", headers=hdr)
+            self.assertEqual((status, body[:15]), (200, b"SQLite format 3"))
+            self.assertIn("hackathon-round-2.db", headers["Content-Disposition"])
+            self.assertEqual(post("/api/admin/update-participant?s=round-2", {"name": "Rounder", "hidden": True})[0], 200)
+            self.assertNotIn("Rounder", names("?s=round-2"))
+            self.assertEqual(post("/api/admin/sessions", {"action": "delete", "slug": "main"})[0], 400)  # active
+            self.assertEqual(post("/api/admin/sessions", {"action": "delete", "slug": "round-2"})[0], 200)
+            self.assertEqual(self.req("/api/me", headers={"X-Upload-Token": token})[0], 401)
+        self.assertEqual(self.req("/api/admin/sessions")[0], 403)
 
     def test_admin_disabled_without_token(self):
         status, _, _ = self.req("/api/admin/remove", json.dumps({"name": "Dup"}).encode(), {"X-Admin-Token": ""})

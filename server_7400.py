@@ -1,16 +1,25 @@
 """Hackathon Control: live leaderboard for AI coding-agent activity.
 
-Pages:  /  /team?name=  /player?name=  /awards  /stage  /join
-API:    GET  /api/leaderboard | /api/player?name= | /api/team?name= | /api/session?participant=&id=
-        GET  /api/events?since= | /api/badges | /healthz
+Sessions: each hackathon event/round has its own board and database (hub/registry.py).
+Every page and /api/ call takes ?s=<slug>; without it, the active session is used.
+Upload tokens belong to one session, so uploads, heartbeats and /join.* find theirs.
+
+Pages:  /  /team?name=  /player?name=  /awards  /stage  /join  /admin
+API:    GET  /api/leaderboard | /api/config | /api/player?name= | /api/team?name= | /api/session?participant=&id=
+        GET  /api/events?since= | /api/badges | /api/me | /healthz
         POST /api/register {name, team, code?} -> upload token (shown once)
         POST /api/upload   (X-Upload-Token header) raw/gzip agentplay map, or {"mapBase64": ...}
-        POST /api/admin/reissue | /api/admin/remove {name}  (X-Admin-Token header)
+Admin (X-Admin-Token header, ?s=<slug>):
+        GET  /api/admin/sessions | /api/admin/participants | /api/admin/participant?name= | /api/admin/export
+        POST /api/admin/sessions {action: create|update|activate|archive|reopen|delete, slug, settings?, copyFrom?}
+        POST /api/admin/reissue | remove {name} | remove-team {team} | remove-session {name, sessionId}
+             | update-participant {name, newName?, newTeam?, hidden?} | clear-feed
 Sync:   GET  /join.ps1?token=  /join.sh?token=
 
 Configuration (environment):
-  HUB_DATA_DIR            where hub.db lives (default ./data)
+  HUB_DATA_DIR            where registry.json and the session databases live (default ./data)
   HUB_PUBLIC_URL          public https URL baked into the sync scripts (set this on any deployment)
+  (the next four seed the first session and are defaults for new ones; /admin edits them after)
   HUB_EVENT_NAME          shown on every page
   HUB_EVENT_START/END     ISO times; sessions started before START are ignored, END drives the countdown
   HUB_UTC_OFFSET_MINUTES  venue time zone for night-owl and power-hour clocks (default 330 = IST)
@@ -37,9 +46,10 @@ from urllib.parse import parse_qs, urlsplit
 
 from hub import badges as B
 from hub import join_scripts
-from hub.board import Board, Config, Rejected
+from hub.board import KNOWN_AGENTS, RANKABLE, Board, Config
 from hub.metrics import parse_ts
-from hub.store import NameTaken, Store
+from hub.registry import Registry
+from hub.store import NameTaken
 
 BASE_DIR = Path(__file__).resolve().parent
 STATIC_DIR = BASE_DIR / "static"
@@ -49,7 +59,7 @@ MAX_JSON_BODY = 4096
 MAX_LABEL_LEN = 40
 
 PAGES = {"/": "index.html", "/team": "team.html", "/player": "player.html", "/awards": "awards.html",
-         "/stage": "stage.html", "/join": "join.html"}
+         "/stage": "stage.html", "/join": "join.html", "/admin": "admin.html"}
 STATIC_FILES = {f"/static/{p.name}": p for p in STATIC_DIR.glob("*") if p.is_file()} if STATIC_DIR.is_dir() else {}
 
 CSP = ("default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
@@ -105,17 +115,19 @@ def _public(payload: dict[str, Any]) -> dict[str, Any]:
 class Handler(BaseHTTPRequestHandler):
     server_version = "HackathonControl/2"
     timeout = 30  # a client that stalls mid-body can't hold a thread forever
-    board: Board
-    store: Store
+    registry: Registry
 
     # -- responses ----------------------------------------------------------
-    def _send(self, status: int, body: bytes, content_type: str, cache: str = "no-store") -> None:
+    def _send(self, status: int, body: bytes, content_type: str, cache: str = "no-store",
+              extra: dict[str, str] | None = None) -> None:
         self.send_response(status)
         self.send_header("Content-Type", content_type)
         self.send_header("Content-Length", str(len(body)))
         self.send_header("Cache-Control", cache)
         self.send_header("X-Content-Type-Options", "nosniff")
         self.send_header("Referrer-Policy", "no-referrer")
+        for k, v in (extra or {}).items():
+            self.send_header(k, v)
         if content_type.startswith("text/html"):
             self.send_header("Content-Security-Policy", CSP)
         self.end_headers()
@@ -147,6 +159,13 @@ class Handler(BaseHTTPRequestHandler):
             return None
         return self.rfile.read(length)
 
+    def _session(self, slug: str) -> Board | None:
+        """The board for ?s=<slug>, or the active session's; answers 404 itself when unknown."""
+        board = self.registry.get(slug or None)
+        if board is None:
+            self._json(HTTPStatus.NOT_FOUND, {"error": "No such session"})
+        return board
+
     # -- GET ----------------------------------------------------------------
     def do_GET(self) -> None:  # noqa: N802
         url = urlsplit(self.path)
@@ -160,57 +179,70 @@ class Handler(BaseHTTPRequestHandler):
             return self._file(STATIC_FILES[path], "public, max-age=300")
         if path == "/healthz":
             return self._text(HTTPStatus.OK, "ok\n")
-        if path == "/api/leaderboard":
-            return self._json(HTTPStatus.OK, _public(self.board.payload()))
-        if path == "/api/config":
-            return self._json(HTTPStatus.OK, self.board.event_info())
         if path == "/api/badges":
             return self._json(HTTPStatus.OK, {"personal": [b.public() for b in B.PERSONAL],
                                               "team": [b.public() for b in B.TEAM], "tiers": list(B.TIER_NAMES)})
+        if path == "/api/me":
+            found = self.registry.find_token(self.headers.get("X-Upload-Token", ""))
+            return (self._json(HTTPStatus.OK, {**found[1], "slug": found[0].slug}) if found
+                    else self._json(HTTPStatus.UNAUTHORIZED, {"error": "Unknown token"}))
+        if path in ("/join.ps1", "/join.sh"):
+            return self._join_script(path, arg("token"))
+        if path.startswith("/api/admin/"):
+            return self._admin_get(path, arg)
+        if not path.startswith("/api/"):
+            return self._json(HTTPStatus.NOT_FOUND, {"error": "Not found"})
+
+        board = self._session(arg("s"))
+        if board is None:
+            return
+        if path == "/api/leaderboard":
+            return self._json(HTTPStatus.OK, _public(board.payload()))
+        if path == "/api/config":
+            return self._json(HTTPStatus.OK, board.event_info())
         if path == "/api/events":
             try:
                 since = int(arg("since") or 0)
             except ValueError:
                 since = 0
-            return self._json(HTTPStatus.OK, {"events": self.store.events_since(since)})
+            return self._json(HTTPStatus.OK, {"events": board.store.events_since(since),
+                                              "announcement": board.cfg.announcement})
         if path == "/api/player":
-            data = self.board.player(arg("name"))
+            data = board.player(arg("name"))
             return self._json(HTTPStatus.OK, data) if data else self._json(HTTPStatus.NOT_FOUND, {"error": "No such participant"})
         if path == "/api/team":
-            data = self.board.team(arg("name"))
+            data = board.team(arg("name"))
             return self._json(HTTPStatus.OK, data) if data else self._json(HTTPStatus.NOT_FOUND, {"error": "No such team"})
         if path == "/api/session":
-            data = self.board.session_timeline(arg("participant"), arg("id"))
+            data = board.session_timeline(arg("participant"), arg("id"))
             return self._json(HTTPStatus.OK, data) if data else self._json(HTTPStatus.NOT_FOUND, {"error": "No such session"})
-        if path == "/api/me":
-            p = self.store.by_token(self.headers.get("X-Upload-Token", ""))
-            return self._json(HTTPStatus.OK, p) if p else self._json(HTTPStatus.UNAUTHORIZED, {"error": "Unknown token"})
-        if path in ("/join.ps1", "/join.sh"):
-            return self._join_script(path, arg("token"))
         self._json(HTTPStatus.NOT_FOUND, {"error": "Not found"})
 
     def _join_script(self, path: str, token: str) -> None:
-        participant = self.store.by_token(token)
-        if not participant:
+        found = self.registry.find_token(token)
+        if not found:
             return self._text(HTTPStatus.NOT_FOUND, "Unknown token. Register at /join first.\n")
+        board, participant = found
         hub = resolve_hub_url(self.headers.get("Host") or "")
         if hub is None:
             return self._text(HTTPStatus.BAD_REQUEST, "Invalid Host header or HUB_PUBLIC_URL.\n")
         gen = join_scripts.ps1 if path == "/join.ps1" else join_scripts.sh
-        since = self.board.event_info()["start"] or ""
+        since = board.event_info()["start"] or ""
         self._text(HTTPStatus.OK, gen(hub, token, participant["name"], participant["team"], since))
 
     # -- POST ---------------------------------------------------------------
     def do_POST(self) -> None:  # noqa: N802
-        path = urlsplit(self.path).path
+        url = urlsplit(self.path)
+        path = url.path
+        slug = (parse_qs(url.query).get("s") or [""])[0].strip()
         if path == "/api/upload":
             return self._upload()
         if path == "/api/register":
-            return self._register()
+            return self._register(slug)
         if path == "/api/heartbeat":
             return self._heartbeat()
-        if path in ("/api/admin/reissue", "/api/admin/remove"):
-            return self._admin(path)
+        if path.startswith("/api/admin/"):
+            return self._admin_post(path, slug)
         self._json(HTTPStatus.NOT_FOUND, {"error": "Not found"})
 
     def _json_body(self) -> dict[str, Any] | None:
@@ -226,32 +258,37 @@ class Handler(BaseHTTPRequestHandler):
             return None
         return body
 
-    def _register(self) -> None:
+    def _register(self, slug: str) -> None:
         body = self._json_body()
         if body is None:
             return
-        code = os.environ.get("HUB_REGISTRATION_CODE", "")
+        board = self._session(slug)
+        if board is None:
+            return
+        if board.cfg.archived or not board.cfg.registration_open:
+            return self._json(HTTPStatus.FORBIDDEN, {"error": "Registration is closed for this session."})
+        code = board.cfg.registration_code
         if code and not hmac.compare_digest(str(body.get("code") or "").encode(), code.encode()):
             return self._json(HTTPStatus.FORBIDDEN, {"error": "Wrong event code."})
         name, team = clean_label(body.get("name")), clean_label(body.get("team"))
         if not name or not team:
             return self._json(HTTPStatus.BAD_REQUEST, {"error": f"Name and team are required (max {MAX_LABEL_LEN} characters)."})
         try:
-            participant, token = self.store.register(name, team)
+            participant, token = board.store.register(name, team)
         except NameTaken:
             return self._json(HTTPStatus.CONFLICT, {"error": f"'{name}' is already registered. Ask an organiser to reissue your token."})
-        self.store.add_event("joined", {"name": name, "team": team})
+        board.store.add_event("joined", {"name": name, "team": team})
         self._json(HTTPStatus.OK, {"name": participant["name"], "team": participant["team"], "token": token,
-                                   "hub": resolve_hub_url(self.headers.get("Host") or "")})
+                                   "slug": board.slug, "hub": resolve_hub_url(self.headers.get("Host") or "")})
 
     def _heartbeat(self) -> None:
         body = self._json_body()
         if body is None:
             return
-        participant = self.store.by_token(self.headers.get("X-Upload-Token", ""))
-        if not participant:
+        found = self.registry.find_token(self.headers.get("X-Upload-Token", ""))
+        if not found:
             return self._json(HTTPStatus.UNAUTHORIZED, {"error": "Missing or unknown X-Upload-Token. Register at /join."})
-        self._json(HTTPStatus.OK, self.board.heartbeat(participant, body))
+        self._json(HTTPStatus.OK, found[0].heartbeat(found[1], body))
 
     def _upload(self) -> None:
         # Read the (size-capped) body before answering: replying first makes clients see a
@@ -259,36 +296,130 @@ class Handler(BaseHTTPRequestHandler):
         raw = self._read_body(MAX_UPLOAD_BYTES)
         if raw is None:
             return
-        participant = self.store.by_token(self.headers.get("X-Upload-Token", ""))
-        if not participant:
+        found = self.registry.find_token(self.headers.get("X-Upload-Token", ""))
+        if not found:
             return self._json(HTTPStatus.UNAUTHORIZED, {"error": "Missing or unknown X-Upload-Token. Register at /join."})
         try:
             data, doc = decode_map(raw)
-            result = self.board.ingest(participant, data, doc)
+            result = found[0].ingest(found[1], data, doc)
         except (ValueError, KeyError, TypeError, OSError, EOFError) as exc:
             return self._json(HTTPStatus.BAD_REQUEST, {"error": str(exc)[:300]})
         self._json(HTTPStatus.OK, result)
 
-    def _admin(self, path: str) -> None:
+    # -- admin --------------------------------------------------------------
+    def _is_admin(self) -> bool:
         admin = os.environ.get("HUB_ADMIN_TOKEN", "")
         given = self.headers.get("X-Admin-Token", "")
-        if not admin or not hmac.compare_digest(given.encode(), admin.encode()):
-            return self._json(HTTPStatus.FORBIDDEN, {"error": "Admin token required."})
+        if admin and hmac.compare_digest(given.encode(), admin.encode()):
+            return True
+        self._json(HTTPStatus.FORBIDDEN, {"error": "Admin token required (HUB_ADMIN_TOKEN)."})
+        return False
+
+    def _admin_get(self, path: str, arg) -> None:
+        if not self._is_admin():
+            return
+        if path == "/api/admin/sessions":
+            return self._json(HTTPStatus.OK, {"sessions": self.registry.list(), "active": self.registry.active_slug,
+                                              "rankable": list(RANKABLE), "agents": list(KNOWN_AGENTS)})
+        board = self._session(arg("s"))
+        if board is None:
+            return
+        if path == "/api/admin/participants":
+            return self._json(HTTPStatus.OK, {"participants": board.store.admin_rows()})
+        if path == "/api/admin/participant":
+            p = board.store.by_name(arg("name"))
+            if not p:
+                return self._json(HTTPStatus.NOT_FOUND, {"error": "No such participant"})
+            rows = sorted(board.store.session_rows(p["id"]), key=lambda r: r["uploaded_at"], reverse=True)
+            return self._json(HTTPStatus.OK, {"name": p["name"], "team": p["team"], "sessions": [{
+                "id": r["session_id"], "startedAt": r["started_at"], "uploadedAt": r["uploaded_at"],
+                "agentTool": (r["metrics"].get("agentTools") or ["unknown"])[0],
+                "calls": r["metrics"]["calls"], "tokens": r["metrics"]["tokens"]} for r in rows]})
+        if path == "/api/admin/export":
+            body = board.store.export_bytes(self.registry.dir)
+            return self._send(HTTPStatus.OK, body, "application/vnd.sqlite3",
+                              extra={"Content-Disposition": f'attachment; filename="hackathon-{board.slug}.db"'})
+        self._json(HTTPStatus.NOT_FOUND, {"error": "Not found"})
+
+    def _admin_post(self, path: str, slug: str) -> None:
+        if not self._is_admin():
+            return
         body = self._json_body()
         if body is None:
             return
+        if path == "/api/admin/sessions":
+            return self._admin_sessions(body)
+        board = self._session(slug)
+        if board is None:
+            return
+        store = board.store
+        if path == "/api/admin/clear-feed":
+            store.clear_events()
+            return self._json(HTTPStatus.OK, {"ok": True})
+        if path == "/api/admin/remove-team":
+            team = clean_label(body.get("team"))
+            names = store.remove_team(team)
+            board.invalidate()
+            return self._json(HTTPStatus.OK if names else HTTPStatus.NOT_FOUND,
+                              {"removed": names} if names else {"error": "No such team"})
         name = clean_label(body.get("name"))
-        if path.endswith("reissue"):
-            token = self.store.reissue(name)
+        if path == "/api/admin/reissue":
+            token = store.reissue(name)
             return self._json(HTTPStatus.OK, {"name": name, "token": token}) if token else self._json(HTTPStatus.NOT_FOUND, {"error": "No such participant"})
-        ok = self.store.remove(name)
-        self._json(HTTPStatus.OK if ok else HTTPStatus.NOT_FOUND, {"removed": ok})
+        if path == "/api/admin/remove":
+            ok = store.remove(name)
+            board.invalidate()
+            return self._json(HTTPStatus.OK if ok else HTTPStatus.NOT_FOUND, {"removed": ok})
+        if path == "/api/admin/remove-session":
+            ok = board.remove_session(name, str(body.get("sessionId") or ""))
+            return self._json(HTTPStatus.OK if ok else HTTPStatus.NOT_FOUND, {"removed": ok})
+        if path == "/api/admin/update-participant":
+            p = store.by_name(name)
+            if not p:
+                return self._json(HTTPStatus.NOT_FOUND, {"error": "No such participant"})
+            if "hidden" in body:
+                store.set_hidden(name, bool(body["hidden"]))
+            new_name = clean_label(body.get("newName")) or p["name"]
+            new_team = clean_label(body.get("newTeam")) or p["team"]
+            if (new_name, new_team) != (p["name"], p["team"]):
+                try:
+                    store.rename(name, new_name, new_team)
+                except NameTaken:
+                    return self._json(HTTPStatus.CONFLICT, {"error": f"'{new_name}' is already registered."})
+            board.invalidate()
+            return self._json(HTTPStatus.OK, {"name": new_name, "team": new_team})
+        self._json(HTTPStatus.NOT_FOUND, {"error": "Not found"})
+
+    def _admin_sessions(self, body: dict[str, Any]) -> None:
+        action, slug = str(body.get("action") or ""), str(body.get("slug") or "").strip().lower()
+        settings = body.get("settings") if isinstance(body.get("settings"), dict) else {}
+        try:
+            if action == "create":
+                board = self.registry.create(slug, settings, copy_from=str(body.get("copyFrom") or "") or None)
+                return self._json(HTTPStatus.OK, {"slug": board.slug})
+            board = self.registry.get(slug)
+            if board is None:
+                return self._json(HTTPStatus.NOT_FOUND, {"error": "No such session"})
+            if action == "update":
+                board.update_settings(settings)
+            elif action == "activate":
+                self.registry.set_active(slug)
+            elif action in ("archive", "reopen"):
+                board.update_settings({"archived": action == "archive"})
+            elif action == "delete":
+                self.registry.delete(slug)
+            else:
+                return self._json(HTTPStatus.BAD_REQUEST, {"error": "Unknown action"})
+        except ValueError as exc:
+            return self._json(HTTPStatus.BAD_REQUEST, {"error": str(exc)})
+        self._json(HTTPStatus.OK, {"ok": True})
 
     def log_message(self, format: str, *args: Any) -> None:  # noqa: A002
         pass  # access logs would carry upload tokens in /join.* query strings
 
 
 def load_config() -> Config:
+    """Defaults from the environment: they seed the first session, and new ones start from them."""
     def ts(name: str):
         value = os.environ.get(name, "").strip()
         parsed = parse_ts(value) if value else None
@@ -312,9 +443,7 @@ def main() -> None:
     ap.add_argument("--data-dir", default=os.environ.get("HUB_DATA_DIR") or str(BASE_DIR / "data"))
     args = ap.parse_args()
 
-    store = Store(Path(args.data_dir) / "hub.db")
-    Handler.store = store
-    Handler.board = Board(store, load_config())
+    Handler.registry = Registry(Path(args.data_dir), load_config())
     server = ThreadingHTTPServer((args.host, args.port), Handler)
     server.daemon_threads = True
     print(f"Hackathon Control on http://{args.host}:{args.port}  (data: {args.data_dir})")

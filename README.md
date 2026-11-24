@@ -19,7 +19,15 @@ paths and repo remotes before storing anything.
 | `/team?name=` | A team: **each member's share** of calls, tokens, commits, lines, MCP, tests, errors and spend; members table; team badges |
 | `/awards` | Every badge with its bronze/silver/gold rule, crown holder, runners-up and how many have earned it |
 | `/stage` | Projector view. Six rotating scenes (room totals, podium, team battle, power hour, crowns, live feed), full-screen spotlights with confetti for crowns, gold badges, podium entries and milestones. `←/→` scenes, `space` pause, `F` fullscreen, `?scene=N` pins one scene |
+| `/admin` | Organisers (needs `HUB_ADMIN_TOKEN`). **Sessions:** create, make active, archive/reopen, delete, export. **Settings** per session: name, start/end, venue time zone, registration code, registration open, uploads open (freeze), rank-by metric, which agents count, announcement banner, clear live feed. **People:** grouped by team with sync-window health; edit name/team, hide (keep data, off the board), new token, remove a builder, a team, or one uploaded session |
 | `/join` | Register (name, team, optional event code) → personal upload token → one-line sync command for Windows or macOS/Linux, or a file upload |
+
+## Sessions
+
+One deployment runs any number of **sessions** (an event, a batch, a round), each with its own board,
+people, badges and database. Every page takes `?s=<slug>`; without it you get the **active** session,
+chosen in `/admin`. Upload tokens belong to one session, so a builder's sync command needs no change.
+The first start adopts an existing `hub.db` as the session `main`; nothing moves on disk.
 
 ## How the competition works
 
@@ -47,6 +55,11 @@ Python 3.11+, standard library only. Load test (100 builders, uploads every 20 s
 
 ## Configuration (environment)
 
+The event variables (name, start/end, time zone, registration code) **seed the first session only**
+and are defaults for new ones. After the first start, change them in `/admin`; editing `.env` no
+longer changes a running session.
+
+
 | Variable | Purpose |
 |---|---|
 | `HUB_PUBLIC_URL` | Public `https://` URL written into the sync scripts. **Set it on any deployment.** |
@@ -54,8 +67,8 @@ Python 3.11+, standard library only. Load test (100 builders, uploads every 20 s
 | `HUB_EVENT_START` / `HUB_EVENT_END` | ISO times. Sessions started before the start are ignored; the end drives the countdowns |
 | `HUB_UTC_OFFSET_MINUTES` | Venue time zone for Night Owl and the power-hour clock (default 330 = IST) |
 | `HUB_REGISTRATION_CODE` | If set, `/join` asks for it (keeps strangers off the board) |
-| `HUB_ADMIN_TOKEN` | Enables `POST /api/admin/reissue` and `/api/admin/remove` (`{"name": ...}`, header `X-Admin-Token`) for lost tokens and cleanup |
-| `HUB_DATA_DIR` | Where `hub.db` (SQLite) lives |
+| `HUB_ADMIN_TOKEN` | Enables `/admin` and its API (header `X-Admin-Token`; endpoints listed at the top of `server_7400.py`). Without it nobody can administer the hub |
+| `HUB_DATA_DIR` | Where `registry.json` and the session databases live (`hub.db` for `main`, `sessions/<slug>/hub.db` for the rest) |
 
 ## Deploy to Google Cloud
 
@@ -69,7 +82,8 @@ server_7400.py        HTTP server: pages, JSON API, uploads, sync scripts
 hub/metrics.py        session map -> activity metrics (and the public replay timeline)
 hub/badges.py         badge rules and tiers
 hub/board.py          ranking, teams, crowns, power hour, live events
-hub/store.py          SQLite storage
+hub/store.py          SQLite storage (one file per session)
+hub/registry.py       sessions: list, active one, token routing, create/delete
 hub/join_scripts.py   /join.ps1 and /join.sh (every value is a quoted literal)
 static/               pages (white theme: theme.css, app.js shared; stage.css for the projector)
 scripts/simulate.py   synthetic participants for demos and load tests
