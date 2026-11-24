@@ -40,6 +40,69 @@ def ts(value):
 SINCE = ts(os.environ.get("HC_SINCE") or "")
 CUTOFF = SINCE or datetime.now(timezone.utc) - timedelta(hours=12)
 TOO_OLD = "started before the event" if SINCE else "no activity in the last 12 hours"
+OUTSIDE = "run outside this folder"
+UNKNOWN = "folder unknown"
+
+_AG = os.path.join(os.path.expanduser("~"), ".gemini", "antigravity")
+if os.path.isdir(_AG):
+    os.environ.setdefault("AGENTPLAY_ANTIGRAVITY_HOMES", _AG)
+
+
+def norm(p):
+    return os.path.normcase(os.path.normpath(os.path.abspath(os.path.expanduser(str(p)))))
+
+
+# Only sessions whose agent ran in this folder (or below it) count: the folder the
+# participant ran the join command in.
+FOLDER = norm(os.environ.get("HC_FOLDER") or os.getcwd())
+
+
+def within(path):
+    p = norm(path)
+    return p == FOLDER or p.startswith(FOLDER.rstrip(os.sep) + os.sep)
+
+
+def session_folders():
+    """sessionId -> the folder its agent ran in. agentplay knows it for most tools but keeps
+    it out of its index, so this reads its source index; any failure falls back to repos."""
+    try:
+        import contextlib, io, logging
+        from agentplay import discover
+        logging.disable(logging.WARNING)
+        try:
+            with contextlib.redirect_stderr(io.StringIO()):
+                idx = discover.local_source(discover.Homes.default(), set(discover.AGENTS))._build_index()
+        finally:
+            logging.disable(logging.NOTSET)
+        return {str(sid): str(ref.cwd) for sid, ref in idx.items() if getattr(ref, "cwd", None)}
+    except Exception:
+        return {}
+
+
+def repo_roots():
+    """Repo name -> its checkout (agentplay's repos.json): the fallback for tools with no cwd."""
+    try:
+        with open(os.path.join(ROOT, "repos.json"), encoding="utf-8") as f:
+            d = json.load(f)
+        return d if isinstance(d, dict) else {}
+    except (OSError, ValueError):
+        return {}
+
+
+folders = {}
+
+
+def in_folder(r):
+    """True / False, or None when the session's folder can't be told."""
+    sid = str(r.get("sessionId") or "")
+    if sid not in folders:
+        folders.update(session_folders())
+        folders.setdefault(sid, "")  # don't rescan for it every cycle
+    if folders[sid]:
+        return within(folders[sid])
+    roots = repo_roots()
+    paths = [roots[n] for n in (r.get("repos") or []) if isinstance(roots.get(n), str)]
+    return any(within(p) for p in paths) if paths else None
 
 
 def build():
@@ -47,9 +110,6 @@ def build():
     exe = shutil.which("agentplay")
     cmd = [exe, "build"] if exe else [sys.executable, "-m", "agentplay", "build"]
     env = dict(os.environ)
-    ag = os.path.join(os.path.expanduser("~"), ".gemini", "antigravity")
-    if os.path.isdir(ag):
-        env.setdefault("AGENTPLAY_ANTIGRAVITY_HOMES", ag)
     try:
         res = subprocess.run(cmd, env=env, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, check=False)
     except OSError as e:
@@ -86,6 +146,10 @@ def sync():
             continue
         stats["found"] += 1
         stats["agents"].add(str(r.get("agentTool") or "unknown"))
+        inside = in_folder(r)
+        if not inside:
+            skip(OUTSIDE if inside is False else UNKNOWN)
+            continue
         when = ts(r.get("startedAt") or "") if SINCE else ts(r.get("endedAt") or r.get("updatedAt") or r.get("startedAt") or "")
         if when is not None and when < CUTOFF:
             skip(TOO_OLD)
@@ -148,9 +212,12 @@ def explain(stats, error):
     print("[*] Found %d agent session(s) (%s); %d count%s." % (
         stats["found"], ", ".join(sorted(stats["agents"])), stats["eligible"], " - not counted: " + reasons if reasons else ""), flush=True)
     if not stats["eligible"]:
-        print("[!] None count yet. Start (or keep using) an agent session now; it appears within %ss." % INTERVAL, flush=True)
+        print("[!] None count yet. Start (or keep using) an agent session in %s; it appears within %ss." % (FOLDER, INTERVAL), flush=True)
 
 
+print("[*] Counting only agent sessions run in: %s" % FOLDER, flush=True)
+if FOLDER in (norm("~"), norm(os.sep)) or os.path.dirname(FOLDER) == FOLDER:
+    print("[!] That is your home folder or a drive root, so almost every session counts. cd into your project first.", flush=True)
 print("[*] Building your local session index (first run can take a minute)...", flush=True)
 error = build()
 stats = sync()

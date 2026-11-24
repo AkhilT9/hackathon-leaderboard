@@ -9,9 +9,13 @@
   const forget = () => { try { localStorage.removeItem("hc_me"); } catch (_) { /* private mode */ } };
 
   function registerView(error) {
+    const closed = !cfg.registrationOpen;
     main.innerHTML = `
       <div class="steps">
-        <div class="step"><span class="step-n" style="background:var(--blue)">1</span><div>
+        ${closed ? `<div class="step"><span class="step-n" style="background:var(--red)">!</span><div>
+          <h3 class="h3">${cfg.archived ? "This session has ended" : "Registration is closed"}</h3>
+          <p class="muted" style="margin:4px 0 0">Ask an organiser if you think you should be on the board.</p>
+          <form id="reg" hidden></form></div></div>` : `<div class="step"><span class="step-n" style="background:var(--blue)">1</span><div>
           <h3 class="h3">Register</h3><p class="muted" style="margin:4px 0 16px">Use the name your team knows you by.</p>
           <form id="reg" style="display:grid;gap:14px">
             <div class="field"><label for="name">Your name</label><input class="input" id="name" maxlength="40" required autocomplete="name"></div>
@@ -19,7 +23,7 @@
             ${cfg.requiresCode ? `<div class="field"><label for="code">Event code</label><input class="input" id="code" required autocomplete="off"></div>` : ""}
             <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><button class="btn" type="submit">Get my sync command</button>
               <span id="err" style="color:var(--red);font-size:14px">${esc(error || "")}</span></div>
-          </form></div></div>
+          </form></div></div>`}
         <div class="step"><span class="step-n" style="background:var(--faint)">2</span><div>
           <h3 class="h3">Already registered?</h3><p class="muted" style="margin:4px 0 12px">Paste the token you were given to get your command back.</p>
           <form id="tok" style="display:flex;gap:10px;flex-wrap:wrap"><input class="input" id="token" placeholder="Your upload token" style="flex:1;min-width:200px" autocomplete="off">
@@ -37,7 +41,7 @@
         const body = { name: document.getElementById("name").value, team: document.getElementById("team").value };
         if (cfg.requiresCode) body.code = document.getElementById("code").value;
         const r = await HC.api("/api/register", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
-        save({ name: r.name, team: r.team, token: r.token });
+        save({ name: r.name, team: r.team, token: r.token, slug: r.slug });
         readyView(true);
       } catch (err) { document.getElementById("err").textContent = err.message; btn.disabled = false; }
     });
@@ -46,7 +50,8 @@
       const token = document.getElementById("token").value.trim();
       try {
         const r = await HC.api("/api/me", { headers: { "X-Upload-Token": token } });
-        save({ name: r.name, team: r.team, token });
+        save({ name: r.name, team: r.team, token, slug: r.slug });
+        if (r.slug !== cfg.slug) { location.href = "/join?s=" + encodeURIComponent(r.slug); return; }  // their session
         readyView(false);
       } catch (err) { registerView(err.message); }
     });
@@ -64,7 +69,8 @@
         <div class="h3" style="font-size:24px">${esc(me.name)} <span class="muted" style="font-weight:500">· ${esc(me.team)}</span></div></div></div>
       <div class="steps">
         <div class="step"><span class="step-n" style="background:var(--green)">1</span><div style="min-width:0">
-          <h3 class="h3">Run this once and keep the window open</h3>
+          <h3 class="h3">Open a terminal in your project folder, run this, keep it open</h3>
+          <p class="muted" style="font-size:13px;margin:4px 0 0">Only agent sessions you run inside that folder count.</p>
           <div class="seg" style="margin:12px 0"><button class="on" data-os="ps">Windows PowerShell</button><button data-os="sh">macOS / Linux</button></div>
           <div class="cmd" id="cmdBox" data-text="${esc(ps)}"><span id="cmdText">${esc(ps)}</span><button class="copy" data-copy="cmdBox">Copy</button></div>
           <p class="muted" style="font-size:13px;margin:10px 0 0">It installs <code>agentplay</code> if needed, then syncs every 20 seconds. Needs Python 3.10+.</p></div></div>
