@@ -141,7 +141,7 @@
         ${sortCol ? `<th class="r hide-sm">${METRICS[sortCol]}</th>` : ""}<th class="hide-sm">Badges</th><th class="r hide-sm">Active</th></tr></thead>
         <tbody>${list.map((p, i) => `<tr data-href="${link.player(p.name)}" class="${me && me.name === p.name ? "me" : ""}">
           <td class="rank">${i + 1}${delta(p.delta)}</td>
-          <td><div class="who">${avatar(p.name, 38)}<div style="min-width:0"><div class="n">${esc(p.name)} ${p.live ? '<span class="live-dot" title="Live"></span>' : ""}</div>
+          <td><div class="who">${avatar(p.name, 38)}<div style="min-width:0"><div class="n">${esc(p.name)} ${p.live ? '<span class="live-dot" title="Live"></span>' : ""} ${p.flagged ? '<span class="tier-pill" style="background:#fee2e2;color:#991b1b;font-size:11px;font-weight:700">🚩 Flagged</span>' : ""}</div>
             <div class="t">${esc(p.team)} · ${esc(p.agentTools.join(", ") || "no sessions yet")}</div></div></div></td>
           <td class="r metric ${state.sort === "calls" ? "sorted" : ""}">${fmt(p.metrics.calls)}</td>
           ${cell("tokens", p)}${cell("commits", p)}${sortCol ? cell(sortCol, p) : ""}

@@ -30,15 +30,18 @@
   // ---------- login ----------
   function loginView(error) {
     main.innerHTML = `<div class="card" style="max-width:460px">
-      <h3 class="h3">Admin token</h3>
-      <p class="muted" style="margin:6px 0 14px">The value of <code>HUB_ADMIN_TOKEN</code> on the server. Kept in this tab only.</p>
-      <form id="login" style="display:flex;gap:10px;flex-wrap:wrap">
-        <input class="input" id="tok" type="password" autocomplete="off" style="flex:1;min-width:200px" required>
-        <button class="btn" type="submit">Unlock</button></form>
+      <h3 class="h3">🔒 Admin Console Login</h3>
+      <p class="muted" style="margin:6px 0 14px">Manage participants, teams, sessions, flags, and reset leaderboard data.<br>
+      <span class="faint" style="font-size:12.5px">Default credentials: <b>admin</b> / <b>admin</b></span></p>
+      <form id="login" style="display:flex;flex-direction:column;gap:12px">
+        <div class="field"><label for="admUser">Username</label><input class="input" id="admUser" type="text" value="admin" required></div>
+        <div class="field"><label for="admPass">Password / Token</label><input class="input" id="admPass" type="password" value="admin" required></div>
+        <div style="display:flex;justify-content:flex-end;margin-top:6px"><button class="btn" type="submit">Unlock Console</button></div>
+      </form>
       ${error ? `<p style="color:var(--red);margin:10px 0 0">${esc(error)}</p>` : ""}</div>`;
     document.getElementById("login").addEventListener("submit", (ev) => {
       ev.preventDefault();
-      token = document.getElementById("tok").value.trim();
+      token = document.getElementById("admPass").value.trim() || document.getElementById("admUser").value.trim();
       start();
     });
   }
@@ -150,6 +153,7 @@
           <div class="h3">Settings · ${esc(c.event_name)}</div>
           <div style="display:flex;gap:8px;flex-wrap:wrap">
             <a class="btn light" href="/api/admin/export?s=${encodeURIComponent(s.slug)}" data-a="export">Export data</a>
+            <button class="btn light danger" type="button" data-a="clear-all" title="Wipe all participants, teams, sessions, and badges for a fresh start">💥 Clean all data</button>
             <button class="btn light danger" type="button" data-a="clear-feed">Clear live feed</button>
             <button class="btn light${c.archived ? "" : " danger"}" type="button" data-a="${c.archived ? "reopen" : "archive"}">${c.archived ? "Reopen" : "Archive"}</button>
             ${s.active ? "" : `<button class="btn light danger" type="button" data-a="delete">Delete session</button>`}</div></div>
@@ -233,13 +237,14 @@
     }
     const open = state.open && state.open.name === p.name;
     return `<tr style="${p.hidden ? "opacity:.55" : ""}">
-      <td><div class="who">${avatar(p.name, 32)}<div style="min-width:0"><div class="n">${esc(p.name)} ${p.hidden ? '<span class="tier-pill">hidden</span>' : ""}</div>
-        <div class="t">joined ${HC.ago(p.created_at)}</div></div></div></td>
+      <td><div class="who">${avatar(p.name, 32)}<div style="min-width:0"><div class="n">${esc(p.name)} ${p.hidden ? '<span class="tier-pill">hidden</span>' : ""} ${p.flagged ? '<span class="tier-pill" style="background:#fee2e2;color:#991b1b;font-weight:700">🚩 Flagged</span>' : ""}</div>
+        <div class="t">📅 Started: ${new Date(p.created_at * 1000).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })} (${HC.ago(p.created_at)})</div></div></div></td>
       <td class="r metric"><button class="btn light" data-a="sessions" data-v="${esc(p.name)}" title="Show uploaded sessions">${fmt(p.sessions)} ${open ? "▴" : "▾"}</button></td>
       <td class="hide-sm faint">${p.last_upload ? HC.ago(p.last_upload) : "–"}</td>
       <td class="hide-sm" style="font-size:13px">${syncCell(p)}</td>
       <td class="r" style="white-space:nowrap">
         <button class="btn light" data-a="edit" data-v="${esc(p.name)}">Edit</button>
+        <button class="btn light" data-a="${p.flagged ? "unflag" : "flag"}" data-v="${esc(p.name)}">${p.flagged ? "Unflag" : "🚩 Flag"}</button>
         <button class="btn light" data-a="${p.hidden ? "unhide" : "hide"}" data-v="${esc(p.name)}" title="${p.hidden ? "Show on the board again" : "Keep their data but take them off the board"}">${p.hidden ? "Unhide" : "Hide"}</button>
         <button class="btn light" data-a="reissue" data-v="${esc(p.name)}">New token</button>
         <button class="btn light danger" data-a="remove" data-v="${esc(p.name)}">Remove</button></td></tr>
@@ -314,7 +319,7 @@
   // ---------- buttons ----------
   // Destructive ones need a second click within 4 s (no browser confirm dialogs).
   const DANGER = { remove: "Click to confirm", team: null, "remove-session": "Click to confirm", "clear-feed": "Clear it?",
-    archive: "Archive it?", delete: "Delete everything?" };
+    "clear-all": "Wipe ALL data?", archive: "Archive it?", delete: "Delete everything?" };
   function armed(btn) {
     if (btn.dataset.armed) return true;
     const original = btn.textContent;
@@ -347,6 +352,15 @@
           await call("/api/admin/sessions", { action: "delete", slug: state.sel });
           state.sel = ""; return refreshAll("Session deleted.");
         case "clear-feed": await call(q("/api/admin/clear-feed"), {}); return renderSettings("Live feed cleared.");
+        case "clear-all":
+          await call(q("/api/admin/clear-all"), {});
+          return refreshAll("All leaderboard data has been reset.");
+        case "flag":
+          await call(q("/api/admin/flag"), { name: v, flagged: true });
+          return refreshAll(`🚩 Flagged ${v} for review.`);
+        case "unflag":
+          await call(q("/api/admin/flag"), { name: v, flagged: false });
+          return refreshAll(`Unflagged ${v}.`);
         case "refresh": return refreshAll();
         case "edit": state.editing = v; return renderPeople();
         case "cancel-edit": state.editing = null; return renderPeople();

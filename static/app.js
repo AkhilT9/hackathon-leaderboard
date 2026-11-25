@@ -167,7 +167,7 @@ const HC = (() => {
     try { config = await api("/api/config"); } catch (_) { config = { name: "Hackathon Control" }; }
     document.title = document.title.replace("{event}", config.name);
     announce(config.announcement);
-    const links = [["/", "Leaderboard", "home"], ["/awards", "Awards", "awards"], ["/stage", "Stage", "stage"]];
+    const links = [["/", "Leaderboard", "home"], ["/awards", "Awards", "awards"], ["/stage", "Stage", "stage"], ["/admin", "🔒 Admin", "admin"]];
     const el = document.getElementById("nav");
     if (el) {
       el.className = "nav";
@@ -179,7 +179,7 @@ const HC = (() => {
     const foot = document.getElementById("footer");
     if (foot) {
       foot.className = "footer";
-      foot.innerHTML = `<div class="wrap"><span>${esc(config.name)} · live agent telemetry</span><span>Only counts, tool names and timings leave a laptop — never code or prompts.</span></div>`;
+      foot.innerHTML = `<div class="wrap"><span>${esc(config.name)} · live agent telemetry</span><span><a href="${withS("/admin")}" style="color:inherit;text-decoration:none;opacity:0.8;font-weight:600;">🔒 Admin Console</a> &middot; Only counts, tool names and timings leave a laptop.</span></div>`;
     }
     return config;
   }

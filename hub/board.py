@@ -239,6 +239,7 @@ class Board:
 
     def _build(self, now: float) -> dict[str, Any]:
         hidden = set(self.store.hidden())
+        flagged = set(self.store.flagged())
         people = [p for p in self.store.participants() if key(p["name"]) not in hidden]
         by_pid: dict[int, list[dict[str, Any]]] = {}
         for r in self.store.session_rows():
@@ -255,8 +256,8 @@ class Board:
             players.append({
                 "id": p["id"], "name": p["name"], "team": p["team"], "teamKey": p["team_key"], "key": key(p["name"]),
                 "totals": totals, "badges": B.evaluate(B.PERSONAL, totals), "lastActive": last,
-                # live = their sync is running right now, or they uploaded activity in the last 5 minutes
                 "live": connected or bool(last and now - last < LIVE_WINDOW_S), "connected": connected,
+                "flagged": key(p["name"]) in flagged,
                 "sync": status, "joinedAt": p["created_at"],
             })
 
@@ -397,6 +398,7 @@ class Board:
     def _public_player(pl: dict[str, Any]) -> dict[str, Any]:
         t = pl["totals"]
         return {"name": pl["name"], "team": pl["team"], "rank": pl["rank"], "delta": pl["delta"], "live": pl["live"],
+                "flagged": pl.get("flagged", False),
                 "lastActive": pl["lastActive"], "agentTools": t["agentTools"], "metrics": _pick(t),
                 "badges": pl["badges"], "crowns": pl["crowns"]}
 

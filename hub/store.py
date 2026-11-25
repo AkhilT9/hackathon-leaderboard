@@ -204,6 +204,28 @@ class Store:
             self.version += 1
         return True
 
+    def flagged(self) -> list[str]:
+        return list(self.meta_get("flagged", []))
+
+    def set_flagged(self, name: str, flag: bool) -> bool:
+        with self.lock:
+            if not self.by_name(name):
+                return False
+            cur = set(self.flagged())
+            cur = cur | {key(name)} if flag else cur - {key(name)}
+            self.meta_set("flagged", sorted(cur))
+            self.version += 1
+        return True
+
+    def clear_all(self) -> None:
+        """Atomically wipe all participants, teams, sessions, snapshots, badges, events, and flags."""
+        with self.lock:
+            for tbl in ("sessions", "snapshots", "badge_state", "sync_status", "events", "participants"):
+                self.db.execute(f"DELETE FROM {tbl}")
+            self.meta_set("hidden", [])
+            self.meta_set("flagged", [])
+            self.version += 1
+
     def remove_session(self, pid: int, session_id: str) -> bool:
         with self.lock:
             cur = self.db.execute("DELETE FROM sessions WHERE participant_id=? AND session_id=?", (pid, session_id))
@@ -241,8 +263,10 @@ class Store:
                 " GROUP BY p.id ORDER BY p.team_key, p.name_key"
             ).fetchall()
         hidden = set(self.hidden())
+        flagged = set(self.flagged())
         return [{**{k: r[k] for k in ("name", "team", "created_at", "sessions", "last_upload", "sync_ts")},
                  "hidden": key(r["name"]) in hidden,
+                 "flagged": key(r["name"]) in flagged,
                  "sync": json.loads(r["sync"]) if r["sync"] else None} for r in rows]
 
     def participants(self) -> list[dict[str, Any]]:
