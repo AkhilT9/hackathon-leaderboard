@@ -486,6 +486,13 @@ class HttpTests(unittest.TestCase):
             self.assertEqual(self.req("/api/me", headers={"X-Upload-Token": token})[0], 401)
         self.assertEqual(self.req("/api/admin/sessions")[0], 403)
 
+    def test_csv_cells_cannot_start_formulas(self):
+        self.assertEqual(srv.csv_text("=HYPERLINK(\"x\")"), "'=HYPERLINK(\"x\")")
+        for bad in ("+1", "-2", "@SUM(A1)", "\tx"):
+            self.assertTrue(srv.csv_text(bad).startswith("'"), bad)
+        self.assertEqual(srv.csv_text("Ada Lovelace"), "Ada Lovelace")
+        self.assertEqual(srv.csv_text("claude-code, codex"), "claude-code, codex")
+
     def test_admin_disabled_without_token(self):
         status, _, _ = self.req("/api/admin/remove", json.dumps({"name": "Dup"}).encode(), {"X-Admin-Token": ""})
         self.assertEqual(status, 403)
