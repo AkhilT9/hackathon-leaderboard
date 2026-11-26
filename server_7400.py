@@ -108,6 +108,13 @@ def decode_map(raw: bytes) -> tuple[bytes, Any]:
     return raw, doc
 
 
+def csv_text(value: Any) -> str:
+    """A spreadsheet-safe cell: text starting like a formula (=, +, -, @, tab, CR) gets a leading
+    apostrophe, so a participant named '=HYPERLINK(...)' can't run when judges open the CSV."""
+    text = str(value)
+    return "'" + text if text[:1] in ("=", "+", "-", "@", "\t", "\r") else text
+
+
 def _public(payload: dict[str, Any]) -> dict[str, Any]:
     return {k: v for k, v in payload.items() if not k.startswith("_")}
 
@@ -347,7 +354,7 @@ class Handler(BaseHTTPRequestHandler):
             for pl in board.payload()["players"]:
                 m = pl["metrics"]
                 w.writerow([
-                    pl["rank"], pl["name"], pl["team"], ", ".join(pl["agentTools"]),
+                    pl["rank"], csv_text(pl["name"]), csv_text(pl["team"]), csv_text(", ".join(pl["agentTools"])),
                     m.get("calls", 0), m.get("tokens", 0), m.get("commits", 0),
                     m.get("mcpCalls", 0), m.get("errors", 0), f"{m.get('costUsd', 0.0):.2f}",
                     len(pl["badges"]), "YES" if pl.get("flagged") else "NO", "YES" if pl["live"] else "NO",
