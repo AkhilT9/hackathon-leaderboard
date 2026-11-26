@@ -8,7 +8,7 @@
     [120, "UTC+2"], [180, "UTC+3"], [240, "UTC+4 (Gulf)"], [330, "UTC+5:30 (India)"], [345, "UTC+5:45 (Nepal)"],
     [420, "UTC+7"], [480, "UTC+8 (Singapore)"], [540, "UTC+9 (Japan)"], [600, "UTC+10 (Sydney)"]];
   const STATUS = { live: "var(--green)", upcoming: "var(--blue)", ended: "var(--faint)", archived: "var(--faint)" };
-  const state = { sessions: [], active: "", rankable: [], agents: [], sel: "", rows: [], q: "", issued: null,
+  const state = { sessions: [], active: "", rankable: [], agents: [], sel: "", rows: [], q: "", onlyFlagged: false, issued: null,
     open: null, editing: null, creating: false };
   let token = "";
   try { token = sessionStorage.getItem(KEY) || ""; } catch (_) { /* storage blocked */ }
@@ -31,17 +31,19 @@
   function loginView(error) {
     main.innerHTML = `<div class="card" style="max-width:460px">
       <h3 class="h3">🔒 Admin Console Login</h3>
-      <p class="muted" style="margin:6px 0 14px">Manage participants, teams, sessions, flags, and reset leaderboard data.<br>
-      <span class="faint" style="font-size:12.5px">Default credentials: <b>admin</b> / <b>admin</b></span></p>
+      <p class="muted" style="margin:6px 0 14px">Enter organiser credentials to manage participants, teams, sessions, flags, and reset leaderboard data.</p>
       <form id="login" style="display:flex;flex-direction:column;gap:12px">
-        <div class="field"><label for="admUser">Username</label><input class="input" id="admUser" type="text" value="admin" required></div>
-        <div class="field"><label for="admPass">Password / Token</label><input class="input" id="admPass" type="password" value="admin" required></div>
+        <div class="field"><label for="admUser">Username</label><input class="input" id="admUser" type="text" autocomplete="username" placeholder="Username" required></div>
+        <div class="field"><label for="admPass">Password</label><input class="input" id="admPass" type="password" autocomplete="current-password" placeholder="Password" required></div>
         <div style="display:flex;justify-content:flex-end;margin-top:6px"><button class="btn" type="submit">Unlock Console</button></div>
       </form>
       ${error ? `<p style="color:var(--red);margin:10px 0 0">${esc(error)}</p>` : ""}</div>`;
     document.getElementById("login").addEventListener("submit", (ev) => {
       ev.preventDefault();
-      token = document.getElementById("admPass").value.trim() || document.getElementById("admUser").value.trim();
+      const user = document.getElementById("admUser").value.trim();
+      const pass = document.getElementById("admPass").value.trim();
+      if (user !== "admin") return loginView("Invalid admin credentials.");
+      token = pass;
       start();
     });
   }
@@ -152,7 +154,9 @@
         <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px">
           <div class="h3">Settings · ${esc(c.event_name)}</div>
           <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <a class="btn light" href="/api/admin/export?s=${encodeURIComponent(s.slug)}" data-a="export">Export data</a>
+            <button class="btn light" type="button" data-a="copy-join">📋 Copy Join Link</button>
+            <a class="btn light" href="/api/admin/export-csv?s=${encodeURIComponent(s.slug)}" data-a="export-csv">📊 Export CSV</a>
+            <a class="btn light" href="/api/admin/export?s=${encodeURIComponent(s.slug)}" data-a="export">Export DB</a>
             <button class="btn light danger" type="button" data-a="clear-all" title="Wipe all participants, teams, sessions, and badges for a fresh start">💥 Clean all data</button>
             <button class="btn light danger" type="button" data-a="clear-feed">Clear live feed</button>
             <button class="btn light${c.archived ? "" : " danger"}" type="button" data-a="${c.archived ? "reopen" : "archive"}">${c.archived ? "Reopen" : "Archive"}</button>
@@ -260,11 +264,13 @@
     const needle = state.q.toLowerCase();
     const teams = new Map();
     for (const p of state.rows) {
+      if (state.onlyFlagged && !p.flagged) continue;
       if (needle && !p.name.toLowerCase().includes(needle) && !p.team.toLowerCase().includes(needle)) continue;
       const k = p.team.toLowerCase();  // the server matches teams case-insensitively
       if (!teams.has(k)) teams.set(k, []);
       teams.get(k).push(p);
     }
+    const flaggedCount = state.rows.filter((p) => p.flagged).length;
     const total = new Set(state.rows.map((p) => p.team.toLowerCase())).size;
     const el = document.getElementById("people");
     const hadFocus = document.activeElement && document.activeElement.id === "q";
@@ -272,6 +278,9 @@
       <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:18px">
         <div class="h3" style="margin-right:auto">People · ${esc(s ? s.settings.event_name : "")}</div>
         <input class="input" id="q" placeholder="Search name or team" value="${esc(state.q)}" style="flex:1;max-width:320px;min-width:200px">
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer">
+          <input type="checkbox" id="fFlagged" ${state.onlyFlagged ? "checked" : ""}> 🚩 Flagged only (${flaggedCount})
+        </label>
         <span class="muted">${fmt(state.rows.length)} builders · ${fmt(total)} teams</span>
         <button class="btn light" data-a="refresh">Refresh</button></div>
       <datalist id="teamList">${[...new Set(state.rows.map((p) => p.team))].map((t) => `<option value="${esc(t)}">`).join("")}</datalist>
@@ -289,6 +298,7 @@
     state.msg = "";
     const qEl = document.getElementById("q");
     qEl.addEventListener("input", () => { state.q = qEl.value; renderPeople(); });
+    document.getElementById("fFlagged").addEventListener("change", (ev) => { state.onlyFlagged = ev.target.checked; renderPeople(); });
     if (hadFocus) { qEl.focus(); qEl.setSelectionRange(qEl.value.length, qEl.value.length); }
     el.querySelectorAll(".editForm").forEach((f) => f.addEventListener("submit", saveEdit));
     HC.copyButtons(el);
@@ -336,7 +346,19 @@
     const btn = ev.target.closest("[data-a]");
     if (!btn) return;
     const a = btn.dataset.a, v = btn.dataset.v;
-    if (a === "export") return exportDb(ev);
+    if (a === "export") return exportFile(ev, "/api/admin/export", `hackathon-${state.sel}.db`);
+    if (a === "export-csv") return exportFile(ev, "/api/admin/export-csv", `hackathon-${state.sel}-scores.csv`);
+    if (a === "copy-join") {
+      const s = sel();
+      const joinUrl = `${location.origin}/join?s=${encodeURIComponent(state.sel)}`;
+      const code = s && s.settings.registration_code ? ` (Code: ${s.settings.registration_code})` : "";
+      try {
+        await navigator.clipboard.writeText(joinUrl + code);
+        btn.textContent = "Copied!";
+        setTimeout(() => { if (btn.isConnected) btn.textContent = "📋 Copy Join Link"; }, 1600);
+      } catch (_) { renderSettings(`Join link: ${joinUrl}${code}`); }
+      return;
+    }
     if (a in DANGER && !armed(btn)) return;
     if (btn.tagName === "BUTTON") btn.disabled = true;
     state.issued = a === "reissue" ? state.issued : null;
@@ -394,13 +416,13 @@
     }
   }
 
-  async function exportDb(ev) {
+  async function exportFile(ev, endpoint, filename) {
     ev.preventDefault();  // the token goes in a header, so fetch it rather than follow the link
     try {
-      const res = await fetch(q("/api/admin/export"), { headers: { "X-Admin-Token": token } });
+      const res = await fetch(q(endpoint), { headers: { "X-Admin-Token": token } });
       if (!res.ok) throw new Error(`Export failed (${res.status})`);
       const url = URL.createObjectURL(await res.blob());
-      const a = Object.assign(document.createElement("a"), { href: url, download: `hackathon-${state.sel}.db` });
+      const a = Object.assign(document.createElement("a"), { href: url, download: filename });
       document.body.append(a); a.click(); a.remove();
       setTimeout(() => URL.revokeObjectURL(url), 5000);
     } catch (e) { renderSettings(e.message, true); }

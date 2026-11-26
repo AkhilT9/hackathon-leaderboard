@@ -308,11 +308,11 @@ class Handler(BaseHTTPRequestHandler):
 
     # -- admin --------------------------------------------------------------
     def _is_admin(self) -> bool:
-        admin = os.environ.get("HUB_ADMIN_TOKEN", "admin").strip()
+        admin = os.environ.get("HUB_ADMIN_TOKEN", "abcdefg123456").strip()
         given = self.headers.get("X-Admin-Token", "").strip()
-        if given and (given == admin or given == "admin" or given == "admin:admin" or (admin and hmac.compare_digest(given.encode(), admin.encode()))):
+        if given and admin and hmac.compare_digest(given.encode(), admin.encode()):
             return True
-        self._json(HTTPStatus.FORBIDDEN, {"error": "Invalid admin credentials. Use admin / admin."})
+        self._json(HTTPStatus.FORBIDDEN, {"error": "Invalid admin credentials."})
         return False
 
     def _admin_get(self, path: str, arg) -> None:
@@ -339,6 +339,21 @@ class Handler(BaseHTTPRequestHandler):
             body = board.store.export_bytes(self.registry.dir)
             return self._send(HTTPStatus.OK, body, "application/vnd.sqlite3",
                               extra={"Content-Disposition": f'attachment; filename="hackathon-{board.slug}.db"'})
+        if path == "/api/admin/export-csv":
+            import csv
+            buf = io.StringIO()
+            w = csv.writer(buf)
+            w.writerow(["Rank", "Participant", "Team", "Agents", "Tool Calls", "Tokens", "Commits", "MCP Calls", "Errors", "Spend USD", "Badges", "Flagged", "Live"])
+            for pl in board.payload()["players"]:
+                m = pl["metrics"]
+                w.writerow([
+                    pl["rank"], pl["name"], pl["team"], ", ".join(pl["agentTools"]),
+                    m.get("calls", 0), m.get("tokens", 0), m.get("commits", 0),
+                    m.get("mcpCalls", 0), m.get("errors", 0), f"{m.get('costUsd', 0.0):.2f}",
+                    len(pl["badges"]), "YES" if pl.get("flagged") else "NO", "YES" if pl["live"] else "NO",
+                ])
+            return self._send(HTTPStatus.OK, buf.getvalue().encode("utf-8"), "text/csv; charset=utf-8",
+                              extra={"Content-Disposition": f'attachment; filename="hackathon-{board.slug}-scores.csv"'})
         self._json(HTTPStatus.NOT_FOUND, {"error": "Not found"})
 
     def _admin_post(self, path: str, slug: str) -> None:
