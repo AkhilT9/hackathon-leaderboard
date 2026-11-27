@@ -181,6 +181,8 @@ class Board:
         started = M.parse_ts(sess.get("startedAt"))
         if self.cfg.event_start and started and started < self.cfg.event_start:
             return {"ok": True, "skipped": "session started before the event"}
+        if self.cfg.event_end and ((started and started > self.cfg.event_end) or datetime.now(UTC) > self.cfg.event_end):
+            return {"ok": True, "skipped": "event time window has ended"}
 
         content_hash = hashlib.sha256(raw_json).hexdigest()
         pid = participant["id"]
