@@ -1,11 +1,12 @@
 """Sync local agentplay sessions to a Hackathon Control hub.
 
-Participants can run this once to upload recent built maps, or with --watch
-to build and push new/updated sessions automatically during a hackathon.
+Same job as the /join.ps1 and /join.sh one-liners, for people who prefer Python.
+Get your upload token from the hub's /join page (it identifies you; name and team
+come from your registration).
 
 Examples:
-    python sync_to_hub.py --name Akhil --team Observability --hub http://127.0.0.1:7400
-    python sync_to_hub.py --name Akhil --team Observability --hub http://192.168.1.10:7400 --watch
+    python sync_to_hub.py --hub https://hub.example.com --token <TOKEN>
+    HUB_TOKEN=<TOKEN> python sync_to_hub.py --hub https://hub.example.com --watch
 """
 
 from __future__ import annotations
@@ -21,7 +22,6 @@ import subprocess
 import sys
 import time
 import urllib.error
-import urllib.parse
 import urllib.request
 
 
@@ -71,17 +71,14 @@ def _parse_iso(ts: str | None) -> datetime | None:
         return None
 
 
-def upload_map(hub_url: str, name: str, team: str, repo: str | None, map_path: Path) -> dict:
-    params = {"participant": name, "team": team}
-    if repo:
-        params["repo"] = repo
-    url = hub_url.rstrip("/") + "/api/upload?" + urllib.parse.urlencode(params)
+def upload_map(hub_url: str, token: str, map_path: Path) -> dict:
+    url = hub_url.rstrip("/") + "/api/upload"
     payload = gzip.compress(map_path.read_bytes())
     req = urllib.request.Request(
         url,
         data=payload,
         method="POST",
-        headers={"Content-Type": "application/gzip"},
+        headers={"Content-Type": "application/gzip", "X-Upload-Token": token},
     )
     with urllib.request.urlopen(req, timeout=15) as resp:
         return json.loads(resp.read().decode("utf-8"))
@@ -89,9 +86,7 @@ def upload_map(hub_url: str, name: str, team: str, repo: str | None, map_path: P
 
 def sync_once(
     hub_url: str,
-    name: str,
-    team: str,
-    repo: str | None,
+    token: str,
     since_hours: float,
     seen_hashes: dict[str, str],
     skip_build: bool = False,
@@ -127,10 +122,11 @@ def sync_once(
             continue
 
         try:
-            res = upload_map(hub_url, name, team, repo, map_path)
+            res = upload_map(hub_url, token, map_path)
             seen_hashes[sid] = chash
             uploaded += 1
-            print(f"[ok] {sid} -> {res.get('calls')} calls, ${res.get('costUsd'):.2f}")
+            status = res.get("skipped") or ("unchanged" if res.get("unchanged") else f"{res.get('calls')} calls")
+            print(f"[ok] {sid} -> {status}")
         except (urllib.error.URLError, OSError, ValueError) as exc:
             print(f"[err] {sid}: {exc}", file=sys.stderr)
 
@@ -139,18 +135,18 @@ def sync_once(
 
 def main() -> None:
     ap = argparse.ArgumentParser(description="Upload local agentplay sessions to Hackathon Control.")
-    ap.add_argument("--name", required=True, help="Participant display name")
-    ap.add_argument("--team", required=True, help="Team name")
-    ap.add_argument("--repo", default=None, help="Optional repo name override")
     ap.add_argument("--hub", default="http://127.0.0.1:7400", help="Hackathon Control URL")
-    ap.add_argument("--hours", type=float, default=72.0, help="Only sync sessions from the last N hours (0 = all)")
+    ap.add_argument("--token", default=os.environ.get("HUB_TOKEN", ""), help="Upload token from /join (or HUB_TOKEN)")
+    ap.add_argument("--hours", type=float, default=12.0, help="Only sync sessions from the last N hours (0 = all)")
     ap.add_argument("--watch", action="store_true", help="Keep polling and uploading new/changed sessions")
     ap.add_argument("--interval", type=int, default=30, help="Seconds between syncs in --watch mode")
     ap.add_argument("--no-build", action="store_true", help="Skip running `agentplay build` before uploading")
     args = ap.parse_args()
+    if not args.token:
+        ap.error("--token is required (get it from the hub's /join page)")
 
     seen: dict[str, str] = {}
-    count = sync_once(args.hub, args.name, args.team, args.repo, args.hours, seen, skip_build=args.no_build)
+    count = sync_once(args.hub, args.token, args.hours, seen, skip_build=args.no_build)
     print(f"Sync complete: {count} session(s) uploaded to {args.hub}.")
 
     if not args.watch:
@@ -160,7 +156,7 @@ def main() -> None:
     try:
         while True:
             time.sleep(args.interval)
-            sync_once(args.hub, args.name, args.team, args.repo, args.hours, seen, skip_build=args.no_build)
+            sync_once(args.hub, args.token, args.hours, seen, skip_build=args.no_build)
     except KeyboardInterrupt:
         print("\nStopped.")
 

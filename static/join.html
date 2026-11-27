@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Join · {event}</title>
+  <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/static/theme.css">
+</head>
+<body>
+  <header id="nav"></header>
+  <section class="hero" style="padding-bottom:16px">
+    <div id="shapes"></div>
+    <div class="wrap">
+      <span class="eyebrow">Join</span>
+      <h1 class="display">Get on<br>the <span class="io-text">board.</span></h1>
+      <p class="lede">Register once, run one command, and every tool call your coding agent makes shows up live. Works with Claude Code, Cursor, Codex, Copilot, Antigravity, Gemini CLI and OpenCode.</p>
+    </div>
+  </section>
+
+  <section class="section" style="padding-top:8px">
+    <div class="wrap grid-2">
+      <div class="card" id="main"></div>
+      <div style="display:grid;gap:16px;align-content:start">
+        <div class="card soft">
+          <h3 class="h3">What leaves your laptop</h3>
+          <p class="muted" style="margin:10px 0 0">Counts, tool names, timings, token totals and file names. Never your code, prompts, file contents, command arguments or secrets — <code>agentplay</code> strips them locally before anything is sent. Only sessions from the event window count.</p>
+        </div>
+        <div class="card soft">
+          <h3 class="h3">How you climb</h3>
+          <p class="muted" style="margin:10px 0 0">The board ranks by tool calls. Badges reward everything else: tokens, commits, tests, MCP servers, research, comebacks and more. <a href="/awards" style="color:var(--blue)">See every badge →</a></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer id="footer"></footer>
+  <script src="/static/app.js"></script>
+  <script src="/static/join.js"></script>
+</body>
+</html>

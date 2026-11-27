@@ -1,2 +1,3 @@
-agentplay>=0.2.6
-
+# The hub server needs only the Python standard library (3.11+).
+# Participants' laptops need agentplay; the /join scripts install it:
+#   python -m pip install --user agentplay

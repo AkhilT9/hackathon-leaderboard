@@ -1,120 +1,118 @@
-# Step-by-Step Gameplan: Local Testing & Cloud Deployment
+# Deploying to Google Cloud
 
-This guide gives you the exact step-by-step instructions for:
-1. **Testing on your desk today** (verifying the dashboard, replay modal, stage view, and live sync).
-2. **Deploying to the Cloud for the Hackathon** (Railway or Render in under 3 minutes).
+The hub keeps its state in one SQLite file, so it runs as **one Compute Engine VM** with a
+persistent disk (not Cloud Run, whose filesystem is wiped on every restart). `deploy/gcp/deploy.sh`
+creates and updates everything; re-run it to ship new code.
 
----
-
-## Phase 1: Testing on Your Desk Today (Localhost)
-
-The server is currently running in your workspace on **port 7400**.
-
-### Step 1: Open the 3 Browser Views
-Open these links in your browser to see the different views:
-
-1. **Main Leaderboard Dashboard**:
-   👉 **[http://127.0.0.1:7400/](http://127.0.0.1:7400/)**
-   - See all participants, tool calls, MCP calls, and commits.
-   - Click on **"Akhil"** in the table $\rightarrow$ The **Interactive Session Replay Modal** opens!
-   - Inspect the top tools (`Bash`, `WebSearch`, `manage_task (MCP)`), Run Health, and the chronological step-by-step timeline.
-
-2. **Stage / Projector View (For the Venue Big Screen)**:
-   👉 **[http://127.0.0.1:7400/stage](http://127.0.0.1:7400/stage)**
-   - Dark neon theme with live HUD stats.
-   - Top 3 Team Podium (Gold, Silver, Bronze).
-   - Real-time rolling ticker streaming live agent actions.
-
-3. **1-Click Quick Join Page**:
-   👉 **[http://127.0.0.1:7400/join](http://127.0.0.1:7400/join)**
-   - Type in any name and team $\rightarrow$ generates the 1-line copy-paste terminal command.
-
----
-
-### Step 2: Test a Participant Joining from Terminal
-Open a new PowerShell terminal window and run:
-```powershell
-irm "http://127.0.0.1:7400/join.ps1?name=TestUser&team=AlphaSquad" | iex
 ```
-*(Alternatively: `& ([scriptblock]::Create((irm http://127.0.0.1:7400/join.ps1))) -Name 'TestUser' -Team 'AlphaSquad'`)*
-**What happens**:
-1. It scans your local sessions.
-2. Uploads the latest session map to the leaderboard.
-3. Switch to your browser tab at `http://127.0.0.1:7400/` $\rightarrow$ **TestUser** and **AlphaSquad** immediately show up on the leaderboard with live sparklines!
-
----
-
-## Phase 2: Deploying to Cloud for the Hackathon (Railway or Render)
-
-All deployment configuration files have been created in your workspace:
-- `requirements.txt` (defines `agentplay`)
-- `Procfile` (tells cloud hosts to run `python server_7400.py`)
-- `Dockerfile` (ready for Docker-based deployments)
-- `render.yaml` (1-click blueprint for Render)
-- `.dockerignore`
-
----
-
-### Step 1: Push Your Code to GitHub (Takes 1 Minute)
-Open PowerShell in `C:\Users\akhil\Desktop\Observability` and run:
-
-```powershell
-# 1. Initialize git
-git init
-
-# 2. Add the hub files (excludes heavy agentplay clone)
-git add server_7400.py leaderboard_data.json requirements.txt Procfile Dockerfile render.yaml .dockerignore README.md EXPLAINER.md sync_to_hub.py
-
-# 3. Commit
-git commit -m "Hackathon Observability Hub & Leaderboard"
-
-# 4. Create a repo on github.com (e.g. 'hackathon-leaderboard'), then link it:
-git branch -M main
-git remote add origin https://github.com/<YOUR_GITHUB_USERNAME>/hackathon-leaderboard.git
-git push -u origin main
+participants ──HTTPS──▶ static IP ─▶ VM (Debian 12, e2-medium, asia-south1)
+                                       ├─ caddy  :80/:443  Let's Encrypt certificate
+                                       └─ hub    :7400     server_7400.py, /data/hub.db (Docker volume)
+                                     boot disk snapshotted daily, 7 days kept
 ```
 
----
+## What you need
 
-### Step 2: Choose Your Free Cloud Host (Takes 2 Minutes)
+- A GCP project with billing and the Compute Engine API enabled, and `gcloud` logged in (`gcloud auth login`).
+- IAP TCP forwarding allowed for your account (`roles/iap.tunnelResourceAccessor`) — the script uses it for SSH,
+  so port 22 is never open to the internet.
+- Optional: your own domain. Without one the script uses `<static-ip>.sslip.io`, which still gets a real certificate.
 
-#### Option A: Railway.app (Fastest & Simplest — Recommended)
-1. Go to **[https://railway.app](https://railway.app)** and click **Login with GitHub**.
-2. Click **"+ New Project"** $\rightarrow$ select **"Deploy from GitHub repo"**.
-3. Select your `hackathon-leaderboard` repository.
-4. Click **"Deploy Now"**.
-5. Once deployed, click on your service $\rightarrow$ go to **Settings** $\rightarrow$ **Networking** $\rightarrow$ click **"Generate Domain"**.
-6. Railway gives you a permanent HTTPS link:
-   `https://hackathon-leaderboard-production.up.railway.app`
-7. **Done!**
+## Preflight (creates nothing)
 
----
+```bash
+PROJECT=my-gcp-project ./deploy/gcp/deploy.sh --check
+```
 
-#### Option B: Render.com (100% Free Forever)
-1. Go to **[https://render.com](https://render.com)** and sign in with GitHub.
-2. Click **"New +"** $\rightarrow$ select **"Web Service"**.
-3. Connect your `hackathon-leaderboard` GitHub repository.
-4. Fill in the fields:
-   - **Name**: `hackathon-leaderboard`
-   - **Environment**: `Python 3`
-   - **Build Command**: `pip install -r requirements.txt`
-   - **Start Command**: `python server_7400.py`
-   - **Plan**: Select **Free**
-5. Click **"Create Web Service"**.
-6. In ~60 seconds, Render gives you a live public link:
-   `https://hackathon-leaderboard.onrender.com`
-7. **Done!**
+It checks the CLI login, project access, billing, required APIs, your event times and the files to ship,
+and says whether the VM will be created or updated.
 
----
+## Deploy
 
-## Phase 3: During the Hackathon Event
+Run from the repository root in Git Bash (Windows), macOS or Linux. On Windows, gcloud uses its bundled
+PuTTY for SSH/SCP over IAP; the first run creates an SSH key without prompting.
 
-Once your cloud link is live (e.g. `https://hackathon-leaderboard.onrender.com`):
+```bash
+PROJECT=my-gcp-project \
+EVENT_NAME="Hack Day 2026" \
+EVENT_START=2026-12-05T09:00:00+05:30 \
+EVENT_END=2026-12-06T09:00:00+05:30 \
+./deploy/gcp/deploy.sh
+```
 
-1. **For the Projector**:
-   Open **`https://hackathon-leaderboard.onrender.com/stage`** on the venue screen or auditorium TV.
-2. **For the Participants**:
-   Put this link on the presentation slides or Discord/Slack:
-   > *"To join the live leaderboard, go to https://hackathon-leaderboard.onrender.com/join"*
-3. Participants open that link on their phones or laptops, copy the 1-liner, paste it into their terminal, and they are live on the leaderboard all weekend!
+Optional variables: `ZONE` (default `asia-south1-a`), `NAME` (`hackathon-hub`), `MACHINE` (`e2-medium`),
+`DOMAIN`, `UTC_OFFSET_MINUTES` (330), `REGISTRATION_CODE`.
 
+On first run it writes `deploy/gcp/.env.hub` (git-ignored, mode 600) with a generated **admin token** and
+**event code**. Share the event code with participants; keep the admin token with organisers.
+
+The script prints the three URLs. Put `/stage` on the projector and `/join` on the slides.
+
+## Cost (approximate, asia-south1)
+
+e2-medium ≈ US$1/day, static IP and 20 GB disk a few cents a day, snapshots pennies.
+
+## Rehearsed locally (same bundle, same Compose stack, Caddy on `localhost`)
+
+- 100 builders uploading every 20 s **and** 100 browsers polling every 10 s through HTTPS:
+  uploads p95 50 ms, 0 failures; leaderboard p95 294 ms, 0 errors. Hub container: ~25 MB RAM.
+- Code update (`compose up --build`) and full `down`/`up` keep all data (Docker volume).
+- HTTP→HTTPS redirect, HSTS, CSP and the other security headers, event-code gate, admin token reissue
+  (old token stops working), `HEAD`/`GET /healthz` for uptime checks.
+
+## Operating during the event
+
+- **Lost token:** `curl -X POST https://<host>/api/admin/reissue -H "X-Admin-Token: $HUB_ADMIN_TOKEN" -d '{"name":"Their Name"}'`
+- **Remove a test or abusive entry:** same with `/api/admin/remove`.
+- **Logs:** `gcloud compute ssh hackathon-hub --zone asia-south1-a --tunnel-through-iap --command "cd /opt/hub/deploy/gcp && sudo docker compose logs -f hub"`
+- **Backup now:** `gcloud compute disks snapshot hackathon-hub --zone asia-south1-a`
+- **Dry run before the day:** point `scripts/simulate.py --hub https://<host> --code <event code>` at it, then
+  remove the simulated builders (or redeploy to a fresh VM).
+
+## Tear down
+
+```bash
+gcloud compute instances delete hackathon-hub --zone asia-south1-a
+gcloud compute addresses delete hackathon-hub-ip --region asia-south1
+gcloud compute firewall-rules delete hackathon-hub-web hackathon-hub-iap-ssh
+gcloud compute resource-policies delete hackathon-hub-daily --region asia-south1
+```
+
+# Deploying to LeafCloud
+
+The hub also runs on LeafCloud app hosting at <https://hackathon.apps.leafcloud.app>, as one container with a
+persistent `data` volume behind LeafCloud's HTTPS edge. `deploy/leafcloud/compose.yml` shows what runs there.
+
+## Automatic deploys
+
+`.github/workflows/deploy-leafcloud.yml` runs on every merge to `main` (and by hand from the Actions tab):
+
+1. runs the unit tests;
+2. builds the image and pushes it to `ghcr.io/akhilt9/hackathon-leaderboard:<short sha>`;
+3. runs `leaf app deploy hackathon <short sha> --wait`. LeafCloud starts the new container beside the old one,
+   checks `/healthz`, then switches traffic. If the health check fails it keeps the old version and the job fails.
+
+## One-time setup
+
+- **`LEAF_TOKEN` repository secret**: a LeafCloud API key with the apps scope, created by the app's owner
+  (`leaf keys create --name github-deploy --can apps --expires 90d`). It can deploy and roll back apps, nothing else.
+- **Public package**: after the first run, set `ghcr.io/akhilt9/hackathon-leaderboard` to public
+  (GitHub → Packages → hackathon-leaderboard → Package settings → Change visibility), so the server can pull it.
+  The image holds only this repository's code.
+
+## Settings
+
+The hub's settings live in LeafCloud's app environment, not in the repository:
+
+| Variable | Kind | Purpose |
+|---|---|---|
+| `HUB_ADMIN_TOKEN` | secret | Admin login (`/admin`, user `admin`). Must be set: without it the hub falls back to a built-in token. |
+| `HUB_REGISTRATION_CODE` | config | Code participants enter on `/join`. |
+| `HUB_PUBLIC_URL` | config | `https://hackathon.apps.leafcloud.app`, baked into the sync scripts. |
+
+They are changed by the app's owner with `leaf app env set hackathon …` and take effect on the next deploy.
+
+## Rollback
+
+`leaf app rollback hackathon` switches back to the previous image. The data volume is kept across deploys and
+rollbacks.

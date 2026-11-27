@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Builder · {event}</title>
+  <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/static/theme.css">
+</head>
+<body>
+  <header id="nav"></header>
+  <section class="hero" style="padding-bottom:24px">
+    <div id="shapes"></div>
+    <div class="wrap" id="hero"><div class="empty">Loading builder…</div></div>
+  </section>
+
+  <section class="section" style="padding-top:0;padding-bottom:16px">
+    <div class="wrap"><div class="card soft" id="sync"></div></div>
+  </section>
+
+  <section class="section" style="padding-top:8px">
+    <div class="wrap">
+      <div class="section-head"><div><span class="eyebrow">Trophy case</span><h2 class="h2" style="font-size:32px;margin-top:8px">Badges earned.</h2></div></div>
+      <div class="grid-auto" id="earned"></div>
+    </div>
+  </section>
+
+  <section class="section" style="padding-top:8px">
+    <div class="wrap grid-2">
+      <div class="card"><div class="card-head"><h3 class="h3">Next up</h3><span class="chip">Closest badges first</span></div><div id="next" style="display:grid;gap:16px"></div></div>
+      <div style="display:grid;gap:16px;align-content:start">
+        <div class="card"><div class="card-head"><h3 class="h3">When you build</h3><span class="chip">Tool calls by hour</span></div><div id="hourly"></div></div>
+        <div class="card"><div class="card-head"><h3 class="h3">Favourite tools</h3></div><div id="tools"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" style="padding-top:8px">
+    <div class="wrap">
+      <div class="section-head"><h2 class="h2" style="font-size:32px">Sessions.</h2><span class="muted">Click a session to replay its steps</span></div>
+      <div class="card" id="sessions"></div>
+    </div>
+  </section>
+
+  <footer id="footer"></footer>
+  <script src="/static/app.js"></script>
+  <script src="/static/player.js"></script>
+</body>
+</html>

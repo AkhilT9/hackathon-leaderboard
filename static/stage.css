@@ -1,0 +1,76 @@
+/* Stage / projector view: one idea per scene, keynote scale. Uses theme.css tokens. */
+html, body { height: 100%; overflow: hidden; }
+.stage { height: 100vh; display: grid; grid-template-rows: auto 1fr auto auto; background: #fff; position: relative; }
+.stage-top { display: flex; align-items: center; gap: 2vw; padding: 2.2vh 3.2vw; font-size: clamp(14px, 1.15vw, 22px); }
+.stage-top .brand { font-size: 1.25em; }
+.stage-top .spacer { flex: 1; }
+.stage-top .chip { font-size: .85em; padding: .45em 1em; }
+.scene { position: relative; padding: 0 4.5vw; display: grid; align-content: center; min-height: 0; }
+.scene > .s { animation: scene-in .9s var(--ease) both; }
+@keyframes scene-in { from { opacity: 0; transform: translateY(2.4vh) scale(.985); } }
+.s-eyebrow { font-size: clamp(14px, 1.2vw, 24px); font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); display: flex; gap: .6em; align-items: center; }
+.s-title { font-size: clamp(40px, 5.6vw, 120px); font-weight: 800; letter-spacing: -.05em; line-height: .98; margin: 1.2vh 0 4vh; }
+
+.mega { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2vw; }
+.mega .m { background: var(--bg-soft); border-radius: 2.2vw; padding: 3.4vh 2.4vw; position: relative; overflow: hidden; }
+.mega .m .v { font-size: clamp(48px, 7.4vw, 170px); font-weight: 800; letter-spacing: -.055em; line-height: 1; font-variant-numeric: tabular-nums; }
+.mega .m .l { font-size: clamp(14px, 1.4vw, 28px); font-weight: 600; color: var(--muted); margin-top: 1.4vh; }
+.mega .m .bar { position: absolute; left: 0; bottom: 0; height: .8vh; width: 100%; }
+.sub-stats { display: flex; gap: 3vw; margin-top: 4vh; font-size: clamp(16px, 1.6vw, 32px); color: var(--ink-2); }
+.sub-stats b { font-weight: 800; color: var(--ink); }
+
+.stage-podium { display: grid; grid-template-columns: 1fr 1.2fr 1fr; gap: 2vw; align-items: end; }
+.stage-podium .pod { cursor: default; border-radius: 2.2vw; padding: 3vh 1.5vw; }
+.stage-podium .pod:hover { transform: none; }
+.stage-podium .who { font-size: clamp(18px, 2vw, 42px); }
+.stage-podium .team { font-size: clamp(13px, 1.2vw, 24px); }
+.stage-podium .big { font-size: clamp(30px, 3.8vw, 84px); }
+.stage-podium .place { font-size: clamp(12px, 1.1vw, 22px); }
+.runners { display: grid; grid-template-columns: repeat(auto-fit, minmax(22vw, 1fr)); gap: 1vh 2.4vw; margin-top: 3.5vh; }
+.runner { display: flex; align-items: center; gap: 1vw; font-size: clamp(14px, 1.35vw, 28px); padding: .8vh 0; border-bottom: 1px solid var(--line-2); }
+.runner .r { font-weight: 800; width: 2.6em; color: var(--faint); font-variant-numeric: tabular-nums; }
+.runner .n { flex: 1; font-weight: 650; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.runner .v { font-weight: 700; font-variant-numeric: tabular-nums; }
+
+.race { display: grid; gap: 2.2vh; }
+.race-row { display: grid; grid-template-columns: minmax(10vw, 20vw) 1fr minmax(8vw, auto); gap: 1.6vw; align-items: center; font-size: clamp(16px, 1.6vw, 34px); }
+.race-row .n { font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.race-row .split { height: 3.6vh; border-radius: 1vh; min-width: 0; }
+.race-row .v { font-weight: 800; font-variant-numeric: tabular-nums; text-align: right; }
+.race-row .track { height: 3.6vh; border-radius: 1vh; background: var(--line-2); overflow: hidden; }
+.race-row .track i { display: block; height: 100%; border-radius: inherit; animation: grow 1.2s var(--ease) both; transform-origin: left; }
+@keyframes grow { from { transform: scaleX(0); } }
+
+.crown-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(26vw, 1fr)); gap: 2vh 2vw; }
+.crown-cell { display: flex; gap: 1.2vw; align-items: center; background: var(--bg-soft); border-radius: 1.6vw; padding: 1.6vh 1.4vw; }
+.crown-cell .bn { font-size: clamp(13px, 1.1vw, 22px); color: var(--muted); font-weight: 600; }
+.crown-cell .hn { font-size: clamp(16px, 1.6vw, 34px); font-weight: 800; letter-spacing: -.02em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.big-feed { display: grid; gap: 1.6vh; }
+.big-feed .feed-item { font-size: clamp(16px, 1.7vw, 34px); padding: 1vh 0; }
+.big-feed .feed-item .txt { font-size: inherit; }
+.big-feed .feed-item .when { font-size: .6em; }
+
+.dots { display: flex; justify-content: center; gap: 10px; padding: 1.6vh 0; }
+.dots i { width: 8px; height: 8px; border-radius: 99px; background: var(--line); transition: all .4s var(--ease); cursor: pointer; }
+.dots i.on { width: 34px; background: var(--ink); }
+
+.ticker { border-top: 1px solid var(--line-2); overflow: hidden; white-space: nowrap; padding: 1.4vh 0; font-size: clamp(13px, 1.1vw, 22px); color: var(--ink-2); }
+.ticker-track { display: inline-flex; gap: 4vw; padding-left: 100%; animation: tick 60s linear infinite; }
+.ticker-track span { display: inline-flex; gap: .6em; align-items: center; }
+@keyframes tick { to { transform: translateX(-100%); } }
+
+.spotlight { position: fixed; inset: 0; display: grid; place-items: center; z-index: 200; pointer-events: none;
+  background: rgba(255, 255, 255, .78); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); opacity: 0; transition: opacity .5s var(--ease); }
+.spotlight.on { opacity: 1; }
+.spotlight .inner { text-align: center; display: grid; justify-items: center; gap: 2.4vh; transform: scale(.9); transition: transform .7s var(--ease); max-width: 80vw; }
+.spotlight.on .inner { transform: scale(1); }
+.spotlight .kicker { font-size: clamp(14px, 1.4vw, 28px); font-weight: 700; letter-spacing: .16em; text-transform: uppercase; }
+.spotlight .headline { font-size: clamp(36px, 5vw, 110px); font-weight: 800; letter-spacing: -.05em; line-height: 1; }
+.spotlight .sub { font-size: clamp(16px, 1.8vw, 38px); color: var(--ink-2); }
+.confetti { position: fixed; inset: 0; pointer-events: none; z-index: 201; overflow: hidden; }
+.confetti i { position: absolute; top: -4vh; width: 1vw; height: 1.8vh; border-radius: 2px; animation: fall 2.8s linear forwards; }
+@keyframes fall { to { transform: translateY(110vh) rotate(720deg); } }
+.hint { position: fixed; right: 16px; bottom: 6vh; font-size: 12px; color: var(--faint); }
+.stage-top .announce-chip { background: var(--ink); color: #fff; font-size: 1em; font-weight: 600; max-width: 45vw;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

@@ -1,0 +1,7 @@
+# Files that run on Linux (the VM, containers, bash) must keep LF line endings on every checkout.
+*.sh            text eol=lf
+Dockerfile      text eol=lf
+Caddyfile       text eol=lf
+*.yml           text eol=lf
+.dockerignore   text eol=lf
+*.py            text eol=lf

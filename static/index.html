@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Leaderboard · {event}</title>
+  <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/static/theme.css">
+</head>
+<body>
+  <header id="nav"></header>
+
+  <section class="hero">
+    <div id="shapes"></div>
+    <div class="wrap">
+      <span class="eyebrow"><span class="live-dot" id="liveDot"></span><span id="liveLabel">Live</span></span>
+      <h1 class="display">Who's building<br>the most, <span class="io-text">live.</span></h1>
+      <p class="lede" id="lede">Every tool call, token and commit from every builder, updated as it happens.</p>
+      <div class="chips" style="margin-top:24px" id="heroChips"></div>
+      <div class="stats" id="stats"></div>
+    </div>
+  </section>
+
+  <section class="section" id="winnersSection" style="display:none;padding-top:12px;padding-bottom:8px">
+    <div class="wrap" id="winnersBanner"></div>
+  </section>
+
+  <section class="section" style="padding-top:8px">
+    <div class="wrap grid-2">
+      <div class="card io-border" id="powerHour"></div>
+      <div class="card">
+        <div class="card-head"><h3 class="h3">Live feed</h3><span class="chip"><span class="live-dot"></span>Real time</span></div>
+        <div class="feed" id="feed"><div class="empty">Waiting for the first upload…</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <span class="eyebrow">Rankings</span>
+          <h2 class="h2" style="margin-top:8px">The leaderboard.</h2>
+        </div>
+        <div class="seg" role="tablist">
+          <button class="on" data-view="people" role="tab">Builders</button>
+          <button data-view="teams" role="tab">Teams</button>
+        </div>
+      </div>
+      <div class="section-head" style="margin-bottom:16px">
+        <div class="chips" id="metricChips"></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <input class="input" id="search" type="search" placeholder="Search builders or teams" aria-label="Search">
+          <select class="input" id="teamFilter" aria-label="Filter by team"></select>
+        </div>
+      </div>
+      <div class="podium" id="podium"></div>
+      <div class="card table-card"><table class="lb" id="table"></table></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <span class="eyebrow">Awards</span>
+          <h2 class="h2" style="margin-top:8px">Crown holders.</h2>
+        </div>
+        <a class="btn light" href="/awards">All badges</a>
+      </div>
+      <div class="grid-auto" id="crowns"></div>
+    </div>
+  </section>
+
+  <footer id="footer"></footer>
+  <script src="/static/app.js"></script>
+  <script src="/static/index.js"></script>
+</body>
+</html>
