@@ -1,0 +1,20 @@
+# The hub on LeafCloud app hosting. LeafCloud keeps its own copy of this file on the server; this one documents
+# what runs there. The deploy tag (APP_TAG) is the short commit SHA the GitHub workflow pushed.
+# HUB_ADMIN_TOKEN, HUB_REGISTRATION_CODE and HUB_PUBLIC_URL come from LeafCloud's app environment
+# (`leaf app env set`), never from this file.
+services:
+  app:
+    image: ghcr.io/akhilt9/hackathon-leaderboard:${APP_TAG}
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1::7400"  # loopback only; LeafCloud's edge serves HTTPS in front of it
+    volumes:
+      - data:/data  # registry.json and the session databases (HUB_DATA_DIR=/data in the image)
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:7400/healthz', timeout=3)"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+volumes:
+  data:

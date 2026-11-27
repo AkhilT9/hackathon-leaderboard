@@ -77,3 +77,42 @@ gcloud compute addresses delete hackathon-hub-ip --region asia-south1
 gcloud compute firewall-rules delete hackathon-hub-web hackathon-hub-iap-ssh
 gcloud compute resource-policies delete hackathon-hub-daily --region asia-south1
 ```
+
+# Deploying to LeafCloud
+
+The hub also runs on LeafCloud app hosting at <https://hackathon.apps.leafcloud.app>, as one container with a
+persistent `data` volume behind LeafCloud's HTTPS edge. `deploy/leafcloud/compose.yml` shows what runs there.
+
+## Automatic deploys
+
+`.github/workflows/deploy-leafcloud.yml` runs on every merge to `main` (and by hand from the Actions tab):
+
+1. runs the unit tests;
+2. builds the image and pushes it to `ghcr.io/akhilt9/hackathon-leaderboard:<short sha>`;
+3. runs `leaf app deploy hackathon <short sha> --wait`. LeafCloud starts the new container beside the old one,
+   checks `/healthz`, then switches traffic. If the health check fails it keeps the old version and the job fails.
+
+## One-time setup
+
+- **`LEAF_TOKEN` repository secret**: a LeafCloud API key with the apps scope, created by the app's owner
+  (`leaf keys create --name github-deploy --can apps --expires 90d`). It can deploy and roll back apps, nothing else.
+- **Public package**: after the first run, set `ghcr.io/akhilt9/hackathon-leaderboard` to public
+  (GitHub → Packages → hackathon-leaderboard → Package settings → Change visibility), so the server can pull it.
+  The image holds only this repository's code.
+
+## Settings
+
+The hub's settings live in LeafCloud's app environment, not in the repository:
+
+| Variable | Kind | Purpose |
+|---|---|---|
+| `HUB_ADMIN_TOKEN` | secret | Admin login (`/admin`, user `admin`). Must be set: without it the hub falls back to a built-in token. |
+| `HUB_REGISTRATION_CODE` | config | Code participants enter on `/join`. |
+| `HUB_PUBLIC_URL` | config | `https://hackathon.apps.leafcloud.app`, baked into the sync scripts. |
+
+They are changed by the app's owner with `leaf app env set hackathon …` and take effect on the next deploy.
+
+## Rollback
+
+`leaf app rollback hackathon` switches back to the previous image. The data volume is kept across deploys and
+rollbacks.
