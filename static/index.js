@@ -185,8 +185,50 @@
       : `<div class="card soft empty">Crowns appear as soon as someone earns a badge.</div>`;
   }
 
+  function renderWinners() {
+    const sec = document.getElementById("winnersSection");
+    const box = document.getElementById("winnersBanner");
+    if (!sec || !box) return;
+    const w = state.data && state.data.event && state.data.event.winners;
+    if (!w || !w.ended || !w.winners || !w.winners.length) {
+      sec.style.display = "none";
+      box.innerHTML = "";
+      return;
+    }
+    sec.style.display = "";
+    const liveLabel = document.getElementById("liveLabel");
+    const liveDot = document.getElementById("liveDot");
+    if (liveLabel) liveLabel.textContent = "Event Ended · Official Winners";
+    if (liveDot) liveDot.classList.add("off");
+
+    const list = w.winners;
+    const order = list.length >= 3 ? [1, 0, 2] : [0];
+    const medals = { 1: "🏆 1st Place", 2: "🥈 2nd Place", 3: "🥉 3rd Place" };
+    const rings = { 1: "#c9971c", 2: "#8d97a5", 3: "#b0652a" };
+    box.innerHTML = `
+      <div class="card io-border" style="padding:24px;text-align:center">
+        <span class="eyebrow" style="color:#b45309">🏁 Hackathon Complete · Official Podium</span>
+        <h2 class="h2" style="margin:8px 0 20px">${w.topN === 1 ? "Official Hackathon Winner" : "Official Top 3 Winners"}</h2>
+        <div class="podium" style="margin-bottom:0;justify-content:center">
+          ${order.filter((idx) => list[idx]).map((idx) => {
+            const x = list[idx];
+            const href = w.entity === "players" ? link.player(x.name) : link.team(x.name);
+            return `<div class="pod p${x.place}" data-href="${href}" onclick="location.href='${href}'" style="cursor:pointer">
+              <div class="place">${medals[x.place] || `#${x.place}`}</div>
+              <div style="margin-top:14px">${avatar(x.name, x.place === 1 ? 76 : 58, rings[x.place] || "#c9971c")}</div>
+              <div class="who" style="font-size:${x.place === 1 ? "22px" : "18px"}">${esc(x.name)}</div>
+              <div class="team">${esc(x.subtitle || (w.entity === "teams" ? "Team" : "Builder"))}</div>
+              <div class="big">${fmt(x.calls)}</div>
+              <div class="muted" style="font-size:13px">tool calls · ${fmt(x.commits)} commits</div>
+            </div>`;
+          }).join("")}
+        </div>
+      </div>`;
+  }
+
   function render() {
     if (!state.data) return;
+    renderWinners();
     renderStats();
     renderPowerHour();
     renderFilter();

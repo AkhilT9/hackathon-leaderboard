@@ -89,11 +89,30 @@
       <div class="big-feed">${feed.slice(-7).reverse().map(HC.feedItem).join("") || '<div class="empty" style="font-size:2vw">Quiet… for now.</div>'}</div></div>`;
   }
 
+  function sceneWinners() {
+    const w = data && data.event && data.event.winners;
+    if (!w || !w.ended || !w.winners || !w.winners.length) return sceneBuilders();
+    const list = w.winners;
+    const order = list.length >= 3 ? [1, 0, 2] : [0];
+    const medals = { 1: "1st", 2: "2nd", 3: "3rd" };
+    const rings = { 1: "#c9971c", 2: "#8d97a5", 3: "#b0652a" };
+    return `<div class="s"><div class="s-eyebrow">${HC.icon("trophy", 22, "#c9971c")} Official Hackathon ${w.topN === 1 ? "Winner" : "Winners"}</div>
+      <div class="s-title" style="margin-bottom:3vh">${w.topN === 1 ? "Champion." : "Top 3 Podium."}</div>
+      <div class="podium stage-podium" style="justify-content:center">${order.filter((idx) => list[idx]).map((idx) => {
+        const x = list[idx];
+        return `<div class="pod p${x.place}"><div class="place">${medals[x.place]}</div>
+          <div style="margin-top:2vh">${avatar(x.name, Math.round(innerHeight * (x.place === 1 ? 0.13 : 0.09)), rings[x.place] || "#c9971c")}</div>
+          <div class="who">${esc(x.name)}</div><div class="team">${esc(x.subtitle || "")}</div>
+          <div class="big">${fmt(x.calls)}</div><div class="muted">tool calls · ${fmt(x.commits)} commits</div></div>`;
+      }).join("")}</div></div>`;
+  }
+
   function show(i) {
     idx = (i + scenes.length) % scenes.length;
     if (!data) return;
     const el = document.getElementById("scene");
-    el.innerHTML = scenes[idx].render();
+    const w = data.event && data.event.winners;
+    el.innerHTML = (w && w.ended && idx === 0) ? sceneWinners() : scenes[idx].render();
     el.querySelectorAll("[data-count]").forEach((n) => HC.countUp(n, Number(n.dataset.count), fmt, 1600));
     document.getElementById("dots").innerHTML = scenes.map((_, j) => `<i class="${j === idx ? "on" : ""}" data-j="${j}"></i>`).join("");
     clearTimeout(timer);

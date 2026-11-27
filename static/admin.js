@@ -58,7 +58,7 @@
     try { sessionStorage.setItem(KEY, token); } catch (_) { /* */ }
     main.innerHTML = `
       <div style="display:flex;justify-content:flex-end;margin:0 0 16px"><button class="btn light" id="logout">Lock admin</button></div>
-      <div id="sessions"></div><div id="settings"></div><div id="people"></div>`;
+      <div id="sessions"></div><div id="endEvent"></div><div id="settings"></div><div id="people"></div>`;
     document.getElementById("logout").addEventListener("click", () => {
       token = ""; try { sessionStorage.removeItem(KEY); } catch (_) { /* */ }
       loginView();
@@ -66,6 +66,7 @@
     main.addEventListener("click", onClick);
     HC.copyButtons(main);
     renderSessions();
+    renderEndEvent();
     renderSettings();
     await loadPeople();
   }
@@ -138,8 +139,73 @@
   async function refreshAll(msg) {
     await loadSessions();
     renderSessions(msg);
+    await renderEndEvent();
     renderSettings();
     await loadPeople();
+  }
+
+  // ---------- end event & announce winners ----------
+  async function renderEndEvent() {
+    const box = document.getElementById("endEvent");
+    if (!box) return;
+    let cfg = null;
+    try { cfg = await HC.api(q("/api/config")); } catch (_) { return; }
+    const w = cfg && cfg.winners;
+    if (w && w.ended && w.winners) {
+      const medals = { 1: "🏆 1st Place", 2: "🥈 2nd Place", 3: "🥉 3rd Place" };
+      const order = w.winners.length >= 3 ? [1, 0, 2] : [0];
+      box.innerHTML = `
+        <div class="card io-border" style="margin-bottom:24px">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px">
+            <div>
+              <div class="h3">🏁 Event Ended · ${w.topN === 1 ? "Top 1 Winner" : "Top 3 Podium"} (${esc(w.entity)})</div>
+              <div class="muted" style="font-size:13px">Uploads are frozen and the Official Winners Podium is displayed on the Leaderboard and Stage.</div>
+            </div>
+            <button class="btn light" type="button" data-a="revert-event">↩️ Revert &amp; Reopen Event</button>
+          </div>
+          <div class="podium" style="margin-bottom:0;justify-content:center">
+            ${order.filter((idx) => w.winners[idx]).map((idx) => {
+              const x = w.winners[idx];
+              return `<div class="pod p${x.place}" style="min-width:170px">
+                <div class="place">${medals[x.place] || `#${x.place}`}</div>
+                <div style="margin-top:10px">${avatar(x.name, x.place === 1 ? 56 : 44)}</div>
+                <div class="who" style="font-size:16px">${esc(x.name)}</div>
+                <div class="team">${esc(x.subtitle || "")}</div>
+                <div class="big" style="font-size:22px">${fmt(x.calls)}</div>
+                <div class="muted" style="font-size:12px">calls · ${fmt(x.commits)} commits</div>
+              </div>`;
+            }).join("")}
+          </div>
+        </div>`;
+      return;
+    }
+
+    box.innerHTML = `
+      <div class="card" style="margin-bottom:24px">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px">
+          <div>
+            <div class="h3">🏁 End Event &amp; Announce Winners</div>
+            <div class="muted" style="font-size:13px">Freezes the leaderboard, locks in the official winners, and displays the Winners Podium on <code>/</code> and <code>/stage</code>. (Can be reverted anytime.)</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:14px;align-items:end;flex-wrap:wrap">
+          <div class="field" style="min-width:200px">
+            <label for="winTopN">Podium Format</label>
+            <select class="input" id="winTopN">
+              <option value="3">🏆 Top 3 Podium (1st, 2nd, 3rd)</option>
+              <option value="1">🥇 Top 1 Winner (1st Only)</option>
+            </select>
+          </div>
+          <div class="field" style="min-width:200px">
+            <label for="winEntity">Award To</label>
+            <select class="input" id="winEntity">
+              <option value="teams">Teams</option>
+              <option value="players">Builders (Individuals)</option>
+            </select>
+          </div>
+          <button class="btn" type="button" data-a="end-event" style="background:#b45309;border-color:#b45309">🏁 End Event &amp; Announce Winners</button>
+        </div>
+      </div>`;
   }
 
   // ---------- settings of the selected session ----------
@@ -377,6 +443,15 @@
         case "clear-all":
           await call(q("/api/admin/clear-all"), {});
           return refreshAll("All leaderboard data has been reset.");
+        case "end-event": {
+          const topN = Number(document.getElementById("winTopN")?.value || 3);
+          const entity = document.getElementById("winEntity")?.value || "teams";
+          await call(q("/api/admin/end-event"), { topN, entity });
+          return refreshAll(`Event ended! Top ${topN} ${entity} announced on the Podium.`);
+        }
+        case "revert-event":
+          await call(q("/api/admin/revert-event"), {});
+          return refreshAll("Event reverted and reopened! Uploads are live again.");
         case "flag":
           await call(q("/api/admin/flag"), { name: v, flagged: true });
           return refreshAll(`🚩 Flagged ${v} for review.`);

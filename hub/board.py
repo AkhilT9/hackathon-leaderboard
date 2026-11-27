@@ -377,17 +377,21 @@ class Board:
     def _event_info(self, now: float) -> dict[str, Any]:
         iso = lambda d: d.astimezone(UTC).strftime("%Y-%m-%dT%H:%M:%SZ") if d else None  # noqa: E731
         c = self.cfg
+        winners = self.store.meta_get("winners", None)
         return {"name": c.event_name, "slug": self.slug, "start": iso(c.event_start), "end": iso(c.event_end),
                 "utcOffsetMin": c.utc_offset_min, "requiresCode": bool(c.registration_code),
                 "registrationOpen": c.registration_open and not c.archived,
                 "uploadsOpen": c.uploads_open and not c.archived, "archived": c.archived,
                 "status": self.status(now), "rankBy": c.rank_by, "agents": list(c.agents),
-                "announcement": c.announcement, "now": int(now)}
+                "announcement": c.announcement, "winners": winners, "now": int(now)}
 
     def status(self, now: float | None = None) -> str:
         now = time.time() if now is None else now
         if self.cfg.archived:
             return "archived"
+        winners = self.store.meta_get("winners", None)
+        if isinstance(winners, dict) and winners.get("ended"):
+            return "ended"
         if self.cfg.event_start and now < self.cfg.event_start.timestamp():
             return "upcoming"
         if self.cfg.event_end and now >= self.cfg.event_end.timestamp():
