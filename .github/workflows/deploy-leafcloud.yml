@@ -1,0 +1,61 @@
+name: Deploy to LeafCloud
+
+# Every merge to main builds the hub image, pushes it to GitHub Container Registry and deploys that exact
+# commit to LeafCloud. A failed health check makes LeafCloud roll back to the previous version, and the job
+# fails.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: deploy-leafcloud
+  cancel-in-progress: false
+
+env:
+  APP: hackathon
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Unit tests
+        run: python -m unittest discover -s tests -t . -v
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push the image
+        run: |
+          IMAGE="ghcr.io/${GITHUB_REPOSITORY,,}"
+          TAG="${GITHUB_SHA::7}"
+          docker build -t "$IMAGE:$TAG" .
+          docker push "$IMAGE:$TAG"
+          echo "TAG=$TAG" >> "$GITHUB_ENV"
+
+      - name: Install the leaf CLI
+        run: |
+          curl -fsSL https://leafcloud.in/install.sh | sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Deploy
+        env:
+          LEAF_TOKEN: ${{ secrets.LEAF_TOKEN }}
+        run: leaf app deploy "$APP" "$TAG" --wait
