@@ -213,7 +213,8 @@ class Handler(BaseHTTPRequestHandler):
             except ValueError:
                 since = 0
             return self._json(HTTPStatus.OK, {"events": board.store.events_since(since),
-                                              "announcement": board.cfg.announcement})
+                                              "announcement": board.cfg.announcement,
+                                              "winners": board.store.meta_get("winners", None)})
         if path == "/api/player":
             data = board.player(arg("name"))
             return self._json(HTTPStatus.OK, data) if data else self._json(HTTPStatus.NOT_FOUND, {"error": "No such participant"})
@@ -382,25 +383,36 @@ class Handler(BaseHTTPRequestHandler):
             return self._json(HTTPStatus.OK, {"ok": True, "message": "All leaderboard data cleared."})
         if path == "/api/admin/end-event":
             top_n = 1 if int(body.get("topN") or 3) == 1 else 3
-            entity = "players" if str(body.get("entity") or "teams") == "players" else "teams"
+            raw_ent = str(body.get("entity") or "teams")
+            entity = raw_ent if raw_ent in ("teams", "players", "both") else "teams"
             payload = board.payload()
-            source = payload["players"] if entity == "players" else payload["teams"]
             rank_by = board.cfg.rank_by or "calls"
-            winners_list = []
-            for idx, item in enumerate(source[:top_n], start=1):
-                m = item.get("metrics") or {}
-                winners_list.append({
-                    "place": idx,
-                    "name": item["name"],
-                    "subtitle": item.get("team", "") if entity == "players" else f"{item.get('memberCount', 1)} member{'s' if item.get('memberCount', 1) != 1 else ''}",
-                    "calls": m.get("calls", 0),
-                    "commits": m.get("commits", 0),
-                    "tokens": m.get("tokens", 0),
-                    "score": m.get(rank_by, m.get("calls", 0)),
-                    "rankBy": rank_by,
-                })
+
+            def _pick_winners(src, kind):
+                out = []
+                for idx, item in enumerate(src[:top_n], start=1):
+                    m = item.get("metrics") or {}
+                    out.append({
+                        "place": idx,
+                        "name": item["name"],
+                        "subtitle": item.get("team", "") if kind == "players" else f"{item.get('memberCount', 1)} member{'s' if item.get('memberCount', 1) != 1 else ''}",
+                        "calls": m.get("calls", 0),
+                        "commits": m.get("commits", 0),
+                        "tokens": m.get("tokens", 0),
+                        "score": m.get(rank_by, m.get("calls", 0)),
+                        "rankBy": rank_by,
+                    })
+                return out
+
+            team_winners = _pick_winners(payload["teams"], "teams") if entity in ("teams", "both") else []
+            player_winners = _pick_winners(payload["players"], "players") if entity in ("players", "both") else []
+            winners_list = player_winners if entity == "players" else team_winners
             import time as _time
-            win_doc = {"ended": True, "topN": top_n, "entity": entity, "winners": winners_list, "endedAt": int(_time.time())}
+            win_doc = {
+                "ended": True, "topN": top_n, "entity": entity,
+                "winners": winners_list, "teamWinners": team_winners, "playerWinners": player_winners,
+                "endedAt": int(_time.time()),
+            }
             store.meta_set("winners", win_doc)
             board.update_settings({"uploads_open": False})
             return self._json(HTTPStatus.OK, {"ok": True, "winners": win_doc})

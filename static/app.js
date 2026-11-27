@@ -163,10 +163,75 @@ const HC = (() => {
 
   // ---------- page chrome ----------
   let config = null;
+  function renderWinnersPopup(w) {
+    let modal = document.getElementById("hcWinnersModal");
+    if (!w || !w.ended || (!w.winners?.length && !w.teamWinners?.length && !w.playerWinners?.length)) {
+      if (modal) modal.remove();
+      return;
+    }
+    const ackKey = "hc_win_ack";
+    const stamp = String(w.endedAt || 1);
+    try { if (sessionStorage.getItem(ackKey) === stamp) return; } catch (_) {}
+    if (modal && modal.dataset.stamp === stamp) return;
+    if (!modal) {
+      modal = document.createElement("div");
+      modal.id = "hcWinnersModal";
+      modal.style.cssText = "position:fixed;inset:0;z-index:9999;background:rgba(15,23,42,0.72);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:20px;";
+      document.body.appendChild(modal);
+    }
+    modal.dataset.stamp = stamp;
+    const medals = { 1: "🏆 1st Place", 2: "🥈 2nd Place", 3: "🥉 3rd Place" };
+    const rings = { 1: "#c9971c", 2: "#8d97a5", 3: "#b0652a" };
+    const podGroup = (list, title, kind) => {
+      if (!list || !list.length) return "";
+      const order = list.length >= 3 ? [1, 0, 2] : [0];
+      return `<div style="margin-top:16px">
+        ${title ? `<div style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#64748b;margin-bottom:10px">${esc(title)}</div>` : ""}
+        <div class="podium" style="margin-bottom:0;justify-content:center;gap:12px">
+          ${order.filter((idx) => list[idx]).map((idx) => {
+            const x = list[idx];
+            const href = kind === "players" ? link.player(x.name) : link.team(x.name);
+            return `<div class="pod p${x.place}" onclick="location.href='${href}'" style="cursor:pointer;min-width:165px;padding:16px">
+              <div class="place">${medals[x.place] || `#${x.place}`}</div>
+              <div style="margin-top:10px">${avatar(x.name, x.place === 1 ? 64 : 48, rings[x.place] || "#c9971c")}</div>
+              <div class="who" style="font-size:${x.place === 1 ? "19px" : "16px"}">${esc(x.name)}</div>
+              <div class="team">${esc(x.subtitle || "")}</div>
+              <div class="big" style="font-size:22px">${fmt(x.calls)}</div>
+              <div class="muted" style="font-size:12px">tool calls · ${fmt(x.commits)} commits</div>
+            </div>`;
+          }).join("")}
+        </div>
+      </div>`;
+    };
+    const bodyHtml = w.entity === "both"
+      ? podGroup(w.teamWinners, "Top Teams", "teams") + podGroup(w.playerWinners, "Top Individual Builders", "players")
+      : podGroup(w.winners, w.entity === "players" ? "Top Individual Builders" : "Top Teams", w.entity);
+    modal.innerHTML = `<div class="card io-border" style="max-width:860px;width:100%;max-height:90vh;overflow-y:auto;padding:28px;text-align:center;position:relative;background:#fff">
+      <button id="hcWinClose" class="btn light" style="position:absolute;top:16px;right:16px">✕ Close</button>
+      <span class="eyebrow" style="color:#b45309">🏁 Event Ended · Official Results</span>
+      <h2 class="h2" style="margin:8px 0 4px">${w.topN === 1 ? "Official Hackathon Winner" : "Official Top 3 Winners"}</h2>
+      ${bodyHtml}
+    </div>`;
+    document.getElementById("hcWinClose").addEventListener("click", () => {
+      try { sessionStorage.setItem(ackKey, stamp); } catch (_) {}
+      modal.remove();
+    });
+  }
+
   async function nav(active) {
     try { config = await api("/api/config"); } catch (_) { config = { name: "Hackathon Control" }; }
     document.title = document.title.replace("{event}", config.name);
     announce(config.announcement);
+    if (active !== "admin" && config.winners) renderWinnersPopup(config.winners);
+    if (active !== "admin") {
+      setInterval(async () => {
+        try {
+          const c = await api("/api/config");
+          if ("announcement" in c) announce(c.announcement);
+          renderWinnersPopup(c.winners);
+        } catch (_) {}
+      }, 6000);
+    }
     const links = [["/", "Leaderboard", "home"], ["/awards", "Awards", "awards"], ["/stage", "Stage", "stage"], ["/admin", "🔒 Admin", "admin"]];
     const el = document.getElementById("nav");
     if (el) {
@@ -275,6 +340,7 @@ const HC = (() => {
       try {
         const d = await api("/api/events?since=" + (since ?? 0));
         if ("announcement" in d) announce(d.announcement);
+        if ("winners" in d && !location.pathname.startsWith("/admin")) renderWinnersPopup(d.winners);
         if (since === null) { since = d.events.length ? d.events[d.events.length - 1].id : 0; onEvents([], d.events); }
         else if (d.events.length) { since = d.events[d.events.length - 1].id; onEvents(d.events, d.events); }
       } catch (_) { /* retry next tick */ }

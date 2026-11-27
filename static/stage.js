@@ -91,8 +91,8 @@
 
   function sceneWinners() {
     const w = data && data.event && data.event.winners;
-    if (!w || !w.ended || !w.winners || !w.winners.length) return sceneBuilders();
-    const list = w.winners;
+    if (!w || !w.ended || (!w.winners?.length && !w.teamWinners?.length && !w.playerWinners?.length)) return sceneBuilders();
+    const list = (w.entity === "both" ? w.teamWinners : w.winners) || [];
     const order = list.length >= 3 ? [1, 0, 2] : [0];
     const medals = { 1: "1st", 2: "2nd", 3: "3rd" };
     const rings = { 1: "#c9971c", 2: "#8d97a5", 3: "#b0652a" };

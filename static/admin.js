@@ -151,21 +151,16 @@
     let cfg = null;
     try { cfg = await HC.api(q("/api/config")); } catch (_) { return; }
     const w = cfg && cfg.winners;
-    if (w && w.ended && w.winners) {
+    if (w && w.ended && (w.winners?.length || w.teamWinners?.length || w.playerWinners?.length)) {
       const medals = { 1: "🏆 1st Place", 2: "🥈 2nd Place", 3: "🥉 3rd Place" };
-      const order = w.winners.length >= 3 ? [1, 0, 2] : [0];
-      box.innerHTML = `
-        <div class="card io-border" style="margin-bottom:24px">
-          <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px">
-            <div>
-              <div class="h3">🏁 Event Ended · ${w.topN === 1 ? "Top 1 Winner" : "Top 3 Podium"} (${esc(w.entity)})</div>
-              <div class="muted" style="font-size:13px">Uploads are frozen and the Official Winners Podium is displayed on the Leaderboard and Stage.</div>
-            </div>
-            <button class="btn light" type="button" data-a="revert-event">↩️ Revert &amp; Reopen Event</button>
-          </div>
+      const podHtml = (list, label) => {
+        if (!list || !list.length) return "";
+        const order = list.length >= 3 ? [1, 0, 2] : [0];
+        return `<div style="margin-top:12px">
+          ${label ? `<div class="muted" style="font-size:12px;font-weight:700;text-transform:uppercase;margin-bottom:8px;text-align:center">${esc(label)}</div>` : ""}
           <div class="podium" style="margin-bottom:0;justify-content:center">
-            ${order.filter((idx) => w.winners[idx]).map((idx) => {
-              const x = w.winners[idx];
+            ${order.filter((idx) => list[idx]).map((idx) => {
+              const x = list[idx];
               return `<div class="pod p${x.place}" style="min-width:170px">
                 <div class="place">${medals[x.place] || `#${x.place}`}</div>
                 <div style="margin-top:10px">${avatar(x.name, x.place === 1 ? 56 : 44)}</div>
@@ -177,6 +172,21 @@
             }).join("")}
           </div>
         </div>`;
+      };
+      const entLabel = w.entity === "both" ? "Teams + Individuals" : w.entity;
+      box.innerHTML = `
+        <div class="card io-border" style="margin-bottom:24px">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px">
+            <div>
+              <div class="h3">🏁 Event Ended · ${w.topN === 1 ? "Top 1 Winner" : "Top 3 Podium"} (${esc(entLabel)})</div>
+              <div class="muted" style="font-size:13px">Uploads are frozen and the Official Winners Podium is displayed as a popup on every screen.</div>
+            </div>
+            <button class="btn light" type="button" data-a="revert-event">↩️ Revert &amp; Reopen Event</button>
+          </div>
+          ${w.entity === "both"
+            ? podHtml(w.teamWinners, "Top Teams") + podHtml(w.playerWinners, "Top Individual Builders")
+            : podHtml(w.winners, "")}
+        </div>`;
       return;
     }
 
@@ -185,7 +195,7 @@
         <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px">
           <div>
             <div class="h3">🏁 End Event &amp; Announce Winners</div>
-            <div class="muted" style="font-size:13px">Freezes the leaderboard, locks in the official winners, and displays the Winners Podium on <code>/</code> and <code>/stage</code>. (Can be reverted anytime.)</div>
+            <div class="muted" style="font-size:13px">Freezes the leaderboard, locks in the official winners, and pops up the Winners Podium on everyone's screen. (Can be reverted anytime.)</div>
           </div>
         </div>
         <div style="display:flex;gap:14px;align-items:end;flex-wrap:wrap">
@@ -196,11 +206,12 @@
               <option value="1">🥇 Top 1 Winner (1st Only)</option>
             </select>
           </div>
-          <div class="field" style="min-width:200px">
+          <div class="field" style="min-width:220px">
             <label for="winEntity">Award To</label>
             <select class="input" id="winEntity">
               <option value="teams">Teams</option>
               <option value="players">Builders (Individuals)</option>
+              <option value="both">Individual + Team (Both)</option>
             </select>
           </div>
           <button class="btn" type="button" data-a="end-event" style="background:#b45309;border-color:#b45309">🏁 End Event &amp; Announce Winners</button>

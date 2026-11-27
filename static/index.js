@@ -190,7 +190,7 @@
     const box = document.getElementById("winnersBanner");
     if (!sec || !box) return;
     const w = state.data && state.data.event && state.data.event.winners;
-    if (!w || !w.ended || !w.winners || !w.winners.length) {
+    if (!w || !w.ended || (!w.winners?.length && !w.teamWinners?.length && !w.playerWinners?.length)) {
       sec.style.display = "none";
       box.innerHTML = "";
       return;
@@ -201,28 +201,36 @@
     if (liveLabel) liveLabel.textContent = "Event Ended · Official Winners";
     if (liveDot) liveDot.classList.add("off");
 
-    const list = w.winners;
-    const order = list.length >= 3 ? [1, 0, 2] : [0];
     const medals = { 1: "🏆 1st Place", 2: "🥈 2nd Place", 3: "🥉 3rd Place" };
     const rings = { 1: "#c9971c", 2: "#8d97a5", 3: "#b0652a" };
-    box.innerHTML = `
-      <div class="card io-border" style="padding:24px;text-align:center">
-        <span class="eyebrow" style="color:#b45309">🏁 Hackathon Complete · Official Podium</span>
-        <h2 class="h2" style="margin:8px 0 20px">${w.topN === 1 ? "Official Hackathon Winner" : "Official Top 3 Winners"}</h2>
+    const podGroup = (list, title, kind) => {
+      if (!list || !list.length) return "";
+      const order = list.length >= 3 ? [1, 0, 2] : [0];
+      return `<div style="margin-top:14px">
+        ${title ? `<div class="muted" style="font-size:13px;font-weight:700;text-transform:uppercase;margin-bottom:10px">${esc(title)}</div>` : ""}
         <div class="podium" style="margin-bottom:0;justify-content:center">
           ${order.filter((idx) => list[idx]).map((idx) => {
             const x = list[idx];
-            const href = w.entity === "players" ? link.player(x.name) : link.team(x.name);
+            const href = kind === "players" ? link.player(x.name) : link.team(x.name);
             return `<div class="pod p${x.place}" data-href="${href}" onclick="location.href='${href}'" style="cursor:pointer">
               <div class="place">${medals[x.place] || `#${x.place}`}</div>
               <div style="margin-top:14px">${avatar(x.name, x.place === 1 ? 76 : 58, rings[x.place] || "#c9971c")}</div>
               <div class="who" style="font-size:${x.place === 1 ? "22px" : "18px"}">${esc(x.name)}</div>
-              <div class="team">${esc(x.subtitle || (w.entity === "teams" ? "Team" : "Builder"))}</div>
+              <div class="team">${esc(x.subtitle || (kind === "teams" ? "Team" : "Builder"))}</div>
               <div class="big">${fmt(x.calls)}</div>
               <div class="muted" style="font-size:13px">tool calls · ${fmt(x.commits)} commits</div>
             </div>`;
           }).join("")}
         </div>
+      </div>`;
+    };
+    box.innerHTML = `
+      <div class="card io-border" style="padding:24px;text-align:center">
+        <span class="eyebrow" style="color:#b45309">🏁 Hackathon Complete · Official Podium</span>
+        <h2 class="h2" style="margin:8px 0 12px">${w.topN === 1 ? "Official Hackathon Winner" : "Official Top 3 Winners"}</h2>
+        ${w.entity === "both"
+          ? podGroup(w.teamWinners, "Top Teams", "teams") + podGroup(w.playerWinners, "Top Individual Builders", "players")
+          : podGroup(w.winners, "", w.entity)}
       </div>`;
   }
 
