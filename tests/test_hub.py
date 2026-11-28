@@ -400,6 +400,7 @@ class JoinScriptTests(unittest.TestCase):
             self.assertEqual(posted, ["/api/upload"])
             self.assertEqual(list(g["sent"]), ["here"])
             self.assertEqual((stats["found"], stats["eligible"], stats["skipped"]), (1, 1, {}))
+            self.assertEqual(stats["elsewhere"], 2)  # "other" and "nofolder": counted, never uploaded
 
     def test_sh_quote_round_trips(self):
         for p in self.PAYLOADS:
