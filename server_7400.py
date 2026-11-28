@@ -1,4 +1,4 @@
-"""Hackathon Control: live leaderboard for AI coding-agent activity.
+"""Catalyst: live leaderboard for AI coding-agent activity.
 
 Sessions: each hackathon event/round has its own board and database (hub/registry.py).
 Every page and /api/ call takes ?s=<slug>; without it, the active session is used.
@@ -120,7 +120,7 @@ def _public(payload: dict[str, Any]) -> dict[str, Any]:
 
 
 class Handler(BaseHTTPRequestHandler):
-    server_version = "HackathonControl/2"
+    server_version = "Catalyst/2"
     timeout = 30  # a client that stalls mid-body can't hold a thread forever
     registry: Registry
 
@@ -407,10 +407,34 @@ class Handler(BaseHTTPRequestHandler):
             team_winners = _pick_winners(payload["teams"], "teams") if entity in ("teams", "both") else []
             player_winners = _pick_winners(payload["players"], "players") if entity in ("players", "both") else []
             winners_list = player_winners if entity == "players" else team_winners
+
+            # Final snapshot: everyone's overall rank and which badges they earned.
+            def _standing(item, kind):
+                m = item.get("metrics") or {}
+                return {"rank": item["rank"], "name": item["name"],
+                        "subtitle": item.get("team", "") if kind == "players" else f"{item.get('memberCount', 1)} members",
+                        "calls": m.get("calls", 0), "tokens": m.get("tokens", 0), "commits": m.get("commits", 0),
+                        "badges": item.get("badges") or {}, "crowns": item.get("crowns") or []}
+
+            standings = {"players": [_standing(p, "players") for p in payload["players"]],
+                         "teams": [_standing(t, "teams") for t in payload["teams"]]}
+
+            def _badge_winners(defs, rows):
+                out = []
+                for b in defs:
+                    earners = [{"name": r["name"], "subtitle": r["subtitle"], "tier": r["badges"][b["id"]],
+                                "crown": b["id"] in r["crowns"]} for r in rows if b["id"] in r["badges"]]
+                    earners.sort(key=lambda e: (not e["crown"], -e["tier"]))
+                    out.append({"id": b["id"], "name": b["name"], "rule": b.get("rule", ""), "earners": earners})
+                return out
+
+            badge_winners = {"personal": _badge_winners(payload["awards"]["personal"], standings["players"]),
+                             "team": _badge_winners(payload["awards"]["team"], standings["teams"])}
             import time as _time
             win_doc = {
                 "ended": True, "topN": top_n, "entity": entity,
                 "winners": winners_list, "teamWinners": team_winners, "playerWinners": player_winners,
+                "standings": standings, "badgeWinners": badge_winners,
                 "endedAt": int(_time.time()),
             }
             store.meta_set("winners", win_doc)
@@ -504,7 +528,7 @@ def load_config() -> Config:
         return parsed
 
     return Config(
-        event_name=os.environ.get("HUB_EVENT_NAME", "Hackathon Control").strip()[:80] or "Hackathon Control",
+        event_name=os.environ.get("HUB_EVENT_NAME", "Catalyst").strip()[:80] or "Catalyst",
         event_start=ts("HUB_EVENT_START"),
         event_end=ts("HUB_EVENT_END"),
         utc_offset_min=int(os.environ.get("HUB_UTC_OFFSET_MINUTES", "330")),
@@ -513,7 +537,7 @@ def load_config() -> Config:
 
 
 def main() -> None:
-    ap = argparse.ArgumentParser(description="Hackathon Control leaderboard server")
+    ap = argparse.ArgumentParser(description="Catalyst leaderboard server")
     ap.add_argument("--host", default=os.environ.get("HOST") or ("0.0.0.0" if os.environ.get("PORT") else "127.0.0.1"))
     ap.add_argument("--port", type=int, default=int(os.environ.get("PORT") or 7400))
     ap.add_argument("--data-dir", default=os.environ.get("HUB_DATA_DIR") or str(BASE_DIR / "data"))
@@ -522,7 +546,7 @@ def main() -> None:
     Handler.registry = Registry(Path(args.data_dir), load_config())
     server = ThreadingHTTPServer((args.host, args.port), Handler)
     server.daemon_threads = True
-    print(f"Hackathon Control on http://{args.host}:{args.port}  (data: {args.data_dir})")
+    print(f"Catalyst on http://{args.host}:{args.port}  (data: {args.data_dir})")
     server.serve_forever()
 
 

@@ -2,8 +2,10 @@
 
 Both wrap the same small Python sync loop (SYNC_PY): agentplay needs Python anyway, and one
 loop keeps Windows and macOS/Linux behaving identically. The loop picks sessions from
-agentplay's index (not file times: `agentplay build` rewrites every map), skips sessions that
-started before the event, and re-uploads a session only when its content hash changes.
+agentplay's index (not file times: `agentplay build` rewrites every map) and uploads only
+sessions run in the folder the command was started in and active in the last hour (and,
+with an event start, started after it). Every other session is ignored without being
+counted or reported. A session is re-uploaded only when its content hash changes.
 
 Every value placed in a script is a quoted literal (no expansion), so names, teams, tokens
 and the hub URL can never become code. SYNC_PY itself is a constant.
@@ -16,7 +18,7 @@ import re
 SYNC_INTERVAL_S = 20
 
 SYNC_PY = r'''
-import gzip, json, os, shutil, subprocess, sys, time, urllib.error, urllib.request
+import gzip, json, os, re, shutil, subprocess, sys, time, urllib.error, urllib.parse, urllib.request
 from datetime import datetime, timedelta, timezone
 
 HUB = os.environ["HC_HUB"].rstrip("/")
@@ -24,7 +26,7 @@ TOKEN = os.environ["HC_TOKEN"]
 INTERVAL = int(os.environ.get("HC_INTERVAL") or 20)
 ROOT = os.path.join(os.path.expanduser("~"), ".agentplay")
 CLIENT = "sync/2"
-TOOLS = "Claude Code, Cursor, Codex, Copilot, Gemini CLI, OpenCode, Antigravity"
+TOOLS = "Claude Code, Cursor, Codex, Copilot, Gemini CLI, OpenCode, Antigravity, Kiro, Goose, Command Code"
 
 
 def ts(value):
@@ -35,13 +37,15 @@ def ts(value):
     return d if d.tzinfo else d.replace(tzinfo=timezone.utc)
 
 
-# With an event start, only sessions started after it count (the hub applies the same rule).
-# Without one, any session with activity in the last 12 hours counts.
+# Only sessions with activity in the last ACTIVE_HOURS are read or uploaded. With an event
+# start, a session must also have started after it (the hub applies the same rule).
+ACTIVE_HOURS = 1
 SINCE = ts(os.environ.get("HC_SINCE") or "")
-CUTOFF = SINCE or datetime.now(timezone.utc) - timedelta(hours=12)
-TOO_OLD = "started before the event" if SINCE else "no activity in the last 12 hours"
-OUTSIDE = "run outside this folder"
-UNKNOWN = "folder unknown"
+BEFORE_EVENT = "started before the event"
+
+
+def active_cutoff():
+    return datetime.now(timezone.utc) - timedelta(hours=ACTIVE_HOURS)
 
 _AG = os.path.join(os.path.expanduser("~"), ".gemini", "antigravity")
 if os.path.isdir(_AG):
@@ -79,8 +83,69 @@ def session_folders():
         return {}
 
 
+# Keys tools use for the folder they ran in, strongest first: Claude Code, Codex, Copilot CLI
+# and command-code write "cwd", goose "working_dir", OpenCode "directory".
+_STRONG = ("cwd", "working_dir", "workingDirectory", "workspaceFolder", "projectRoot", "project_root")
+_WEAK = ("directory", "workdir")
+_KEY = re.compile(r'"(%s)"\s*:\s*"((?:[^"\\]|\\.){2,1000})"' % "|".join(_STRONG + _WEAK))
+
+
+def _path(value):
+    """A plain absolute path from a path or file:// URI, or ''."""
+    v = str(value or "").strip()
+    if v.startswith("file://"):
+        v = urllib.parse.unquote(v[7:])
+        if re.match(r"^/[A-Za-z]:", v):  # file:///c:/x on Windows
+            v = v[1:]
+    return v if v and os.path.isabs(v) else ""
+
+
+def source_folder(r):
+    """The folder the tool itself recorded for a session, read from the tool's own session
+    file on this laptop (index "sourcePath"). Covers tools whose folder agentplay's index
+    leaves out. Read locally only; nothing extra is uploaded."""
+    src = str(r.get("sourcePath") or "")
+    if not src or not os.path.isfile(src):
+        return ""
+    d = os.path.dirname(src)
+    for _ in range(3):
+        # VS Code family (Copilot Chat, Cursor): the workspace folder sits beside the chats.
+        if "workspaceStorage" in d:
+            try:
+                with open(os.path.join(d, "workspace.json"), encoding="utf-8") as f:
+                    found = _path(json.load(f).get("folder"))
+                if found:
+                    return found
+            except (OSError, ValueError, AttributeError):
+                pass
+        # Gemini CLI: a project's chats live under a folder holding .project_root.
+        try:
+            with open(os.path.join(d, ".project_root"), encoding="utf-8") as f:
+                found = _path(f.read())
+            if found:
+                return found
+        except OSError:
+            pass
+        d = os.path.dirname(d)
+    try:
+        with open(src, encoding="utf-8", errors="replace") as f:
+            head = f.read(512 * 1024)  # tools record the folder at the start
+    except OSError:
+        return ""
+    weak = ""
+    for m in _KEY.finditer(head):
+        try:
+            found = _path(json.loads('"%s"' % m.group(2)))
+        except ValueError:
+            continue
+        if found and m.group(1) in _STRONG:
+            return found
+        weak = weak or found
+    return weak
+
+
 def repo_roots():
-    """Repo name -> its checkout (agentplay's repos.json): the fallback for tools with no cwd."""
+    """Repo name -> its checkout (agentplay's repos.json): the last fallback."""
     try:
         with open(os.path.join(ROOT, "repos.json"), encoding="utf-8") as f:
             d = json.load(f)
@@ -97,7 +162,8 @@ def in_folder(r):
     sid = str(r.get("sessionId") or "")
     if sid not in folders:
         folders.update(session_folders())
-        folders.setdefault(sid, "")  # don't rescan for it every cycle
+        if not folders.get(sid):
+            folders[sid] = source_folder(r)  # "" means unknown; don't rescan every cycle
     if folders[sid]:
         return within(folders[sid])
     roots = repo_roots()
@@ -108,7 +174,9 @@ def in_folder(r):
 def build():
     """Run agentplay build; return an error line, or '' on success."""
     exe = shutil.which("agentplay")
-    cmd = [exe, "build"] if exe else [sys.executable, "-m", "agentplay", "build"]
+    # Build only recently active sessions, with repo-relative paths (never full laptop paths).
+    args = ["build", "--since", "%dh" % ACTIVE_HOURS, "--path-mode", "relative"]
+    cmd = [exe] + args if exe else [sys.executable, "-m", "agentplay"] + args
     env = dict(os.environ)
     try:
         res = subprocess.run(cmd, env=env, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, check=False)
@@ -130,8 +198,20 @@ def post(path, body, ctype):
 sent = {}
 
 
+def eligible(r, cutoff):
+    """Main session, active within the window, run in FOLDER. Anything else is ignored
+    silently: other folders' sessions are never counted, reported or uploaded."""
+    if r.get("role") in ("subagent", "helper") or not r.get("calls"):
+        return False
+    last = ts(r.get("endedAt") or r.get("updatedAt") or r.get("startedAt") or "")
+    if last is None or last < cutoff:
+        return False
+    return in_folder(r) is True  # unknown folder never counts
+
+
 def sync():
     stats = {"found": 0, "eligible": 0, "uploaded": 0, "skipped": {}, "agents": set()}
+    cutoff = active_cutoff()
 
     def skip(reason):
         stats["skipped"][reason] = stats["skipped"].get(reason, 0) + 1
@@ -142,18 +222,15 @@ def sync():
     except (OSError, ValueError):
         rows = []
     for r in rows:
-        if r.get("role") in ("subagent", "helper") or not r.get("calls"):
+        if not eligible(r, cutoff):
             continue
         stats["found"] += 1
         stats["agents"].add(str(r.get("agentTool") or "unknown"))
-        inside = in_folder(r)
-        if not inside:
-            skip(OUTSIDE if inside is False else UNKNOWN)
-            continue
-        when = ts(r.get("startedAt") or "") if SINCE else ts(r.get("endedAt") or r.get("updatedAt") or r.get("startedAt") or "")
-        if when is not None and when < CUTOFF:
-            skip(TOO_OLD)
-            continue
+        if SINCE:
+            started = ts(r.get("startedAt") or "")
+            if started is None or started < SINCE:
+                skip(BEFORE_EVENT)
+                continue
         stats["eligible"] += 1
         sid = str(r.get("sessionId") or "")
         digest = "%s|%s" % (r.get("contentHash"), r.get("updatedAt"))
@@ -191,7 +268,8 @@ def sync():
 def heartbeat(stats, error):
     body = {"found": stats["found"], "eligible": stats["eligible"], "uploaded": stats["uploaded"],
             "synced": len(sent), "skipped": stats["skipped"], "agents": sorted(stats["agents"]),
-            "error": error, "since": CUTOFF.strftime("%Y-%m-%dT%H:%M:%SZ"), "client": CLIENT}
+            "error": error, "since": max(filter(None, [SINCE, active_cutoff()])).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "client": CLIENT}
     try:
         post("/api/heartbeat", json.dumps(body).encode("utf-8"), "application/json")
     except urllib.error.HTTPError as e:
@@ -205,19 +283,19 @@ def explain(stats, error):
     if error:
         print("[-] agentplay build failed: %s" % error, flush=True)
     if not stats["found"]:
-        print("[!] No agent sessions found on this laptop yet. Use a supported tool (%s);" % TOOLS, flush=True)
-        print("    your activity appears here within %ss. To check what agentplay sees: python -m agentplay agents" % INTERVAL, flush=True)
+        print("[!] No agent session active in the last %dh in this folder yet. Start one here with a" % ACTIVE_HOURS, flush=True)
+        print("    supported tool (%s); it appears within %ss." % (TOOLS, INTERVAL), flush=True)
         return
     reasons = ", ".join("%d %s" % (n, why) for why, n in sorted(stats["skipped"].items()))
-    print("[*] Found %d agent session(s) (%s); %d count%s." % (
+    print("[*] %d active session(s) in this folder (%s); %d count%s." % (
         stats["found"], ", ".join(sorted(stats["agents"])), stats["eligible"], " - not counted: " + reasons if reasons else ""), flush=True)
     if not stats["eligible"]:
         print("[!] None count yet. Start (or keep using) an agent session in %s; it appears within %ss." % (FOLDER, INTERVAL), flush=True)
 
 
-print("[*] Counting only agent sessions run in: %s" % FOLDER, flush=True)
-if FOLDER in (norm("~"), norm(os.sep)) or os.path.dirname(FOLDER) == FOLDER:
-    print("[!] That is your home folder or a drive root, so almost every session counts. cd into your project first.", flush=True)
+if FOLDER == norm("~") or os.path.dirname(FOLDER) == FOLDER:
+    sys.exit("[-] %s is your home folder or a drive root. cd into your project folder and run this again." % FOLDER)
+print("[*] Watching only: %s (sessions active in the last %dh). Nothing else is uploaded." % (FOLDER, ACTIVE_HOURS), flush=True)
 print("[*] Building your local session index (first run can take a minute)...", flush=True)
 error = build()
 stats = sync()
@@ -250,7 +328,7 @@ def sh_quote(value: str) -> str:
 
 def ps1(hub_url: str, token: str, name: str, team: str, since: str = "") -> str:
     head = (
-        "# Hackathon Control - live sync (Windows PowerShell). Press Ctrl+C to stop.\n"
+        "# Catalyst - live sync (Windows PowerShell). Press Ctrl+C to stop.\n"
         f"$env:HC_HUB = {ps_quote(hub_url)}\n"
         f"$env:HC_TOKEN = {ps_quote(token)}\n"
         f"$env:HC_SINCE = {ps_quote(since)}\n"
@@ -260,7 +338,7 @@ def ps1(hub_url: str, token: str, name: str, team: str, since: str = "") -> str:
     )
     body = r"""
 Write-Host ""
-Write-Host "  Hackathon Control  |  $Name  ($Team)" -ForegroundColor Cyan
+Write-Host "  Catalyst  |  $Name  ($Team)" -ForegroundColor Cyan
 Write-Host "  Syncing to $env:HC_HUB" -ForegroundColor DarkGray
 Write-Host ""
 
@@ -284,7 +362,7 @@ if (-not (Get-Command agentplay -ErrorAction SilentlyContinue)) {
     }
 }
 
-$sync = Join-Path ([IO.Path]::GetTempPath()) "hackathon-control-sync.py"
+$sync = Join-Path ([IO.Path]::GetTempPath()) "catalyst-sync.py"
 Set-Content -Path $sync -Value @'
 """ + SYNC_PY.strip("\n") + r"""
 '@ -Encoding ASCII
@@ -296,7 +374,7 @@ Set-Content -Path $sync -Value @'
 def sh(hub_url: str, token: str, name: str, team: str, since: str = "") -> str:
     head = (
         "#!/usr/bin/env bash\n"
-        "# Hackathon Control - live sync (macOS / Linux). Press Ctrl+C to stop.\n"
+        "# Catalyst - live sync (macOS / Linux). Press Ctrl+C to stop.\n"
         f"export HC_HUB={sh_quote(hub_url)}\n"
         f"export HC_TOKEN={sh_quote(token)}\n"
         f"export HC_SINCE={sh_quote(since)}\n"
@@ -305,7 +383,7 @@ def sh(hub_url: str, token: str, name: str, team: str, since: str = "") -> str:
         f"TEAM={sh_quote(team)}\n"
     )
     body = r"""
-printf '\n  Hackathon Control  |  %s  (%s)\n  Syncing to %s\n\n' "$NAME" "$TEAM" "$HC_HUB"
+printf '\n  Catalyst  |  %s  (%s)\n  Syncing to %s\n\n' "$NAME" "$TEAM" "$HC_HUB"
 
 PY=""
 for cand in python3 python; do

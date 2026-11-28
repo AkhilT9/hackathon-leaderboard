@@ -324,7 +324,7 @@ class JoinScriptTests(unittest.TestCase):
             env = {"HC_HUB": "http://x", "HC_TOKEN": "t", "HC_FOLDER": proj}
             with mock.patch.dict(os.environ, env):
                 g: dict = {}
-                exec(join_scripts.SYNC_PY.split('print("[*] Counting')[0], g)
+                exec(join_scripts.SYNC_PY.split('if FOLDER == norm("~")')[0], g)
             g["ROOT"] = tmp
             with open(os.path.join(tmp, "repos.json"), "w", encoding="utf-8") as f:
                 json.dump({"mine": os.path.join(proj, "sub"), "other": os.path.join(tmp, "proj2")}, f)
@@ -334,6 +334,71 @@ class JoinScriptTests(unittest.TestCase):
             self.assertTrue(g["in_folder"]({"sessionId": "c", "repos": ["mine"]}))  # no cwd: repo fallback
             self.assertFalse(g["in_folder"]({"sessionId": "d", "repos": ["other"]}))
             self.assertIsNone(g["in_folder"]({"sessionId": "e"}))
+
+    def test_source_folder_reads_each_tools_own_session_file(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            env = {"HC_HUB": "http://x", "HC_TOKEN": "t", "HC_FOLDER": tmp}
+            with mock.patch.dict(os.environ, env):
+                g: dict = {}
+                exec(join_scripts.SYNC_PY.split('if FOLDER == norm("~")')[0], g)
+            proj = os.path.join(tmp, "proj")
+            proj_uri = "file:///" + proj.replace(os.sep, "/").replace(":", "%3A")
+
+            def write(rel, text):
+                path = os.path.join(tmp, rel)
+                os.makedirs(os.path.dirname(path), exist_ok=True)
+                with open(path, "w", encoding="utf-8") as f:
+                    f.write(text)
+                return path
+
+            line = lambda d: json.dumps(d) + chr(10)  # noqa: E731
+            cases = {
+                "claude/codex/copilot cli": write("a.jsonl", line({"type": "meta", "payload": {"cwd": proj}})),
+                "goose": write("b.jsonl", line({"working_dir": proj})),
+                "opencode": write("c.json", json.dumps({"id": "x", "directory": proj})),
+                "tool input before cwd": write("d.jsonl", line({"input": {"directory": "/elsewhere"}}) + line({"cwd": proj})),
+                "vscode workspace": write(os.path.join("workspaceStorage", "h", "chatSessions", "e.jsonl"), "{}"),
+                "gemini": write(os.path.join("gemini", "tmp", "p", "chats", "f.json"), "{}"),
+            }
+            write(os.path.join("workspaceStorage", "h", "workspace.json"), json.dumps({"folder": proj_uri}))
+            write(os.path.join("gemini", "tmp", "p", ".project_root"), proj)
+            for name, src in cases.items():
+                with self.subTest(name):
+                    self.assertEqual(g["norm"](g["source_folder"]({"sourcePath": src})), g["norm"](proj))
+            self.assertEqual(g["source_folder"]({"sourcePath": write("g.jsonl", line({"x": 1}))}), "")
+            self.assertEqual(g["source_folder"]({"sourcePath": os.path.join(tmp, "gone.jsonl")}), "")
+
+    def test_sync_uploads_only_this_folders_recently_active_sessions(self):
+        from datetime import datetime, timedelta, timezone
+        with tempfile.TemporaryDirectory() as tmp:
+            proj = os.path.join(tmp, "proj")
+            env = {"HC_HUB": "http://x", "HC_TOKEN": "t", "HC_FOLDER": proj}
+            with mock.patch.dict(os.environ, env):
+                g: dict = {}
+                exec(join_scripts.SYNC_PY.split('if FOLDER == norm("~")')[0], g)
+            g["ROOT"] = tmp
+            now = datetime.now(timezone.utc)
+            iso = lambda d: d.strftime("%Y-%m-%dT%H:%M:%SZ")
+            recent, stale = iso(now - timedelta(minutes=10)), iso(now - timedelta(hours=2))
+            g["session_folders"] = lambda: {"here": proj, "idle": proj, "other": os.path.join(tmp, "proj2")}
+            rows = {
+                "here": {"sessionId": "here", "key": "here", "calls": 5, "updatedAt": recent},
+                "idle": {"sessionId": "idle", "key": "idle", "calls": 5, "updatedAt": stale},
+                "other": {"sessionId": "other", "key": "other", "calls": 5, "updatedAt": recent},
+                "nofolder": {"sessionId": "nofolder", "key": "nofolder", "calls": 5, "updatedAt": recent},
+            }
+            os.makedirs(os.path.join(tmp, "maps"))
+            for k in rows:
+                with open(os.path.join(tmp, "maps", k + ".json"), "w", encoding="utf-8") as f:
+                    f.write("{}")
+            with open(os.path.join(tmp, "index.json"), "w", encoding="utf-8") as f:
+                json.dump({"sessions": rows}, f)
+            posted = []
+            g["post"] = lambda path, body, ctype: posted.append(path) or {"calls": 5}
+            stats = g["sync"]()
+            self.assertEqual(posted, ["/api/upload"])
+            self.assertEqual(list(g["sent"]), ["here"])
+            self.assertEqual((stats["found"], stats["eligible"], stats["skipped"]), (1, 1, {}))
 
     def test_sh_quote_round_trips(self):
         for p in self.PAYLOADS:
@@ -448,6 +513,29 @@ class HttpTests(unittest.TestCase):
             self.assertEqual(self.req("/api/admin/remove-team", json.dumps({"team": "Doomed"}).encode(), hdr)[0], 404)
         self.assertEqual(self.req("/api/admin/participants")[0], 403)
         self.assertEqual(self.req("/admin")[0], 200)
+
+    def test_end_event_snapshots_standings_and_badges(self):
+        hdr = {"X-Admin-Token": "s3cret", "Content-Type": "application/json"}
+        post = lambda path, body: self.req(path, json.dumps(body).encode(), hdr)  # noqa: E731
+        with mock.patch.dict(os.environ, {"HUB_ADMIN_TOKEN": "s3cret"}):
+            self.assertEqual(post("/api/admin/sessions", {"action": "create", "slug": "finale"})[0], 200)
+            for name, team, calls in (("Fin Ada", "Alpha", 600), ("Fin Bo", "Beta", 40)):
+                _, _, body = self.req("/api/register?s=finale", json.dumps({"name": name, "team": team}).encode(),
+                                      {"Content-Type": "application/json"})
+                token = json.loads(body)["token"]
+                self.req("/api/upload", gzip.compress(json.dumps(make_map(name, calls=calls)).encode()),
+                         {"X-Upload-Token": token})
+            srv.Handler.registry.get("finale").invalidate()
+            status, _, body = post("/api/admin/end-event?s=finale", {"topN": 3, "entity": "both"})
+            self.assertEqual(status, 200, body)
+        w = json.loads(self.req("/api/config?s=finale")[2])["winners"]
+        self.assertEqual([p["name"] for p in w["standings"]["players"]], ["Fin Ada", "Fin Bo"])
+        self.assertEqual([t["name"] for t in w["standings"]["teams"]], ["Alpha", "Beta"])
+        ada = w["standings"]["players"][0]
+        self.assertTrue(ada["badges"])
+        for bid in ada["badges"]:
+            entry = next(b for b in w["badgeWinners"]["personal"] if b["id"] == bid)
+            self.assertIn("Fin Ada", [e["name"] for e in entry["earners"]])
 
     def test_sessions_routing_and_admin(self):
         hdr = {"X-Admin-Token": "s3cret", "Content-Type": "application/json"}
