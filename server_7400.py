@@ -64,7 +64,8 @@ STATIC_FILES = {f"/static/{p.name}": p for p in STATIC_DIR.glob("*") if p.is_fil
 
 CSP = ("default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
        "font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; "
-       "frame-ancestors 'none'; base-uri 'none'; form-action 'self'")
+       "frame-ancestors *; base-uri 'none'; form-action 'self'")
+CSP_STRICT = CSP.replace("frame-ancestors *", "frame-ancestors 'none'")
 
 _HOST_RE = re.compile(r"^[A-Za-z0-9.-]{1,253}(:[0-9]{1,5})?$")
 _PUBLIC_URL_RE = re.compile(r"^https?://[A-Za-z0-9.-]{1,253}(:[0-9]{1,5})?$")
@@ -136,7 +137,8 @@ class Handler(BaseHTTPRequestHandler):
         for k, v in (extra or {}).items():
             self.send_header(k, v)
         if content_type.startswith("text/html"):
-            self.send_header("Content-Security-Policy", CSP)
+            csp = CSP_STRICT if self.path.startswith("/admin") else CSP
+            self.send_header("Content-Security-Policy", csp)
         self.end_headers()
         if self.command != "HEAD":
             self.wfile.write(body)
@@ -144,8 +146,16 @@ class Handler(BaseHTTPRequestHandler):
     def do_HEAD(self) -> None:  # noqa: N802  (uptime checks; same headers as GET, no body)
         self.do_GET()
 
-    def _json(self, status: int, payload: Any) -> None:
-        self._send(status, json.dumps(payload, separators=(",", ":")).encode("utf-8"), "application/json; charset=utf-8")
+    def do_OPTIONS(self) -> None:  # noqa: N802  (CORS preflight for external showcase sites)
+        self.send_response(HTTPStatus.NO_CONTENT)
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Access-Control-Allow-Methods", "GET, OPTIONS")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type")
+        self.end_headers()
+
+    def _json(self, status: int, payload: Any, cors: bool = False) -> None:
+        extra = {"Access-Control-Allow-Origin": "*"} if cors else None
+        self._send(status, json.dumps(payload, separators=(",", ":")).encode("utf-8"), "application/json; charset=utf-8", extra=extra)
 
     def _text(self, status: int, text: str) -> None:
         self._send(status, text.encode("utf-8"), "text/plain; charset=utf-8")
@@ -204,9 +214,9 @@ class Handler(BaseHTTPRequestHandler):
         if board is None:
             return
         if path == "/api/leaderboard":
-            return self._json(HTTPStatus.OK, _public(board.payload()))
+            return self._json(HTTPStatus.OK, _public(board.payload()), cors=True)
         if path == "/api/config":
-            return self._json(HTTPStatus.OK, board.event_info())
+            return self._json(HTTPStatus.OK, board.event_info(), cors=True)
         if path == "/api/events":
             try:
                 since = int(arg("since") or 0)
@@ -214,16 +224,16 @@ class Handler(BaseHTTPRequestHandler):
                 since = 0
             return self._json(HTTPStatus.OK, {"events": board.store.events_since(since),
                                               "announcement": board.cfg.announcement,
-                                              "winners": board.store.meta_get("winners", None)})
+                                              "winners": board.store.meta_get("winners", None)}, cors=True)
         if path == "/api/player":
             data = board.player(arg("name"))
-            return self._json(HTTPStatus.OK, data) if data else self._json(HTTPStatus.NOT_FOUND, {"error": "No such participant"})
+            return self._json(HTTPStatus.OK, data, cors=True) if data else self._json(HTTPStatus.NOT_FOUND, {"error": "No such participant"}, cors=True)
         if path == "/api/team":
             data = board.team(arg("name"))
-            return self._json(HTTPStatus.OK, data) if data else self._json(HTTPStatus.NOT_FOUND, {"error": "No such team"})
+            return self._json(HTTPStatus.OK, data, cors=True) if data else self._json(HTTPStatus.NOT_FOUND, {"error": "No such team"}, cors=True)
         if path == "/api/session":
             data = board.session_timeline(arg("participant"), arg("id"))
-            return self._json(HTTPStatus.OK, data) if data else self._json(HTTPStatus.NOT_FOUND, {"error": "No such session"})
+            return self._json(HTTPStatus.OK, data, cors=True) if data else self._json(HTTPStatus.NOT_FOUND, {"error": "No such session"}, cors=True)
         self._json(HTTPStatus.NOT_FOUND, {"error": "Not found"})
 
     def _join_script(self, path: str, token: str) -> None:
