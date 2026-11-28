@@ -288,11 +288,11 @@ const HC = (() => {
 
   function shapes() {
     return `<div class="shapes" aria-hidden="true">
-      <svg class="float-a" style="right:6%;top:40px" width="180" height="180" viewBox="0 0 180 180"><circle cx="90" cy="90" r="90" fill="#1a73e8"/></svg>
-      <svg class="float-b" style="right:22%;top:170px" width="120" height="60" viewBox="0 0 120 60"><path d="M0 60a60 60 0 0 1 120 0z" fill="#f9ab00"/></svg>
-      <svg class="float-a" style="right:1.5%;top:196px" width="72" height="72" viewBox="0 0 72 72"><rect width="72" height="72" rx="20" fill="#ea4335"/></svg>
-      <svg class="float-c" style="right:18%;top:24px" width="76" height="76" viewBox="0 0 76 76"><circle cx="38" cy="38" r="30" fill="none" stroke="#1e8e3e" stroke-width="14"/></svg>
-      <svg class="float-b" style="right:31%;top:60px" width="54" height="54" viewBox="0 0 54 54"><path d="M27 0l27 27-27 27L0 27z" fill="#1e8e3e" opacity=".9"/></svg>
+      <svg class="float-a" style="right:6%;top:40px" width="180" height="180" viewBox="0 0 180 180"><circle cx="90" cy="90" r="90" fill="#2563eb" opacity=".9"/></svg>
+      <svg class="float-b" style="right:22%;top:170px" width="120" height="60" viewBox="0 0 120 60"><path d="M0 60a60 60 0 0 1 120 0z" fill="#38bdf8"/></svg>
+      <svg class="float-a" style="right:1.5%;top:196px" width="72" height="72" viewBox="0 0 72 72"><rect width="72" height="72" rx="20" fill="#1e3a8a"/></svg>
+      <svg class="float-c" style="right:18%;top:24px" width="76" height="76" viewBox="0 0 76 76"><circle cx="38" cy="38" r="30" fill="none" stroke="#93c5fd" stroke-width="14"/></svg>
+      <svg class="float-b" style="right:31%;top:60px" width="54" height="54" viewBox="0 0 54 54"><path d="M27 0l27 27-27 27L0 27z" fill="#60a5fa" opacity=".9"/></svg>
     </div>`;
   }
 
