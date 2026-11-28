@@ -2,7 +2,7 @@
 
 Same job as the /join.ps1 and /join.sh one-liners (it runs the very same sync loop), for
 people who prefer Python. Only sessions run in --folder (default: the current folder) and
-active in the last hour are uploaded; nothing else on the laptop is sent.
+active in the last 4 hours are uploaded; nothing else on the laptop is sent.
 Get your upload token from the hub's /join page (it identifies you; name and team
 come from your registration).
 

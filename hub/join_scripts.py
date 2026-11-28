@@ -3,7 +3,7 @@
 Both wrap the same small Python sync loop (SYNC_PY): agentplay needs Python anyway, and one
 loop keeps Windows and macOS/Linux behaving identically. The loop picks sessions from
 agentplay's index (not file times: `agentplay build` rewrites every map) and uploads only
-sessions run in the folder the command was started in and active in the last hour (and,
+sessions run in the folder the command was started in and active in the last ACTIVE_HOURS hours (and,
 with an event start, started after it). Every other session is ignored without being
 counted or reported. A session is re-uploaded only when its content hash changes.
 
@@ -39,7 +39,7 @@ def ts(value):
 
 # Only sessions with activity in the last ACTIVE_HOURS are read or uploaded. With an event
 # start, a session must also have started after it (the hub applies the same rule).
-ACTIVE_HOURS = 1
+ACTIVE_HOURS = 4
 SINCE = ts(os.environ.get("HC_SINCE") or "")
 BEFORE_EVENT = "started before the event"
 
@@ -171,12 +171,75 @@ def in_folder(r):
     return any(within(p) for p in paths) if paths else None
 
 
+# agentplay is pure Python with no dependencies. pip is unreliable here (Homebrew and Linux
+# system Pythons refuse installs, and --user can land on a different Python), so unless this
+# Python already has a recent agentplay, fetch the pinned, hash-checked wheel once into
+# ~/.catalyst and run it with this same Python (never agentplay.exe, which some Windows
+# Application Control policies block).
+AGENTPLAY = "0.2.6"
+WHEEL_URL = ("https://files.pythonhosted.org/packages/53/89/27bda0796995823827c07d60202d755789ce835ba41d329d54f656df61de/"
+             "agentplay-0.2.6-py3-none-any.whl")
+WHEEL_SHA256 = "b595890785649cb9fa8d83957fadcfbb1cfc47117bb1d60e21ebfdb0938ba4ee"
+LIB = os.path.join(os.path.expanduser("~"), ".catalyst", "agentplay-" + AGENTPLAY)
+
+
+def _have_agentplay():
+    try:
+        import agentplay
+        v = tuple(int(x) for x in str(getattr(agentplay, "__version__", "0")).split(".")[:3])
+        return v >= tuple(int(x) for x in AGENTPLAY.split("."))
+    except Exception:
+        return False
+
+
+def _use_lib():
+    for name in [m for m in sys.modules if m == "agentplay" or m.startswith("agentplay.")]:
+        del sys.modules[name]  # drop an older copy so ours loads
+    if LIB not in sys.path:
+        sys.path.insert(0, LIB)
+    os.environ["PYTHONPATH"] = os.pathsep.join(p for p in (LIB, os.environ.get("PYTHONPATH")) if p)
+
+
+def _fetch_wheel():
+    import hashlib, zipfile, io
+    with urllib.request.urlopen(WHEEL_URL, timeout=120) as resp:
+        data = resp.read()
+    if hashlib.sha256(data).hexdigest() != WHEEL_SHA256:
+        raise OSError("downloaded agentplay does not match its expected checksum")
+    tmp = LIB + ".tmp%d" % os.getpid()
+    with zipfile.ZipFile(io.BytesIO(data)) as z:
+        z.extractall(tmp, [n for n in z.namelist() if n.startswith("agentplay/") and ".." not in n])
+    shutil.rmtree(LIB, ignore_errors=True)
+    os.replace(tmp, LIB)
+
+
+def ensure_agentplay():
+    """'' once this Python can run agentplay, else an error line."""
+    if LIB in sys.path or _have_agentplay():
+        return ""
+    if not os.path.isfile(os.path.join(LIB, "agentplay", "__init__.py")):
+        print("[*] Fetching agentplay %s (one time, into %s)..." % (AGENTPLAY, os.path.dirname(LIB)), flush=True)
+        try:
+            os.makedirs(os.path.dirname(LIB), exist_ok=True)
+            _fetch_wheel()
+        except Exception as e:  # e.g. no certificates on a python.org macOS install: let pip try
+            res = subprocess.run([sys.executable, "-m", "pip", "install", "--quiet", "--disable-pip-version-check",
+                                  "--target", LIB, "agentplay==" + AGENTPLAY],
+                                 stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, check=False)
+            if res.returncode != 0:
+                tail = (res.stderr.decode("utf-8", "replace").strip().splitlines() or ["pip failed"])[-1]
+                return ("could not install agentplay (%s; pip: %s)" % (e, tail))[:300]
+    _use_lib()
+    return "" if _have_agentplay() else "agentplay in %s does not load with %s" % (LIB, sys.executable)
+
+
 def build():
     """Run agentplay build; return an error line, or '' on success."""
-    exe = shutil.which("agentplay")
+    missing = ensure_agentplay()
+    if missing:
+        return missing
     # Build only recently active sessions, with repo-relative paths (never full laptop paths).
-    args = ["build", "--since", "%dh" % ACTIVE_HOURS, "--path-mode", "relative"]
-    cmd = [exe] + args if exe else [sys.executable, "-m", "agentplay"] + args
+    cmd = [sys.executable, "-m", "agentplay", "build", "--since", "%dh" % ACTIVE_HOURS, "--path-mode", "relative"]
     env = dict(os.environ)
     try:
         res = subprocess.run(cmd, env=env, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, check=False)
@@ -198,19 +261,23 @@ def post(path, body, ctype):
 sent = {}
 
 
-def eligible(r, cutoff):
-    """Main session, active within the window, run in FOLDER. Anything else is ignored
-    silently: other folders' sessions are never counted, reported or uploaded."""
+ELSEWHERE = "run in another folder"
+
+
+def placement(r, cutoff):
+    """For a main session active within the window: "here" when it ran in FOLDER, else
+    "elsewhere" (an unknown folder never counts). None for anything else. Sessions from other
+    folders are only ever counted as a number; their names, folders and data stay here."""
     if r.get("role") in ("subagent", "helper") or not r.get("calls"):
-        return False
+        return None
     last = ts(r.get("endedAt") or r.get("updatedAt") or r.get("startedAt") or "")
     if last is None or last < cutoff:
-        return False
-    return in_folder(r) is True  # unknown folder never counts
+        return None
+    return "here" if in_folder(r) is True else "elsewhere"
 
 
 def sync():
-    stats = {"found": 0, "eligible": 0, "uploaded": 0, "skipped": {}, "agents": set()}
+    stats = {"found": 0, "eligible": 0, "uploaded": 0, "skipped": {}, "agents": set(), "elsewhere": 0}
     cutoff = active_cutoff()
 
     def skip(reason):
@@ -222,7 +289,10 @@ def sync():
     except (OSError, ValueError):
         rows = []
     for r in rows:
-        if not eligible(r, cutoff):
+        where = placement(r, cutoff)
+        if where == "elsewhere":
+            stats["elsewhere"] += 1
+        if where != "here":
             continue
         stats["found"] += 1
         stats["agents"].add(str(r.get("agentTool") or "unknown"))
@@ -267,7 +337,8 @@ def sync():
 
 def heartbeat(stats, error):
     body = {"found": stats["found"], "eligible": stats["eligible"], "uploaded": stats["uploaded"],
-            "synced": len(sent), "skipped": stats["skipped"], "agents": sorted(stats["agents"]),
+            "synced": len(sent), "agents": sorted(stats["agents"]),
+            "skipped": dict(stats["skipped"], **({ELSEWHERE: stats["elsewhere"]} if stats.get("elsewhere") else {})),
             "error": error, "since": max(filter(None, [SINCE, active_cutoff()])).strftime("%Y-%m-%dT%H:%M:%SZ"),
             "client": CLIENT}
     try:
@@ -282,6 +353,10 @@ def heartbeat(stats, error):
 def explain(stats, error):
     if error:
         print("[-] agentplay build failed: %s" % error, flush=True)
+    if stats.get("elsewhere"):
+        print("[!] %d agent session(s) active in the last %dh ran in a different folder, so they don't count." % (
+            stats["elsewhere"], ACTIVE_HOURS), flush=True)
+        print("    Run this command in the folder you open your agent in (your project folder).", flush=True)
     if not stats["found"]:
         print("[!] No agent session active in the last %dh in this folder yet. Start one here with a" % ACTIVE_HOURS, flush=True)
         print("    supported tool (%s); it appears within %ss." % (TOOLS, INTERVAL), flush=True)
@@ -289,11 +364,16 @@ def explain(stats, error):
     reasons = ", ".join("%d %s" % (n, why) for why, n in sorted(stats["skipped"].items()))
     print("[*] %d active session(s) in this folder (%s); %d count%s." % (
         stats["found"], ", ".join(sorted(stats["agents"])), stats["eligible"], " - not counted: " + reasons if reasons else ""), flush=True)
+    if stats["skipped"].get(BEFORE_EVENT):
+        print("[!] Sessions started before the event start (%s your time) never count. Start a new agent session after it." % (
+            SINCE.astimezone().strftime("%H:%M")), flush=True)
     if not stats["eligible"]:
         print("[!] None count yet. Start (or keep using) an agent session in %s; it appears within %ss." % (FOLDER, INTERVAL), flush=True)
 
 
 if FOLDER == norm("~") or os.path.dirname(FOLDER) == FOLDER:
+    heartbeat({"found": 0, "eligible": 0, "uploaded": 0, "skipped": {}, "agents": set()},
+              "ran from the home folder or a drive root; must run in the project folder")
     sys.exit("[-] %s is your home folder or a drive root. cd into your project folder and run this again." % FOLDER)
 print("[*] Watching only: %s (sessions active in the last %dh). Nothing else is uploaded." % (FOLDER, ACTIVE_HOURS), flush=True)
 print("[*] Building your local session index (first run can take a minute)...", flush=True)
@@ -302,16 +382,17 @@ stats = sync()
 explain(stats, error)
 heartbeat(stats, error)
 print("[+] Live sync on, every %ss. Keep this window open while you build. Ctrl+C to stop." % INTERVAL, flush=True)
-shown = (stats["found"], stats["eligible"], error)
+shown = (stats["found"], stats["eligible"], stats["elsewhere"], error)
 try:
     while True:
         time.sleep(INTERVAL)
         error = build()
         stats = sync()
         heartbeat(stats, error)
-        if (stats["found"], stats["eligible"], error) != shown and (not shown[1] or error):
+        now = (stats["found"], stats["eligible"], stats["elsewhere"], error)
+        if now != shown and (not shown[1] or error):
             explain(stats, error)  # e.g. the first session that counts, or a new build error
-        shown = (stats["found"], stats["eligible"], error)
+        shown = now
 except KeyboardInterrupt:
     print("Stopped.")
 '''
@@ -343,23 +424,15 @@ Write-Host "  Syncing to $env:HC_HUB" -ForegroundColor DarkGray
 Write-Host ""
 
 $py = $null
-foreach ($cand in @('python', 'py', 'python3')) {
+foreach ($cand in @('py', 'python', 'python3')) {
     if (Get-Command $cand -ErrorAction SilentlyContinue) {
-        & $cand -c "import sys; sys.exit(0 if sys.version_info >= (3, 10) else 1)" 2>$null
+        & $cand -c "import sys; sys.exit(0 if sys.version_info >= (3, 11) else 1)" 2>$null
         if ($LASTEXITCODE -eq 0) { $py = $cand; break }
     }
 }
 if (-not $py) {
-    Write-Host "[-] Python 3.10+ is required. Install it from https://www.python.org/downloads/ and run this again." -ForegroundColor Red
+    Write-Host "[-] Python 3.11+ is required. Install it from https://www.python.org/downloads/ and run this again." -ForegroundColor Red
     return
-}
-
-if (-not (Get-Command agentplay -ErrorAction SilentlyContinue)) {
-    & $py -c "import agentplay" 2>$null
-    if ($LASTEXITCODE -ne 0) {
-        Write-Host "[*] Installing agentplay (pip --user)..." -ForegroundColor Yellow
-        & $py -m pip install --user --quiet agentplay
-    }
 }
 
 $sync = Join-Path ([IO.Path]::GetTempPath()) "catalyst-sync.py"
@@ -386,18 +459,13 @@ def sh(hub_url: str, token: str, name: str, team: str, since: str = "") -> str:
 printf '\n  Catalyst  |  %s  (%s)\n  Syncing to %s\n\n' "$NAME" "$TEAM" "$HC_HUB"
 
 PY=""
-for cand in python3 python; do
-    if command -v "$cand" >/dev/null 2>&1 && "$cand" -c 'import sys; sys.exit(0 if sys.version_info >= (3, 10) else 1)'; then
+for cand in python3 python3.14 python3.13 python3.12 python3.11 python; do
+    if command -v "$cand" >/dev/null 2>&1 && "$cand" -c 'import sys; sys.exit(0 if sys.version_info >= (3, 11) else 1)'; then
         PY="$cand"; break
     fi
 done
 if [ -z "$PY" ]; then
-    echo "[-] Python 3.10+ is required. Install it and run this again."; exit 1
-fi
-
-if ! command -v agentplay >/dev/null 2>&1 && ! "$PY" -c 'import agentplay' >/dev/null 2>&1; then
-    echo "[*] Installing agentplay (pip --user)..."
-    "$PY" -m pip install --user --quiet agentplay || pipx install agentplay || true
+    echo "[-] Python 3.11+ is required. Install it and run this again."; exit 1
 fi
 
 exec "$PY" - <<'HC_SYNC_PY'

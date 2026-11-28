@@ -380,7 +380,7 @@ class JoinScriptTests(unittest.TestCase):
             g["ROOT"] = tmp
             now = datetime.now(timezone.utc)
             iso = lambda d: d.strftime("%Y-%m-%dT%H:%M:%SZ")
-            recent, stale = iso(now - timedelta(minutes=10)), iso(now - timedelta(hours=2))
+            recent, stale = iso(now - timedelta(minutes=10)), iso(now - timedelta(hours=5))
             g["session_folders"] = lambda: {"here": proj, "idle": proj, "other": os.path.join(tmp, "proj2")}
             rows = {
                 "here": {"sessionId": "here", "key": "here", "calls": 5, "updatedAt": recent},
@@ -400,6 +400,7 @@ class JoinScriptTests(unittest.TestCase):
             self.assertEqual(posted, ["/api/upload"])
             self.assertEqual(list(g["sent"]), ["here"])
             self.assertEqual((stats["found"], stats["eligible"], stats["skipped"]), (1, 1, {}))
+            self.assertEqual(stats["elsewhere"], 2)  # "other" and "nofolder": counted, never uploaded
 
     def test_sh_quote_round_trips(self):
         for p in self.PAYLOADS:

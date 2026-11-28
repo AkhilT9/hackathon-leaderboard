@@ -135,7 +135,7 @@ The standardized JSON format:
 
 ### Layer 4: Transmission Wrappers
 - **Manual Web Upload**: Drag and drop `session.json.gz` directly onto the `:7400` dashboard modal.
-- **CLI Sync Daemon (`sync_to_hub.py`)**: Runs in the background on a participant's laptop. As they code, it builds and posts fresh session maps to `:7400` every 20 seconds, only for sessions run in the project folder and active in the last hour.
+- **CLI Sync Daemon (`sync_to_hub.py`)**: Runs in the background on a participant's laptop. As they code, it builds and posts fresh session maps to `:7400` every 20 seconds, only for sessions run in the project folder and active in the last 4 hours.
 
 ### Layer 5: Catalyst Hub (`server_7400.py`)
 - Python HTTP server with embedded HTML/CSS/JS frontend.
@@ -292,7 +292,7 @@ Invoke-RestMethod -Method Post `
 ```
 
 **Option D — Continuous Live Auto-Sync (`sync_to_hub.py`)**:
-Run it from your project folder; it syncs only sessions run in that folder and active in the last hour:
+Run it from your project folder; it syncs only sessions run in that folder and active in the last 4 hours:
 ```powershell
 python sync_to_hub.py --hub "http://192.168.1.50:7400" --token <TOKEN> --folder .
 ```
