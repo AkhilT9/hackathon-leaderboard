@@ -380,7 +380,7 @@ class JoinScriptTests(unittest.TestCase):
             g["ROOT"] = tmp
             now = datetime.now(timezone.utc)
             iso = lambda d: d.strftime("%Y-%m-%dT%H:%M:%SZ")
-            recent, stale = iso(now - timedelta(minutes=10)), iso(now - timedelta(hours=2))
+            recent, stale = iso(now - timedelta(minutes=10)), iso(now - timedelta(hours=5))
             g["session_folders"] = lambda: {"here": proj, "idle": proj, "other": os.path.join(tmp, "proj2")}
             rows = {
                 "here": {"sessionId": "here", "key": "here", "calls": 5, "updatedAt": recent},

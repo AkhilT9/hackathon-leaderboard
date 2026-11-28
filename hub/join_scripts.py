@@ -3,7 +3,7 @@
 Both wrap the same small Python sync loop (SYNC_PY): agentplay needs Python anyway, and one
 loop keeps Windows and macOS/Linux behaving identically. The loop picks sessions from
 agentplay's index (not file times: `agentplay build` rewrites every map) and uploads only
-sessions run in the folder the command was started in and active in the last hour (and,
+sessions run in the folder the command was started in and active in the last ACTIVE_HOURS hours (and,
 with an event start, started after it). Every other session is ignored without being
 counted or reported. A session is re-uploaded only when its content hash changes.
 
@@ -39,7 +39,7 @@ def ts(value):
 
 # Only sessions with activity in the last ACTIVE_HOURS are read or uploaded. With an event
 # start, a session must also have started after it (the hub applies the same rule).
-ACTIVE_HOURS = 1
+ACTIVE_HOURS = 4
 SINCE = ts(os.environ.get("HC_SINCE") or "")
 BEFORE_EVENT = "started before the event"
 
