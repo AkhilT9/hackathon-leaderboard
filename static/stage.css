@@ -1,6 +1,6 @@
 /* Stage / projector view: one idea per scene, keynote scale. Uses theme.css tokens. */
 html, body { height: 100%; overflow: hidden; }
-.stage { height: 100vh; display: grid; grid-template-rows: auto 1fr auto auto; background: #fff; position: relative; }
+.stage { height: 100vh; display: grid; grid-template-rows: auto 1fr auto auto; background: transparent; position: relative; }
 .stage-top { display: flex; align-items: center; gap: 2vw; padding: 2.2vh 3.2vw; font-size: clamp(14px, 1.15vw, 22px); }
 .stage-top .brand { font-size: 1.25em; }
 .stage-top .spacer { flex: 1; }
@@ -9,11 +9,11 @@ html, body { height: 100%; overflow: hidden; }
 .scene > .s { animation: scene-in .9s var(--ease) both; }
 @keyframes scene-in { from { opacity: 0; transform: translateY(2.4vh) scale(.985); } }
 .s-eyebrow { font-size: clamp(14px, 1.2vw, 24px); font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); display: flex; gap: .6em; align-items: center; }
-.s-title { font-size: clamp(40px, 5.6vw, 120px); font-weight: 800; letter-spacing: -.05em; line-height: .98; margin: 1.2vh 0 4vh; }
+.s-title { font-family: var(--display); font-size: clamp(40px, 5.6vw, 120px); font-weight: 700; letter-spacing: -.045em; line-height: 1.02; margin: 1.2vh 0 4vh; }
 
 .mega { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2vw; }
-.mega .m { background: var(--bg-soft); border-radius: 2.2vw; padding: 3.4vh 2.4vw; position: relative; overflow: hidden; }
-.mega .m .v { font-size: clamp(48px, 7.4vw, 170px); font-weight: 800; letter-spacing: -.055em; line-height: 1; font-variant-numeric: tabular-nums; }
+.mega .m { background: #fff; border: 1px solid var(--line); box-shadow: var(--shadow); border-radius: 2.2vw; padding: 3.4vh 2.4vw; position: relative; overflow: hidden; }
+.mega .m .v { font-family: var(--display); font-size: clamp(48px, 7.4vw, 170px); font-weight: 800; letter-spacing: -.055em; line-height: 1; font-variant-numeric: tabular-nums; }
 .mega .m .l { font-size: clamp(14px, 1.4vw, 28px); font-weight: 600; color: var(--muted); margin-top: 1.4vh; }
 .mega .m .bar { position: absolute; left: 0; bottom: 0; height: .8vh; width: 100%; }
 .sub-stats { display: flex; gap: 3vw; margin-top: 4vh; font-size: clamp(16px, 1.6vw, 32px); color: var(--ink-2); }
